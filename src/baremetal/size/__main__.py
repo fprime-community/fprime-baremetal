@@ -14,7 +14,7 @@ toolchains = {
     'esp32': f'{ROOT_USER}/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/esp-2021r2-patch5-8.4.0/bin/xtensa-esp32-elf-',
     'featherM0': f'{ROOT_USER}/.arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/bin/arm-none-eabi-',
     'native': '',
-    'rpipicow': f'{ROOT_USER}/.arduino15/packages/rp2040/tools/pqt-gcc/1.5.0-b-c7bab52/bin/arm-none-eabi-',
+    'rpipicow': f'{ROOT_USER}/.arduino15/packages/rp2040/tools/pqt-gcc/2.1.0-a-d3d2e6b/bin/arm-none-eabi-',
     'teensy32': f'{ROOT_USER}/.arduino15/packages/teensy/tools/teensy-compile/11.3.1/arm/bin/arm-none-eabi-',
     'teensy40': f'{ROOT_USER}/.arduino15/packages/teensy/tools/teensy-compile/11.3.1/arm/bin/arm-none-eabi-',
     'teensy41': f'{ROOT_USER}/.arduino15/packages/teensy/tools/teensy-compile/11.3.1/arm/bin/arm-none-eabi-',
