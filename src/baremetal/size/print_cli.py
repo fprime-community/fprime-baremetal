@@ -23,6 +23,8 @@ def print_component_size(deployment, util_path, bin_path):
     
     global _EXISTS_CMD_DISP
     global _EXISTS_TLM_CHAN
+    _EXISTS_TLM_CHAN = False
+    _EXISTS_CMD_DISP = False
     if f'{deployment}::tlmSend' in output_arr:
         _EXISTS_TLM_CHAN = True
     if f'{deployment}::cmdDisp' in output_arr:
