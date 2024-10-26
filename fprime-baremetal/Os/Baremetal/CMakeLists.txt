@@ -1,0 +1,17 @@
+set(SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/Cpu.cpp")
+set(HEADER_FILES "${CMAKE_CURRENT_LIST_DIR}/Cpu.hpp")
+set(MOD_DEPS)
+register_fprime_module(Os_Cpu_Baremetal)
+register_fprime_implementation(Os/Cpu Os_Cpu_Baremetal "${CMAKE_CURRENT_LIST_DIR}/DefaultCpu.cpp")
+
+set(SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/Memory.cpp")
+set(HEADER_FILES "${CMAKE_CURRENT_LIST_DIR}/Memory.hpp")
+set(MOD_DEPS)
+register_fprime_module(Os_Memory_Baremetal)
+register_fprime_implementation(Os/Memory Os_Memory_Baremetal "${CMAKE_CURRENT_LIST_DIR}/DefaultMemory.cpp")
+
+set(SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/Task.cpp")
+set(HEADER_FILES "${CMAKE_CURRENT_LIST_DIR}/Task.hpp")
+set(MOD_DEPS fprime-baremetal_Os_TaskRunner)
+register_fprime_module(Os_Task_Baremetal)
+register_fprime_implementation(Os/Task Os_Task_Baremetal "${CMAKE_CURRENT_LIST_DIR}/DefaultTask.cpp")

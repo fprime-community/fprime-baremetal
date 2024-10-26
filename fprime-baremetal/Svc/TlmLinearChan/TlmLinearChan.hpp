@@ -8,7 +8,7 @@
 #define TELEMCHANIMPL_HPP_
 
 #include <Fw/Tlm/TlmPacket.hpp>
-#include <Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
+#include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
 #include <TlmChanImplCfg.hpp>
 
 namespace Baremetal {
