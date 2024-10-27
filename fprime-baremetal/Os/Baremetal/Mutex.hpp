@@ -1,6 +1,6 @@
 // ======================================================================
 // \title fprime-baremetal/Os/Baremetal/Mutex.hpp
-// \brief Arduino definitions for Os::Mutex
+// \brief Baremetal definitions for Os::Mutex
 // ======================================================================
 #include "Os/Mutex.hpp"
 

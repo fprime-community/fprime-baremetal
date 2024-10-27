@@ -3,7 +3,6 @@
 // \brief baremetal implementations for Os::Baremetal::Task
 // ======================================================================
 #include "fprime-baremetal/Os/Baremetal/Task.hpp"
-#include <FprimeArduino.hpp>
 #include "fprime-baremetal/Os/TaskRunner/TaskRunner.hpp"  // Required for task execution
 namespace Os {
 namespace Baremetal {
