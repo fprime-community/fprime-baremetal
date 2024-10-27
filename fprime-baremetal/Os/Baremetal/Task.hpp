@@ -11,8 +11,10 @@ namespace Baremetal {
 
 //! Test task handle
 struct BaremetalTaskHandle : public TaskHandle {
-    Task::taskRoutine m_routine;
-    void* m_argument;
+    bool m_enabled;                            //!< Is this task enabled or not
+    NATIVE_INT_TYPE m_priority;                //!< Save the priority
+    Os::TaskInterface::taskRoutine m_routine;  //!< Function passed into the task
+    void* m_argument;                          //!< Argument input pointer
 };
 
 //! Implementation of task
@@ -82,10 +84,11 @@ class BaremetalTask : public TaskInterface {
     //! \param arguments: arguments supplied to the task start call
     //! \return status of the task start
     Status start(const Arguments& arguments) override;
+
   private:
     BaremetalTaskHandle m_handle;
 };
 
-}
-}
-#endif // OS_BAREMETAL_TASK_HPP
+}  // namespace Baremetal
+}  // namespace Os
+#endif  // OS_BAREMETAL_TASK_HPP

@@ -2,10 +2,10 @@
 // \title fprime-baremetal/Os/TaskRunner/TaskRunner.cpp
 // \brief TaskRunner implementations
 // ======================================================================
-#include <Fw/Types/Assert.hpp>
 #include <FpConfig.hpp>
-#include <fprime-baremetal/Os/TaskRunner/TaskRunner.hpp>
+#include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Os/Baremetal/Task.hpp>
+#include <fprime-baremetal/Os/TaskRunner/TaskRunner.hpp>
 namespace Os {
 namespace Baremetal {
 
@@ -24,18 +24,26 @@ TaskRunner::TaskRunner() {
 TaskRunner::~TaskRunner() {}
 
 void TaskRunner::addTask(Task* task) {
-    FW_ASSERT(task->isCooperative()); // Cannot register uncooperative tasks
-    // Sort by priority during insertion
-    Task* sort_element = task;
-    for (FwSizeType i = 0; (sort_element != nullptr) && (i < Os::Baremetal::TASK_CAPACITY); i++) {
-        if ((this->m_task_table[i] == nullptr) or (sort_element->getPriority() > this->m_task_table[i]->getPriority())) {
-            Task* temp = sort_element;
-            sort_element = this->m_task_table[i];
-            this->m_task_table[i] = temp;
-        }
-    }
+    FW_ASSERT(task->isCooperative());  // Cannot register uncooperative tasks
+
+    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY);
+    this->m_task_table[this->m_index] = task;
+    this->m_index++;
+
+    // !!! PRIORITY NOT YET RELEASED IN FPRIME v3.5.0
+    // // Sort by priority during insertion
+    // Task* sort_element = task;
+    // for (FwSizeType i = 0; (sort_element != nullptr) && (i < Os::Baremetal::TASK_CAPACITY); i++) {
+    //     if ((this->m_task_table[i] == nullptr) or (sort_element->getPriority() >
+    //     this->m_task_table[i]->getPriority())) {
+    //         Task* temp = sort_element;
+    //         sort_element = this->m_task_table[i];
+    //         this->m_task_table[i] = temp;
+    //     }
+    // }
+
     // The last sort element must be nullptr or the table overflowed
-    FW_ASSERT(sort_element == nullptr);
+    // FW_ASSERT(sort_element == nullptr);
 }
 
 void TaskRunner::removeTask(Task* task) {
@@ -99,5 +107,5 @@ void TaskRunner::run() {
         }
     }
 }
-} // End namespace Baremetal
-} // End Namespace Os
+}  // End namespace Baremetal
+}  // End Namespace Os
