@@ -6,7 +6,6 @@
 
 namespace Os {
 namespace Baremetal {
-namespace Mutex {
 
 BaremetalMutex::Status BaremetalMutex::take() {
     return Status::OP_OK;
@@ -20,6 +19,5 @@ MutexHandle* BaremetalMutex::getHandle() {
     return &this->m_handle;
 }
 
-}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os

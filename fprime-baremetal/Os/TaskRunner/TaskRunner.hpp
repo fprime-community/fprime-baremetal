@@ -5,7 +5,6 @@
 #ifndef FPRIME_BAREMETAL_TASKRUNNER_TASKRUNNER_HPP_
 #define FPRIME_BAREMETAL_TASKRUNNER_TASKRUNNER_HPP_
 #include <Os/Task.hpp>
-#include <bitset>
 
 namespace Os {
 namespace Baremetal {

@@ -8,7 +8,6 @@
 
 namespace Os {
 namespace Baremetal {
-namespace Mutex {
 
 struct BaremetalConditionVariableHandle : public ConditionVariableHandle {};
 
@@ -46,7 +45,6 @@ class BaremetalConditionVariable : public ConditionVariableInterface {
     BaremetalConditionVariableHandle m_handle;
 };
 
-}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os
 #endif  // OS_BAREMETAL_CONDITION_VARIABLE_HPP

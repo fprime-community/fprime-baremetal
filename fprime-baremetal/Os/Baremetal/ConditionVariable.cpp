@@ -7,7 +7,6 @@
 
 namespace Os {
 namespace Baremetal {
-namespace Mutex {
 
 void BaremetalConditionVariable::wait(Os::Mutex& mutex) {}
 void BaremetalConditionVariable::notify() {}
@@ -17,6 +16,5 @@ ConditionVariableHandle* BaremetalConditionVariable::getHandle() {
     return &m_handle;
 }
 
-}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os

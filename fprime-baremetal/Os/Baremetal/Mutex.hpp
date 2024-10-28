@@ -8,7 +8,6 @@
 #define OS_BAREMETAL_MUTEX_HPP
 namespace Os {
 namespace Baremetal {
-namespace Mutex {
 
 struct BaremetalMutexHandle : public MutexHandle {};
 
@@ -38,7 +37,6 @@ class BaremetalMutex : public MutexInterface {
     BaremetalMutexHandle m_handle;
 };
 
-}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os
 #endif  // OS_BAREMETAL_MUTEX_HPP
