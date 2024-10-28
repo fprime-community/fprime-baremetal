@@ -13,7 +13,7 @@ void BaremetalConditionVariable::notify() {}
 void BaremetalConditionVariable::notifyAll() {}
 
 ConditionVariableHandle* BaremetalConditionVariable::getHandle() {
-    return &m_handle;
+    return nullptr;
 }
 
 }  // namespace Baremetal

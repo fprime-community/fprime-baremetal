@@ -13,7 +13,7 @@ namespace Os {
 //! \param to_copy: pointer to copy-constructor input
 //! \return: pointer to delegate
 MutexInterface* MutexInterface::getDelegate(MutexHandleStorage& aligned_new_memory) {
-    return Os::Delegate::makeDelegate<MutexInterface, Os::Baremetal::Mutex::BaremetalMutex>(aligned_new_memory);
+    return Os::Delegate::makeDelegate<MutexInterface, Os::Baremetal::BaremetalMutex>(aligned_new_memory);
 }
 
 //! \brief get a delegate for condition variable
@@ -21,7 +21,7 @@ MutexInterface* MutexInterface::getDelegate(MutexHandleStorage& aligned_new_memo
 //! \return: pointer to delegate
 ConditionVariableInterface* ConditionVariableInterface::getDelegate(
     ConditionVariableHandleStorage& aligned_new_memory) {
-    return Os::Delegate::makeDelegate<ConditionVariableInterface, Os::Baremetal::Mutex::BaremetalConditionVariable,
+    return Os::Delegate::makeDelegate<ConditionVariableInterface, Os::Baremetal::BaremetalConditionVariable,
                                       ConditionVariableHandleStorage>(aligned_new_memory);
 }
 }  // namespace Os

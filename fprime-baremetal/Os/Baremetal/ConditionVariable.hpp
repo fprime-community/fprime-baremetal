@@ -9,8 +9,6 @@
 namespace Os {
 namespace Baremetal {
 
-struct BaremetalConditionVariableHandle : public ConditionVariableHandle {};
-
 //! \brief Baremetal implementation of Os::ConditionVariable
 //!
 //! Baremetal implementation of `ConditionVariable` for use as a delegate class handling error-only file operations.
@@ -39,10 +37,6 @@ class BaremetalConditionVariable : public ConditionVariableInterface {
 
     //! \brief get handle
     ConditionVariableHandle* getHandle() override;
-
-  private:
-    //! Handle for PosixMutex
-    BaremetalConditionVariableHandle m_handle;
 };
 
 }  // namespace Baremetal

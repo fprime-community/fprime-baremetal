@@ -9,8 +9,6 @@
 namespace Os {
 namespace Baremetal {
 
-struct BaremetalMutexHandle : public MutexHandle {};
-
 //! \brief Baremetal implementation of Os::Mutex
 //!
 //! Baremetal implementation of `MutexInterface` for use as a delegate class handling error-only file operations.
@@ -31,10 +29,6 @@ class BaremetalMutex : public MutexInterface {
 
     Status take() override;     //!<  lock the mutex and get return status
     Status release() override;  //!<  unlock the mutex and get return status
-
-  private:
-    //! Handle for BaremetalMutex
-    BaremetalMutexHandle m_handle;
 };
 
 }  // namespace Baremetal

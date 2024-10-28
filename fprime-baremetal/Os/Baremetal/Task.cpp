@@ -32,7 +32,6 @@ Os::TaskHandle* BaremetalTask::getHandle() {
 Os::TaskInterface::Status BaremetalTask::start(const Os::TaskInterface::Arguments& arguments) {
     // Set handle member variables
     this->m_handle.m_enabled = true;
-    this->m_handle.m_priority = arguments.m_priority;
     this->m_handle.m_routine = arguments.m_routine;
     this->m_handle.m_argument = arguments.m_routine_argument;
 

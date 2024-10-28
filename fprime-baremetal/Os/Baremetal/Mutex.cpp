@@ -16,7 +16,7 @@ BaremetalMutex::Status BaremetalMutex::release() {
 }
 
 MutexHandle* BaremetalMutex::getHandle() {
-    return &this->m_handle;
+    return nullptr;
 }
 
 }  // namespace Baremetal
