@@ -7,7 +7,7 @@
 #include <FpConfig.hpp>
 #include <Fw/Com/ComBuffer.hpp>
 #include <Fw/Types/Assert.hpp>
-#include <Svc/TlmLinearChan/TlmLinearChan.hpp>
+#include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
 
 namespace Baremetal {
 
