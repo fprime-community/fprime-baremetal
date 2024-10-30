@@ -21,18 +21,19 @@ def print_component_size(deployment, util_path, bin_path):
         elif i % 4 == 0:
             print()
     
-    global _EXISTS_CMD_DISP
-    global _EXISTS_TLM_CHAN
-    _EXISTS_TLM_CHAN = False
-    _EXISTS_CMD_DISP = False
+    exists_tlm_chan = False
+    exists_cmd_disp = False
+    
     if f'{deployment}::tlmSend' in output_arr:
-        _EXISTS_TLM_CHAN = True
+        exists_tlm_chan = True
     if f'{deployment}::cmdDisp' in output_arr:
-        _EXISTS_CMD_DISP = True
+        exists_cmd_disp = True
+        
+    return exists_tlm_chan, exists_cmd_disp
 
 # Print Size of Telemetry Channels
-def print_channel_size(xml_path):
-    if not _EXISTS_TLM_CHAN:
+def print_channel_size(exists_tlm_chan, xml_path):
+    if not exists_tlm_chan:
         return
 
     print('\n\n----------------------------------')
@@ -64,8 +65,8 @@ def print_channel_size(xml_path):
     print(f'\t- TLMCHAN_HASH_BUCKETS = {int(output.decode("utf-8").strip()) - 15 - (commQueue * 2)}')
 
 # Print Size of Commands
-def print_command_size(xml_path):
-    if not _EXISTS_CMD_DISP:
+def print_command_size(exists_cmd_disp, xml_path):
+    if not exists_cmd_disp:
         return
     
     p1 = subprocess.Popen(['cat', xml_path], stdout=subprocess.PIPE)
