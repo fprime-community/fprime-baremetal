@@ -30,20 +30,19 @@ void TaskRunner::addTask(Task* task) {
     this->m_task_table[this->m_index] = task;
     this->m_index++;
 
-    // !!! PRIORITY NOT YET RELEASED IN FPRIME v3.5.0
-    // // Sort by priority during insertion
-    // Task* sort_element = task;
-    // for (FwSizeType i = 0; (sort_element != nullptr) && (i < Os::Baremetal::TASK_CAPACITY); i++) {
-    //     if ((this->m_task_table[i] == nullptr) or (sort_element->getPriority() >
-    //     this->m_task_table[i]->getPriority())) {
-    //         Task* temp = sort_element;
-    //         sort_element = this->m_task_table[i];
-    //         this->m_task_table[i] = temp;
-    //     }
-    // }
+    // Sort by priority during insertion
+    Task* sort_element = task;
+    for (FwSizeType i = 0; (sort_element != nullptr) && (i < Os::Baremetal::TASK_CAPACITY); i++) {
+        if ((this->m_task_table[i] == nullptr) or (sort_element->getPriority() >
+        this->m_task_table[i]->getPriority())) {
+            Task* temp = sort_element;
+            sort_element = this->m_task_table[i];
+            this->m_task_table[i] = temp;
+        }
+    }
 
     // The last sort element must be nullptr or the table overflowed
-    // FW_ASSERT(sort_element == nullptr);
+    FW_ASSERT(sort_element == nullptr);
 }
 
 void TaskRunner::removeTask(Task* task) {
