@@ -8,6 +8,7 @@
 #define OS_BAREMETAL_MUTEX_HPP
 namespace Os {
 namespace Baremetal {
+namespace Mutex {
 
 //! \brief Baremetal implementation of Os::Mutex
 //!
@@ -31,6 +32,7 @@ class BaremetalMutex : public MutexInterface {
     Status release() override;  //!<  unlock the mutex and get return status
 };
 
+}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os
 #endif  // OS_BAREMETAL_MUTEX_HPP

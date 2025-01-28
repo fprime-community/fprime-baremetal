@@ -1,4 +1,4 @@
-add_fprime_supplied_os_module(Cpu Baremetal)
-add_fprime_supplied_os_module(Memory Baremetal)
-add_fprime_supplied_os_module("Mutex;ConditionVariable" Baremetal)
-add_fprime_supplied_os_module(Task Baremetal fprime-baremetal_Os_TaskRunner)
+register_os_implementation("Cpu" Baremetal)
+register_os_implementation("Memory" Baremetal)
+register_os_implementation("Mutex;ConditionVariable" Baremetal)
+register_os_implementation("Task" Baremetal fprime-baremetal_Os_TaskRunner)

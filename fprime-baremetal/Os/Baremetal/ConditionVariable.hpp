@@ -8,6 +8,7 @@
 
 namespace Os {
 namespace Baremetal {
+namespace Mutex {
 
 //! \brief Baremetal implementation of Os::ConditionVariable
 //!
@@ -27,7 +28,7 @@ class BaremetalConditionVariable : public ConditionVariableInterface {
     ConditionVariableInterface& operator=(const ConditionVariableInterface& other) override = delete;
 
     //! \brief wait releasing mutex
-    void wait(Os::Mutex& mutex) override;
+    ConditionVariableInterface::Status pend(Os::Mutex& mutex) override;
 
     //! \brief notify a single waiter
     void notify() override;
@@ -39,6 +40,7 @@ class BaremetalConditionVariable : public ConditionVariableInterface {
     ConditionVariableHandle* getHandle() override;
 };
 
+}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os
 #endif  // OS_BAREMETAL_CONDITION_VARIABLE_HPP

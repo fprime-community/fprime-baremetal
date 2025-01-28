@@ -7,8 +7,11 @@
 
 namespace Os {
 namespace Baremetal {
+namespace Mutex {
 
-void BaremetalConditionVariable::wait(Os::Mutex& mutex) {}
+ConditionVariableInterface::Status BaremetalConditionVariable::pend(Os::Mutex& mutex) {
+    return ConditionVariableInterface::Status::ERROR_NOT_IMPLEMENTED;
+}
 void BaremetalConditionVariable::notify() {}
 void BaremetalConditionVariable::notifyAll() {}
 
@@ -16,5 +19,6 @@ ConditionVariableHandle* BaremetalConditionVariable::getHandle() {
     return nullptr;
 }
 
+}  // namespace Mutex
 }  // namespace Baremetal
 }  // namespace Os
