@@ -2,9 +2,11 @@
 // \title Os/Baremetal/File.hpp
 // \brief baremetal implementation for Os::File, header and test definitions
 // ======================================================================
-#include <Os/File.hpp>
 #ifndef OS_BAREMETAL_FILE_HPP
 #define OS_BAREMETAL_FILE_HPP
+
+#include <Os/File.hpp>
+#include <config/MicroFsCfg.hpp>
 
 namespace Os {
 namespace Baremetal {
@@ -12,7 +14,33 @@ namespace File {
 
 //! FileHandle class definition for baremetal implementations.
 //!
-struct BaremetalFileHandle : public FileHandle {};
+struct BaremetalFileHandle : public FileHandle {
+    static constexpr PlatformIntType INVALID_FILE_DESCRIPTOR = -1;
+    static constexpr PlatformIntType ERROR_RETURN_VALUE = -1;
+
+    //! Baremetal file descriptor
+    PlatformIntType m_file_descriptor = INVALID_FILE_DESCRIPTOR;
+    //! File mode
+    Os::FileInterface::Mode m_mode = Os::File::Mode::OPEN_NO_MODE;
+};
+
+struct MicroFsBin {
+    FwSizeType fileSize;  //<! The size of the files in the bin
+    FwSizeType numFiles;  //<! The number of files in the bin
+};
+
+struct MicroFsConfig {
+    FwSizeType numBins;                 //!< The number of bins configured. Must be <= than MAX_MICROFS_BINS
+    MicroFsBin bins[MAX_MICROFS_BINS];  //!< The bins containing file sizes and numbers of files
+};
+
+// private data structure for managing file state
+struct MicroFsFileState {
+    FwIndexType loc;           //!< location in file where last operation left off
+    FwNativeIntType currSize;  //!< current size of the file after writes were done. -1 = not created yet.
+    FwSizeType dataSize;       //!< alloted size of the file
+    BYTE* data;                //!< location of file data
+};
 
 //! \brief baremetal implementation of Os::File
 //!
@@ -26,15 +54,9 @@ class BaremetalFile : public FileInterface {
     //!
     BaremetalFile() = default;
 
-    //! \brief copy constructor
-    BaremetalFile(const BaremetalFile& other);
-
-    //! \brief assignment operator that copies the internal representation
-    BaremetalFile& operator=(const BaremetalFile& other);
-
     //! \brief destructor
     //!
-    ~BaremetalFile() override = default;
+    ~BaremetalFile() override;
 
     // ------------------------------------
     // Functions overrides
@@ -57,6 +79,11 @@ class BaremetalFile : public FileInterface {
     //! \return: status of the open
     //!
     Os::FileInterface::Status open(const char* path, Mode mode, OverwriteType overwrite) override;
+
+    //! \brief determine if the file is open
+    //! \return true if file is open, false otherwise
+    //!
+    bool isOpen() const;
 
     //! \brief close the file, if not opened then do nothing
     //!
