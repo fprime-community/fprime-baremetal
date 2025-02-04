@@ -146,7 +146,7 @@ class MicroFs {
 
   public:
     // private pointer to allocated memory for microfs
-    void* s_microFsMem = 0;
+    void* s_microFsMem = nullptr;
     // private copy of configuration struct passed by
     // user
     MicroFsConfig s_microFsConfig;

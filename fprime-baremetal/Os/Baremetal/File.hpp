@@ -24,24 +24,6 @@ struct BaremetalFileHandle : public FileHandle {
     Os::FileInterface::Mode m_mode = Os::File::Mode::OPEN_NO_MODE;
 };
 
-struct MicroFsBin {
-    FwSizeType fileSize;  //<! The size of the files in the bin
-    FwSizeType numFiles;  //<! The number of files in the bin
-};
-
-struct MicroFsConfig {
-    FwSizeType numBins;                 //!< The number of bins configured. Must be <= than MAX_MICROFS_BINS
-    MicroFsBin bins[MAX_MICROFS_BINS];  //!< The bins containing file sizes and numbers of files
-};
-
-// private data structure for managing file state
-struct MicroFsFileState {
-    FwIndexType loc;           //!< location in file where last operation left off
-    FwNativeIntType currSize;  //!< current size of the file after writes were done. -1 = not created yet.
-    FwSizeType dataSize;       //!< alloted size of the file
-    BYTE* data;                //!< location of file data
-};
-
 //! \brief baremetal implementation of Os::File
 //!
 //! Baremetal implementation of `FileInterface` for use as a delegate class handling baremetal file operations.

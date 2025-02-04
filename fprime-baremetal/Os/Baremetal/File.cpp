@@ -8,78 +8,15 @@
 #include <cstdio>
 #include <cstring>
 #include <fprime-baremetal/Os/Baremetal/File.hpp>
+#include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include <fprime-baremetal/Os/Baremetal/error.hpp>
 
 namespace Os {
 namespace Baremetal {
 namespace File {
-///////////////////////////////////////
-// Helper static functions
-///////////////////////////////////////
-
-// private pointer to allocated memory for microfs
-STATIC void* s_microFsMem = 0;
-// private copy of configuration struct passed by
-// user
-MicroFsConfig s_microFsConfig;
-// offset from zero for fds to allow zero checks
-STATIC const FwSizeType MICROFS_FD_OFFSET = 1;
-
-// Find file state entry from file name. Will return index if found, -1 if not
-STATIC FwIndexType getFileStateIndex(const char* fileName) {
-    // the directory/filename rule is very strict - it has to be /MICROFS_BIN_STRING<n>/MICROFS_FILE_STRING<m>,
-    // where n = number of file bins, and m = number of files in a particular bin
-    // any other name will return an error
-
-    // Scan the string for the bin and file numbers.
-    // We want a failure to find the file if there is any extension
-    // after the file number.
-    const char* filePathSpec = "/" MICROFS_BIN_STRING "%d/" MICROFS_FILE_STRING "%d.%1s";
-
-    FwSizeType binIndex;
-    FwSizeType fileIndex;
-    // crcExtension should be 2 bytes because scanf appends a null character at the end.
-    char crcExtension[2];
-    FwNativeIntType stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);
-    if (stat != 2) {
-        return -1;
-    }
-
-    // check to see that indexes don't exceed config
-    if (binIndex >= s_microFsConfig.numBins) {
-        return -1;
-    }
-
-    if (fileIndex >= s_microFsConfig.bins[binIndex].numFiles) {
-        return -1;
-    }
-
-    FwIndexType stateIndex = 0;
-    // compute file state index
-
-    // add each chunk of file numbers from full bins
-    for (FwSizeType currBin = 0; currBin < binIndex; currBin++) {
-        stateIndex += s_microFsConfig.bins[currBin].numFiles;
-    }
-
-    // get residual file number from last bin
-    stateIndex += fileIndex;
-
-    return stateIndex;
-}
-
-// Get state pointer from index
-STATIC MicroFsFileState* getFileStateFromIndex(FwIndexType index) {
-    // should be >=0 by the time this is called
-    FW_ASSERT(index >= 0, index);
-    FW_ASSERT(s_microFsMem != nullptr);
-    // Get base of state structures
-    MicroFsFileState* ptr = reinterpret_cast<MicroFsFileState*>(s_microFsMem);
-    return &ptr[index];
-}
 
 BaremetalFile::~BaremetalFile() {
-    if (this->m_handle.m_mode != OPEN_NO_MODE) {
+    if (!this->isOpen()) {
         this->close();
     }
 }
@@ -89,17 +26,18 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::OverwriteType overwrite) {
     FW_ASSERT(path != nullptr);
     Status stat = OP_OK;
+    auto microFs = MicroFs::getSingleton();
 
     // common checks
     // retrieve index to file entry
-    FwIndexType entry = getFileStateIndex(path);
+    FwIndexType entry = microFs.getFileStateIndex(path);
     // not found
     if (-1 == entry) {
         return Os::File::Status::DOESNT_EXIST;
     }
 
-    MicroFsFileState* state = getFileStateFromIndex(entry);
-    FW_ASSERT(state);
+    MicroFs::MicroFsFileState* state = microFs.getFileStateFromIndex(entry);
+    FW_ASSERT(state != nullptr);
 
     // make sure it isn't already open. If so, return an error
     if (state->loc != -1) {
@@ -147,7 +85,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
     this->m_handle.m_mode = mode;
 
     // set file descriptor to index into state structure
-    this->m_handle.m_file_descriptor = entry + MICROFS_FD_OFFSET;
+    this->m_handle.m_file_descriptor = entry + microFs.MICROFS_FD_OFFSET;
 
     return stat;
 }
@@ -163,14 +101,16 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSignedSizeType offset, FwSign
 }
 
 void BaremetalFile::close() {
+    auto microFs = MicroFs::getSingleton();
     if (this->m_handle.m_file_descriptor != -1) {
         // only do cleanup of file state
         // if file system memory is still around
         // catches case where file objects are still
         // lingering after cleanup
-        if (s_microFsMem) {
+        if (microFs.s_microFsMem) {
             // get state to clear it
-            MicroFsFileState* state = getFileStateFromIndex(this->m_handle.m_file_descriptor - MICROFS_FD_OFFSET);
+            MicroFs::MicroFsFileState* state =
+                microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
             FW_ASSERT(state != nullptr);
             state->loc = -1;
         }
@@ -199,10 +139,12 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
     if (!this->isOpen()) {
         return NOT_OPENED;
     }
-
     // get file state entry
     FW_ASSERT(this->m_handle.m_file_descriptor != -1);
-    MicroFsFileState* state = getFileStateFromIndex(this->m_handle.m_file_descriptor - MICROFS_FD_OFFSET);
+
+    auto microFs = MicroFs::getSingleton();
+    MicroFs::MicroFsFileState* state =
+        microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
     FwNativeIntType oldSize = state->currSize;
@@ -259,10 +201,12 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSignedSizeType& size, Ba
         size = 0;
         return NOT_OPENED;
     }
-
     // get file state entry
     FW_ASSERT(this->m_handle.m_file_descriptor != -1);
-    MicroFsFileState* state = getFileStateFromIndex(this->m_handle.m_file_descriptor - MICROFS_FD_OFFSET);
+
+    auto microFs = MicroFs::getSingleton();
+    MicroFs::MicroFsFileState* state =
+        microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
     // find size to copy
@@ -308,7 +252,10 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSignedSizeType& s
 
     // get file state entry
     FW_ASSERT(this->m_handle.m_file_descriptor != -1);
-    MicroFsFileState* state = getFileStateFromIndex(this->m_handle.m_file_descriptor - MICROFS_FD_OFFSET);
+
+    auto microFs = MicroFs::getSingleton();
+    MicroFs::MicroFsFileState* state =
+        microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
     // write up to the end of the allocated buffer

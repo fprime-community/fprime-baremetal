@@ -49,7 +49,7 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
 
     // check things...
     FW_ASSERT(cfg.numBins <= MAX_MICROFS_BINS, cfg.numBins, MAX_MICROFS_BINS);
-    FW_ASSERT((not MICROFS_SKIP_NULL_CHECK) and 0 == microFs.s_microFsMem);
+    FW_ASSERT((not MICROFS_SKIP_NULL_CHECK) and (microFs.s_microFsMem == nullptr));
 
     // copy config to private copy
     microFs.s_microFsConfig = cfg;
@@ -166,17 +166,6 @@ MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
 }
 
 #if 0
-File::File() : m_fd(-1), m_mode(OPEN_NO_MODE), m_lastError(0) {}
-
-File::~File() {
-    if (this->m_mode != OPEN_NO_MODE) {
-        this->close();
-    }
-}
-
-File::Status File::open(const char* fileName, File::Mode mode) {
-    return this->open(fileName, mode, true);
-}
 File::Status File::open(const char* fileName, File::Mode mode, bool include_excl) {
     Status stat = OP_OK;
 
