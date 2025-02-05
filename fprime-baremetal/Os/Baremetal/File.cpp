@@ -28,17 +28,16 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
         return OTHER_ERROR;
     }
     Status stat = OP_OK;
-    auto microFs = MicroFs::getSingleton();
 
     // common checks
     // retrieve index to file entry
-    FwIndexType entry = microFs.getFileStateIndex(path);
+    FwIndexType entry = MicroFs::getFileStateIndex(path);
     // not found
     if (-1 == entry) {
         return Os::File::Status::DOESNT_EXIST;
     }
 
-    MicroFs::MicroFsFileState* state = microFs.getFileStateFromIndex(entry);
+    MicroFs::MicroFsFileState* state = MicroFs::getFileStateFromIndex(entry);
     FW_ASSERT(state != nullptr);
 
     // make sure it isn't already open. If so, return an error
@@ -87,7 +86,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
     this->m_handle.m_mode = mode;
 
     // set file descriptor to index into state structure
-    this->m_handle.m_file_descriptor = entry + microFs.MICROFS_FD_OFFSET;
+    this->m_handle.m_file_descriptor = entry + MicroFs::MICROFS_FD_OFFSET;
 
     return stat;
 }
@@ -112,7 +111,7 @@ void BaremetalFile::close() {
         if (microFs.s_microFsMem) {
             // get state to clear it
             MicroFs::MicroFsFileState* state =
-                microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
+                MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
             FW_ASSERT(state != nullptr);
             state->loc = -1;
         }
@@ -147,9 +146,8 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
     // get file state entry
     FW_ASSERT(this->m_handle.m_file_descriptor != -1);
 
-    auto microFs = MicroFs::getSingleton();
     MicroFs::MicroFsFileState* state =
-        microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
+        MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
     FwNativeIntType oldSize = state->currSize;
@@ -209,9 +207,8 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSignedSizeType& size, Ba
     // get file state entry
     FW_ASSERT(this->m_handle.m_file_descriptor != -1);
 
-    auto microFs = MicroFs::getSingleton();
     MicroFs::MicroFsFileState* state =
-        microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
+        MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
     // find size to copy
@@ -258,9 +255,8 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSignedSizeType& s
     // get file state entry
     FW_ASSERT(this->m_handle.m_file_descriptor != -1);
 
-    auto microFs = MicroFs::getSingleton();
     MicroFs::MicroFsFileState* state =
-        microFs.getFileStateFromIndex(this->m_handle.m_file_descriptor - microFs.MICROFS_FD_OFFSET);
+        MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
     // write up to the end of the allocated buffer
