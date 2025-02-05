@@ -356,31 +356,6 @@ Status readDirectory(const char* path, const U32 maxNum, Fw::String fileArray[],
     return OP_OK;
 }
 
-Status removeFile(const char* path) {
-    if (not path) {
-        return INVALID_PATH;
-    }
-
-    // get file state
-    FwIndexType index = getFileStateIndex(path);
-    if (index == -1) {
-        return INVALID_PATH;
-    }
-
-    MicroFsFileState* fState = getFileStateFromIndex(index);
-    FW_ASSERT(fState);
-
-    if (fState->loc != -1) {
-        return BUSY;
-    }
-
-    // delete the file by setting current size to be -1
-    fState->currSize = -1;
-    fState->loc = -1;
-
-    return OP_OK;
-}
-
 Status moveFile(const char* originPath, const char* destPath) {
     Status copyStat = copyFile(originPath, destPath);
     if (copyStat != OP_OK) {
