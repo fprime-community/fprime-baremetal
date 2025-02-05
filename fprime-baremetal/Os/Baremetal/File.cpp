@@ -16,7 +16,7 @@ namespace Baremetal {
 namespace File {
 
 BaremetalFile::~BaremetalFile() {
-    if (!this->isOpen()) {
+    if (this->isOpen()) {
         this->close();
     }
 }
@@ -102,13 +102,12 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSignedSizeType offset, FwSign
 }
 
 void BaremetalFile::close() {
-    auto microFs = MicroFs::getSingleton();
     if (this->m_handle.m_file_descriptor != -1) {
         // only do cleanup of file state
         // if file system memory is still around
         // catches case where file objects are still
         // lingering after cleanup
-        if (microFs.s_microFsMem) {
+        if ((MicroFs::getSingleton()).s_microFsMem) {
             // get state to clear it
             MicroFs::MicroFsFileState* state =
                 MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
