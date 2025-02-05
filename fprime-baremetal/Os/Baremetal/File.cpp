@@ -124,15 +124,19 @@ void BaremetalFile::close() {
 }
 
 BaremetalFile::Status BaremetalFile::size(FwSignedSizeType& size_result) {
-    FwSignedSizeType current_position = 0;
-    Status status = this->position(current_position);
-    // TODO
-    return status;
+    MicroFs::MicroFsFileState* state =
+        MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
+    FW_ASSERT(state != nullptr);
+    size_result = state->currSize;
+    return OP_OK;
 }
 
 BaremetalFile::Status BaremetalFile::position(FwSignedSizeType& position_result) {
-    // TODO
-    return NOT_SUPPORTED;
+    MicroFs::MicroFsFileState* state =
+        MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
+    FW_ASSERT(state != nullptr);
+    position_result = state->loc;
+    return OP_OK;
 }
 
 BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile::SeekType seekType) {
