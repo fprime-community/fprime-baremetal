@@ -105,7 +105,7 @@ class MicroFs {
     };
 
   public:
-    // private data structure for managing file state
+    // data structure for managing file state
     struct MicroFsFileState {
         FwIndexType loc;           //!< location in file where last operation left off
         FwNativeIntType currSize;  //!< current size of the file after writes were done. -1 = not created yet.
