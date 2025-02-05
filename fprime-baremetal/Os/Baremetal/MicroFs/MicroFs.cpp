@@ -111,7 +111,7 @@ void MicroFs::MicroFsCleanup(const FwNativeUIntType id, Fw::MemAllocator& alloca
 }
 
 // helper to find file state entry from file name. Will return index if found, -1 if not
-FwIndexType getFileStateIndex(const char* fileName) {
+FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // the directory/filename rule is very strict - it has to be /MICROFS_BIN_STRING<n>/MICROFS_FILE_STRING<m>,
     // where n = number of file bins, and m = number of files in a particular bin
     // any other name will return an error

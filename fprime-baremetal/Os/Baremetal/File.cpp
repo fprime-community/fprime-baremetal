@@ -24,7 +24,9 @@ BaremetalFile::~BaremetalFile() {
 BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::Mode mode,
                                           BaremetalFile::OverwriteType overwrite) {
-    FW_ASSERT(path != nullptr);
+    if (path == nullptr) {
+        return OTHER_ERROR;
+    }
     Status stat = OP_OK;
     auto microFs = MicroFs::getSingleton();
 
@@ -129,9 +131,8 @@ BaremetalFile::Status BaremetalFile::size(FwSignedSizeType& size_result) {
 }
 
 BaremetalFile::Status BaremetalFile::position(FwSignedSizeType& position_result) {
-    Status status = OP_OK;
     // TODO
-    return status;
+    return NOT_SUPPORTED;
 }
 
 BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile::SeekType seekType) {
