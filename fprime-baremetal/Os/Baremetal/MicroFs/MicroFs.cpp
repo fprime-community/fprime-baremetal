@@ -253,33 +253,7 @@ namespace Os {
 
 namespace FileSystem {
 
-Status createDirectory(const char* path) {
-    // The directory can only be one of the
-    // bin file names, and it is already "created" if
-    // the bin exists. See if the directory matches
-    // one of the bins, and if it does, return OK, otherwise
-    // return NO_PERMISSION.
 
-    const char* dirPathSpec = "/" MICROFS_BIN_STRING "%d";
-
-    // if the directory number can be scanned out following the directory path spec,
-    // the directory name has the correct format
-
-    FwIndexType binIndex = 0;
-
-    FwNativeUIntType stat = sscanf(path, dirPathSpec, &binIndex);
-    if (stat != 1) {
-        return NO_PERMISSION;
-    }
-
-    // If the path format is correct, check to see if it is in the
-    // range of bins
-    if (binIndex < static_cast<FwIndexType>(s_microFsConfig.numBins)) {
-        return OP_OK;
-    } else {
-        return NO_PERMISSION;
-    }
-}
 
 Status removeDirectory(const char* path) {
     // since we can't create or remove directories anyway,
