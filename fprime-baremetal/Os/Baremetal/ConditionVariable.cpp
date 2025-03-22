@@ -8,7 +8,7 @@
 namespace Os {
 namespace Baremetal {
 
-void BaremetalConditionVariable::wait(Os::Mutex& mutex) {}
+ConditionVariableInterface::Status BaremetalConditionVariable::pend(Os::Mutex& mutex) {}
 void BaremetalConditionVariable::notify() {}
 void BaremetalConditionVariable::notifyAll() {}
 
