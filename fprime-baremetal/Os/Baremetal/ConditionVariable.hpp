@@ -26,8 +26,8 @@ class BaremetalConditionVariable : public ConditionVariableInterface {
     //! \brief assignment operator is forbidden
     ConditionVariableInterface& operator=(const ConditionVariableInterface& other) override = delete;
 
-    //! \brief wait releasing mutex
-    void wait(Os::Mutex& mutex) override;
+    //! \brief pend releasing mutex
+    Status pend(Os::Mutex& mutex) override;
 
     //! \brief notify a single waiter
     void notify() override;
