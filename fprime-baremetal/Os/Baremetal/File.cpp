@@ -102,7 +102,7 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSignedSizeType offset, FwSign
 }
 
 void BaremetalFile::close() {
-    if (this->m_handle.m_file_descriptor != -1) {
+    if (this->m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
         // only do cleanup of file state
         // if file system memory is still around
         // catches case where file objects are still
@@ -116,7 +116,7 @@ void BaremetalFile::close() {
         }
     }
     // reset fd
-    this->m_handle.m_file_descriptor = -1;
+    this->m_handle.m_file_descriptor = BaremetalFileHandle::INVALID_FILE_DESCRIPTOR;
     this->m_handle.m_mode = OPEN_NO_MODE;
     // clear
 }
@@ -143,7 +143,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
         return NOT_OPENED;
     }
     // get file state entry
-    FW_ASSERT(this->m_handle.m_file_descriptor != -1);
+    FW_ASSERT(this->m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR);
 
     MicroFs::MicroFsFileState* state =
         MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
@@ -204,7 +204,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSignedSizeType& size, Ba
         return NOT_OPENED;
     }
     // get file state entry
-    FW_ASSERT(this->m_handle.m_file_descriptor != -1);
+    FW_ASSERT(this->m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR);
 
     MicroFs::MicroFsFileState* state =
         MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
@@ -252,7 +252,7 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSignedSizeType& s
     }
 
     // get file state entry
-    FW_ASSERT(this->m_handle.m_file_descriptor != -1);
+    FW_ASSERT(this->m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR);
 
     MicroFs::MicroFsFileState* state =
         MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
