@@ -1,5 +1,5 @@
 \page MicroFs SDD
-# Os::MicroFs Library
+# Os::Baremetal::MicroFs Library
 
 ## 1. Introduction
 
@@ -11,15 +11,15 @@ non-volatile files (like `Svc/PrmDb`) wouldn't make sense in this context.
 
 ## 2. Requirements
 
-The requirements for `Os::MicroFs` are as follows:
+The requirements for `Os::Baremetal::MicroFs` are as follows:
 
 Requirement | Description | Verification Method
 ----------- | ----------- | -------------------
-MFS-001 | The `Os::MicroFs` library shall utilize only RAM for implementing the file system | Analysis
-MFS-002 | The `Os::MicroFs` library shall utilize the `Fw::MemAllocator` base class to allocate memory | Analysis
-MFS-003 | The `Os::MicroFs` library shall implement the `Os::File` class implementation | Analysis
-MFS-004 | The `Os::MicroFs` library shall implement the `Os::FileSystem` class implementation | Analysis
-MFS-005 | The `Os::MicroFs` library shall implement the `Os::Directory` class implementation | Analysis
+MFS-001 | The `Os::Baremetal::MicroFs` library shall utilize only RAM for implementing the file system | Analysis
+MFS-002 | The `Os::Baremetal::MicroFs` library shall utilize the `Fw::MemAllocator` base class to allocate memory | Analysis
+MFS-003 | The `Os::Baremetal::MicroFs` library shall implement the `Os::File` class implementation | Analysis
+MFS-004 | The `Os::Baremetal::MicroFs` library shall implement the `Os::FileSystem` class implementation | Analysis
+MFS-005 | The `Os::Baremetal::MicroFs` library shall implement the `Os::Directory` class implementation | Analysis
 
 ## 3. Design
 
@@ -27,7 +27,7 @@ MFS-005 | The `Os::MicroFs` library shall implement the `Os::Directory` class im
 
 #### 3.1.1 Class Diagram
 
-The `Os::MicroFs` component has the following class diagram:
+The `Os::Baremetal::MicroFs` component has the following class diagram:
 
 
 ### 3.2 Design Description
@@ -73,7 +73,7 @@ The state structures fill the memory after the copy of `MicroFsConfig`.
 
 #### 3.2.2 Initialization
 
-`Os::MicroFs` requests memory from the `Fw::MemAlloctor` instance passed to the following call:
+`Os::Baremetal::MicroFs` requests memory from the `Fw::MemAlloctor` instance passed to the following call:
 
 ```c++
 void MicroFsInit(const MicroFsConfig& cfg,      //!< the configuration of the memory space
