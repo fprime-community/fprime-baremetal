@@ -5,7 +5,6 @@
 #ifndef OS_BAREMETAL_DIRECTORY_HPP
 #define OS_BAREMETAL_DIRECTORY_HPP
 #include <Os/Directory.hpp>
-#include <climits>
 
 namespace Os {
 namespace Baremetal {

@@ -9,7 +9,6 @@
 #include <cstring>
 #include <fprime-baremetal/Os/Baremetal/Directory.hpp>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
-#include <fprime-baremetal/Os/Baremetal/error.hpp>
 
 namespace Os {
 namespace Baremetal {
