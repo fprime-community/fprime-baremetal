@@ -130,17 +130,18 @@ BaremetalFileSystem::Status BaremetalFileSystem::_getFreeSpace(const char* path,
     totalBytes = 0;
     freeBytes = 0;
 
-    auto microFs = MicroFs::getSingleton();
-
     // Get first file state struct
-    MicroFs::MicroFsFileState* statePtr = reinterpret_cast<MicroFs::MicroFsFileState*>(microFs.s_microFsMem);
+    MicroFs::MicroFsFileState* statePtr =
+        reinterpret_cast<MicroFs::MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
     FW_ASSERT(statePtr != nullptr);
 
     // iterate through bins
-    for (FwIndexType currBin = 0; currBin < static_cast<FwIndexType>(microFs.s_microFsConfig.numBins); currBin++) {
+    for (FwIndexType currBin = 0; currBin < static_cast<FwIndexType>(MicroFs::getSingleton().s_microFsConfig.numBins);
+         currBin++) {
         // iterate through files in each bin
         for (FwIndexType currFile = 0;
-             currFile < static_cast<FwIndexType>(microFs.s_microFsConfig.bins[currBin].numFiles); currFile++) {
+             currFile < static_cast<FwIndexType>(MicroFs::getSingleton().s_microFsConfig.bins[currBin].numFiles);
+             currFile++) {
             totalBytes += statePtr->dataSize;
             // only add unused file slots to free space
             if (-1 == statePtr->currSize) {
