@@ -94,7 +94,9 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
     return status;
 }
 
-void BaremetalDirectory::close() {}
+void BaremetalDirectory::close() {
+    this->m_handle.m_dir_index = BaremetalDirectoryHandle::INVALID_DIR_DESCRIPTOR;
+}
 
 }  // namespace Directory
 }  // namespace Baremetal
