@@ -45,6 +45,7 @@ BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /
     // range of bins
     if (binIndex < static_cast<PlatformSizeType>(MicroFs::getSingleton().s_microFsConfig.numBins)) {
         this->m_handle.m_dir_index = binIndex;
+        this->m_handle.m_file_index = 0;
         return OP_OK;
     } else {
         return NO_PERMISSION;
