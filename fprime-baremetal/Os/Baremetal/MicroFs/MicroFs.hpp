@@ -114,6 +114,11 @@ class MicroFs {
     };
 
   public:
+    MicroFs() = default;
+    MicroFs(const MicroFs&) = delete;
+    MicroFs& operator=(const MicroFs&) = delete;
+
+  public:
     //!< set the number of bins in config
     static void MicroFsSetCfgBins(MicroFsConfig& cfg, const FwSizeType numBins);
 

@@ -45,14 +45,14 @@ MicroFs& MicroFs::getSingleton() {
 
 void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, Fw::MemAllocator& allocator) {
     // Force trigger on the fly singleton setup
-    auto microFs = MicroFs::getSingleton();
+    (void)MicroFs::getSingleton();
 
     // check things...
     FW_ASSERT(cfg.numBins <= MAX_MICROFS_BINS, cfg.numBins, MAX_MICROFS_BINS);
-    FW_ASSERT((not MICROFS_SKIP_NULL_CHECK) and (microFs.s_microFsMem == nullptr));
+    FW_ASSERT((not MICROFS_SKIP_NULL_CHECK) and (MicroFs::getSingleton().s_microFsMem == nullptr));
 
     // copy config to private copy
-    microFs.s_microFsConfig = cfg;
+    MicroFs::getSingleton().s_microFsConfig = cfg;
 
     // compute the amount of memory needed to hold the file system state
     // and data
@@ -70,16 +70,16 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     FwNativeUIntType reqMem = memSize;
 
     bool dontcare;
-    microFs.s_microFsMem = allocator.allocate(id, reqMem, dontcare);
+    MicroFs::getSingleton().s_microFsMem = allocator.allocate(id, reqMem, dontcare);
 
     // make sure got the amount requested.
     // improvement could be best effort based on received memory
     FW_ASSERT(reqMem >= memSize, reqMem, memSize);
     // make sure we got a non-null pointer
-    FW_ASSERT(microFs.s_microFsMem != nullptr);
+    FW_ASSERT(MicroFs::getSingleton().s_microFsMem != nullptr);
 
     // lay out the memory with the state and the buffers after the config section
-    MicroFsFileState* statePtr = reinterpret_cast<MicroFsFileState*>(microFs.s_microFsMem);
+    MicroFsFileState* statePtr = reinterpret_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
 
     // point to memory after state structs for beginning of file data
     BYTE* currFileBuff = reinterpret_cast<BYTE*>(&statePtr[totalNumFiles]);
@@ -105,9 +105,8 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
 }
 
 void MicroFs::MicroFsCleanup(const FwNativeUIntType id, Fw::MemAllocator& allocator) {
-    auto microFs = MicroFs::getSingleton();
-    allocator.deallocate(id, microFs.s_microFsMem);
-    microFs.s_microFsMem = 0;
+    allocator.deallocate(id, MicroFs::getSingleton().s_microFsMem);
+    MicroFs::getSingleton().s_microFsMem = 0;
 }
 
 // helper to find file state entry from file name. Will return index if found, -1 if not
@@ -130,13 +129,12 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
         return -1;
     }
 
-    auto microFs = MicroFs::getSingleton();
     // check to see that indexes don't exceed config
-    if (binIndex >= microFs.s_microFsConfig.numBins) {
+    if (binIndex >= MicroFs::getSingleton().s_microFsConfig.numBins) {
         return -1;
     }
 
-    if (fileIndex >= microFs.s_microFsConfig.bins[binIndex].numFiles) {
+    if (fileIndex >= MicroFs::getSingleton().s_microFsConfig.bins[binIndex].numFiles) {
         return -1;
     }
 
@@ -145,7 +143,7 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
 
     // add each chunk of file numbers from full bins
     for (FwSizeType currBin = 0; currBin < binIndex; currBin++) {
-        stateIndex += microFs.s_microFsConfig.bins[currBin].numFiles;
+        stateIndex += MicroFs::getSingleton().s_microFsConfig.bins[currBin].numFiles;
     }
 
     // get residual file number from last bin
@@ -156,12 +154,11 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
 
 // helper to get state pointer from index
 MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
-    auto microFs = MicroFs::getSingleton();
     // should be >=0 by the time this is called
     FW_ASSERT(index >= 0, index);
-    FW_ASSERT(microFs.s_microFsMem);
+    FW_ASSERT(MicroFs::getSingleton().s_microFsMem);
     // Get base of state structures
-    MicroFsFileState* ptr = reinterpret_cast<MicroFsFileState*>(microFs.s_microFsMem);
+    MicroFsFileState* ptr = reinterpret_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
     return &ptr[index];
 }
 
