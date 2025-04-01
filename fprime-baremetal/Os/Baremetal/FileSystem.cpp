@@ -70,13 +70,11 @@ BaremetalFileSystem::Status BaremetalFileSystem::_rename(const char* originPath,
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_getWorkingDirectory(char* path, FwSizeType bufferSize) {
-    Status status = OP_OK;
-    return status;
+    return NOT_SUPPORTED;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_changeWorkingDirectory(const char* path) {
-    Status status = OP_OK;
-    return status;
+    return NOT_SUPPORTED;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::copyFile(const char* originPath, const char* destPath) {
