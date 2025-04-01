@@ -330,33 +330,6 @@ Status getFileSize(const char* path, FwSizeType& size) {
     return OP_OK;
 }
 
-// We can get a "free" space number by adding up all the space left in the file bins
-
-Status getFreeSpace(const char* path, FwSizeType& totalBytes, FwSizeType& freeBytes) {
-    totalBytes = 0;
-    freeBytes = 0;
-
-    // Get first file state struct
-    MicroFsFileState* statePtr = reinterpret_cast<MicroFsFileState*>(s_microFsMem);
-    FW_ASSERT(statePtr);
-
-    // iterate through bins
-    for (FwIndexType currBin = 0; currBin < static_cast<FwIndexType>(s_microFsConfig.numBins); currBin++) {
-        // iterate through files in each bin
-        for (FwIndexType currFile = 0; currFile < static_cast<FwIndexType>(s_microFsConfig.bins[currBin].numFiles);
-             currFile++) {
-            totalBytes += statePtr->dataSize;
-            // only add unused file slots to free space
-            if (-1 == statePtr->currSize) {
-                freeBytes += statePtr->dataSize;
-            }
-            statePtr += 1;
-        }
-    }
-
-    return OP_OK;
-}
-
 }  // namespace FileSystem
 #endif
 }  // namespace Baremetal
