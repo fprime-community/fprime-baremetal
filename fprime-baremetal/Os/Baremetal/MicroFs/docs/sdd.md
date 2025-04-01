@@ -94,6 +94,20 @@ The file is initialized to be empty, which is considered by the file system to b
 
 4\) Optionally clears the file data to zero.
 
+Here is an example of initialization MicroFs with 5 bins of different sizes
+
+```c++
+    // Initialize the RAM File system
+    Os::Baremetal::MicroFs::MicroFsConfig microFsCfg;
+    Os::Baremetal::MicroFs::MicroFsSetCfgBins(microFsCfg, 5);
+    Os::Baremetal::MicroFs::MicroFsAddBin(microFsCfg, 0, 1 * 1024, 5);
+    Os::Baremetal::MicroFs::MicroFsAddBin(microFsCfg, 1, 10 * 1024, 5);
+    Os::Baremetal::MicroFs::MicroFsAddBin(microFsCfg, 2, 100 * 1024, 5);
+    Os::Baremetal::MicroFs::MicroFsAddBin(microFsCfg, 3, 1000 * 1024, 5);
+    Os::Baremetal::MicroFs::MicroFsAddBin(microFsCfg, 4, 10000 * 1024, 5);
+    Os::Baremetal::MicroFs::MicroFsInit(microFsCfg, 0, mallocator);
+```
+
 #### 3.2.3 File Operations
 
 Since none of the files initially exist, the file must be first opened for write with the `OPEN_CREATE` flag. Any other
@@ -139,16 +153,14 @@ sequences that may attempt to clean up directories.
 
 ##### 3.2.4.2 Read Directory
 
-The `readDirectory()` call will work with two arguments. The first is the root `/` where it will return a list of
-the file bins that were configured by the user. The second is when the argument gives a particular bin name. It will
-return a list of the files that have been created in that bin. Any other arguments will return a `NO_PERMISSION` error.
+The `read()` call will return the next available file. If no more files can be read, then the NO_MORE_FILES status is returned.
 
 ##### 3.2.4.3 Remove File
 
 This call will reinitialize the file state data to the state that indicates it doesn't exist, and subsequent calls
 will follow the rules for nonexistent files.
 
-##### 3.2.4.4 Move/Copy/Append Files
+##### 3.2.4.4 Move/Copy Files
 
 This call will copy data from the source to destination file buffers. If the destination buffer is smaller than 
 the source(s), the data will be truncated to fit in the destination buffer. A `INVALID_PATH` error will be 
@@ -159,16 +171,11 @@ created yet.
 
 This call will return the current file size from the file state structure.
 
-##### 3.2.4.6 Get File Count
-
-This call will return the number of bins if the path is `/`, or the number of created file in a bin if a valid bin
-pathname is given.
-
-##### 3.2.4.7 Change Working Directory
+##### 3.2.4.6 Change Working Directory
 
 This call has no effect.
 
-##### 3.2.4.8 Get Free Space
+##### 3.2.4.7 Get Free Space
 
 This call will add up the sizes of uncreated files. It will not count created and partially filled files.
 

@@ -74,7 +74,7 @@ BaremetalFileSystem::Status BaremetalFileSystem::_getWorkingDirectory(char* path
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_changeWorkingDirectory(const char* path) {
-    return NOT_SUPPORTED;
+    return OP_OK;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::copyFile(const char* originPath, const char* destPath) {
