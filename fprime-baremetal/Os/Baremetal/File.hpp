@@ -6,7 +6,6 @@
 #define OS_BAREMETAL_FILE_HPP
 
 #include <Os/File.hpp>
-#include <config/MicroFsCfg.hpp>
 
 namespace Os {
 namespace Baremetal {

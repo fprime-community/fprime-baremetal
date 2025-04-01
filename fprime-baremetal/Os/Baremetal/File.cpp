@@ -5,7 +5,6 @@
 
 #include <Fw/Types/Assert.hpp>
 #include <Os/File.hpp>
-#include <cstdio>
 #include <cstring>
 #include <fprime-baremetal/Os/Baremetal/File.hpp>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
