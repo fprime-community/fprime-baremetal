@@ -5,12 +5,18 @@
 #ifndef OS_BAREMETAL_DIRECTORY_HPP
 #define OS_BAREMETAL_DIRECTORY_HPP
 #include <Os/Directory.hpp>
+#include <climits>
 
 namespace Os {
 namespace Baremetal {
 namespace Directory {
 
-struct BaremetalDirectoryHandle : public DirectoryHandle {};
+struct BaremetalDirectoryHandle : public DirectoryHandle {
+    static constexpr PlatformSizeType INVALID_DIR_DESCRIPTOR = std::numeric_limits<PlatformSizeType>::max();
+
+    PlatformSizeType m_dir_index = INVALID_DIR_DESCRIPTOR;  // The current open directory
+    PlatformSizeType m_file_index = 0;                      // Keep track of the last file index to read
+};
 
 //! \brief Baremetal implementation of Os::Directory
 //!
@@ -33,22 +39,15 @@ class BaremetalDirectory : public DirectoryInterface {
 
     //! \brief Open or create a directory
     //!
-    //! Using the path provided, this function will open or create a directory.
-    //! Use OpenMode::READ to open an existing directory and error if the directory is not found
-    //! Use OpenMode::CREATE_IF_MISSING to open a directory, creating the directory if it doesn't exist
-    //! Use OpenMode::CREATE_EXCLUSIVE to open a directory, creating the directory and erroring if it already exists
+    //! This call will return success if the directory name (path) matches the file bin naming scheme.
+    //! This does not affect the state of any files.
     //!
     //! It is invalid to pass `nullptr` as the path.
-    //! It is invalid to supply `mode` as a non-enumerated value.
     //!
     //! \param path: path of directory to open
-    //! \param mode: enum (READ, CREATE_IF_MISSING, CREATE_EXCLUSIVE). See notes above for more information
+    //! \param mode: Unused
     //! \return status of the operation
     Status open(const char* path, OpenMode mode) override;
-
-    //! \brief Check if Directory is open or not
-    //! \return true if Directory is open, false otherwise
-    bool isOpen();
 
     //! \brief Rewind directory stream
     //!

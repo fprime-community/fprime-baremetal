@@ -6,6 +6,7 @@
 #include <Fw/Types/Assert.hpp>
 #include <Fw/Types/StringUtils.hpp>
 #include <cstdio>
+#include <cstring>
 #include <fprime-baremetal/Os/Baremetal/Directory.hpp>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include <fprime-baremetal/Os/Baremetal/error.hpp>
@@ -27,21 +28,23 @@ BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /
     // one of the bins, and if it does, return OK, otherwise
     // return NO_PERMISSION.
 
+    FW_ASSERT(path != nullptr);
+
     const char* dirPathSpec = "/" MICROFS_BIN_STRING "%d";
 
     // if the directory number can be scanned out following the directory path spec,
     // the directory name has the correct format
+    PlatformSizeType binIndex = 0;
 
-    FwIndexType binIndex = 0;
-
-    FwNativeUIntType stat = sscanf(path, dirPathSpec, &binIndex);
+    PlatformIntType stat = sscanf(path, dirPathSpec, &binIndex);
     if (stat != 1) {
         return NO_PERMISSION;
     }
 
     // If the path format is correct, check to see if it is in the
     // range of bins
-    if (binIndex < static_cast<FwIndexType>(MicroFs::getSingleton().s_microFsConfig.numBins)) {
+    if (binIndex < static_cast<PlatformSizeType>(MicroFs::getSingleton().s_microFsConfig.numBins)) {
+        this->m_handle.m_dir_index = binIndex;
         return OP_OK;
     } else {
         return NO_PERMISSION;
@@ -49,14 +52,44 @@ BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /
 }
 
 BaremetalDirectory::Status BaremetalDirectory::rewind() {
-    Status status = Status::OP_OK;
-    return status;
+    this->m_handle.m_file_index = 0;
+    return Status::OP_OK;
 }
 
 BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSizeType bufSize) {
-    FW_ASSERT(fileNameBuffer);
+    FW_ASSERT(fileNameBuffer != nullptr);
+    if (this->m_handle.m_dir_index == BaremetalDirectoryHandle::INVALID_DIR_DESCRIPTOR) {
+        return BAD_DESCRIPTOR;
+    }
 
-    Status status = Status::OP_OK;
+    if (this->m_handle.m_file_index >=
+        MicroFs::getSingleton().s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles) {
+        return NO_MORE_FILES;
+    }
+
+    Status status = NO_MORE_FILES;
+
+    for (; this->m_handle.m_file_index <
+           MicroFs::getSingleton().s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles;
+         this->m_handle.m_file_index++) {
+        Fw::String fileStr;
+        const char* filePathSpec = "/" MICROFS_BIN_STRING "%d/" MICROFS_FILE_STRING "%d";
+        fileStr.format(filePathSpec, this->m_handle.m_dir_index, this->m_handle.m_file_index);
+
+        // get file state
+        FwIndexType fileIndex = MicroFs::getFileStateIndex(fileStr.toChar());
+        // should always find it, since it is from a known valid bin
+        FW_ASSERT(fileIndex != -1);
+        MicroFs::MicroFsFileState* fState = MicroFs::getFileStateFromIndex(fileIndex);
+        FW_ASSERT(fState != nullptr);
+
+        // check to see if it has been written
+        if (fState->currSize != -1) {
+            (void)memcpy(fileNameBuffer, fileStr.toChar(), bufSize);
+            status = OP_OK;
+            break;
+        }
+    }
 
     return status;
 }
