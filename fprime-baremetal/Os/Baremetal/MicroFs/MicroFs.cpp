@@ -1,23 +1,9 @@
-#include <FpConfig.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <Fw/Types/StringUtils.hpp>
-#include <Os/File.hpp>
-#include <Os/FileSystem.hpp>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
-
-#ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
-
-#include <Utils/Hash/libcrc/lib_crc.h>  // borrow CRC
-
-#ifdef __cplusplus
-}
-#endif  // __cplusplus
 
 #include <cstdio>
 #include <cstring>
-#include <limits>
 
 namespace Os {
 namespace Baremetal {
@@ -87,14 +73,14 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     for (FwSizeType bin = 0; bin < cfg.numBins; bin++) {
         for (FwSizeType file = 0; file < cfg.bins[bin].numFiles; file++) {
             // clear state structure memory
-            memset(statePtr, 0, sizeof(MicroFsFileState));
+            (void)memset(statePtr, 0, sizeof(MicroFsFileState));
             // initialize state
             statePtr->loc = -1;                           // no operation in progress
             statePtr->currSize = -1;                      // nothing written yet
             statePtr->data = currFileBuff;                // point to data for the file
             statePtr->dataSize = cfg.bins[bin].fileSize;  // store allocated size for file data
 #if MICROFS_INIT_FILE_DATA
-            ::memset(currFileBuff, 0, cfg.bins[bin].fileSize);
+            (void)::memset(currFileBuff, 0, cfg.bins[bin].fileSize);
 #endif
             // advance file data pointer
             currFileBuff += cfg.bins[bin].fileSize;
