@@ -16,7 +16,6 @@ namespace File {
 //!
 struct BaremetalFileHandle : public FileHandle {
     static constexpr PlatformIntType INVALID_FILE_DESCRIPTOR = -1;
-    static constexpr PlatformIntType ERROR_RETURN_VALUE = -1;
 
     //! Baremetal file descriptor
     PlatformIntType m_file_descriptor = INVALID_FILE_DESCRIPTOR;
