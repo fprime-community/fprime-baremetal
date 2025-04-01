@@ -89,6 +89,13 @@ class BaremetalFileSystem : public FileSystemInterface {
     //! \return Status of the operation
     Status _changeWorkingDirectory(const char* path) override;
 
+    //! \brief Copy file originPath to destPath
+    //!
+    //! \param originPath: Name of source file
+    //! \param destPath: Name of destination file
+    //! \return Status of operation
+    Status copyFile(const char* originPath, const char* destPath);
+
     //! \brief Get the raw FileSystem handle
     //!
     //! Gets the raw FileSystem handle from the implementation. Note: users must include the implementation specific

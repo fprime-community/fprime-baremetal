@@ -4,6 +4,7 @@
 // ======================================================================
 #include "fprime-baremetal/Os/Baremetal/FileSystem.hpp"
 #include <cstdio>
+#include <cstring>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include "fprime-baremetal/Os/Baremetal/error.hpp"
 
@@ -60,8 +61,12 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_rename(const char* originPath, const char* destPath) {
-    Status status = OP_OK;
-    return status;
+    Status copyStat = this->copyFile(originPath, destPath);
+    if (copyStat != OP_OK) {
+        return copyStat;
+    }
+
+    return this->_removeFile(originPath);
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_getWorkingDirectory(char* path, FwSizeType bufferSize) {
@@ -74,10 +79,80 @@ BaremetalFileSystem::Status BaremetalFileSystem::_changeWorkingDirectory(const c
     return status;
 }
 
+BaremetalFileSystem::Status BaremetalFileSystem::copyFile(const char* originPath, const char* destPath) {
+    if ((originPath == nullptr) || (destPath == nullptr)) {
+        return INVALID_PATH;
+    }
+
+    // get file state of origin
+    FwIndexType origIndex = MicroFs::getFileStateIndex(originPath);
+    if (origIndex == -1) {
+        return INVALID_PATH;
+    }
+
+    MicroFs::MicroFsFileState* origState = MicroFs::getFileStateFromIndex(origIndex);
+    FW_ASSERT(origState != nullptr);
+
+    // get file state of dest
+    FwIndexType destIndex = MicroFs::getFileStateIndex(destPath);
+    if (-1 == destIndex) {
+        return INVALID_PATH;
+    }
+
+    MicroFs::MicroFsFileState* destState = MicroFs::getFileStateFromIndex(destIndex);
+    FW_ASSERT(destState != nullptr);
+
+    // make sure source exists
+    if (origState->currSize == -1) {
+        return INVALID_PATH;
+    }
+
+    // make sure neither is open so we don't corrupt operations
+    // in progress
+    if ((destState->loc != -1) or (origState->loc != -1)) {
+        return BUSY;
+    }
+
+    // check sizes to see if going from a bigger slot to a
+    // smaller slot
+
+    FwSizeType copySize = (origState->currSize < static_cast<FwNativeIntType>(destState->dataSize))
+                              ? origState->currSize
+                              : destState->dataSize;
+
+    (void)memcpy(destState->data, origState->data, copySize);
+    destState->currSize = copySize;
+
+    return OP_OK;
+}
+
 BaremetalFileSystem::Status BaremetalFileSystem::_getFreeSpace(const char* path,
                                                                FwSizeType& totalBytes,
                                                                FwSizeType& freeBytes) {
-    return Status::NOT_SUPPORTED;
+    totalBytes = 0;
+    freeBytes = 0;
+
+    auto microFs = MicroFs::getSingleton();
+
+    // Get first file state struct
+    MicroFs::MicroFsFileState* statePtr = reinterpret_cast<MicroFs::MicroFsFileState*>(microFs.s_microFsMem);
+    FW_ASSERT(statePtr != nullptr);
+
+    // iterate through bins
+    for (FwIndexType currBin = 0; currBin < static_cast<FwIndexType>(microFs.s_microFsConfig.numBins); currBin++) {
+        // iterate through files in each bin
+        for (FwIndexType currFile = 0;
+             currFile < static_cast<FwIndexType>(microFs.s_microFsConfig.bins[currBin].numFiles); currFile++) {
+            totalBytes += statePtr->dataSize;
+            // only add unused file slots to free space
+            if (-1 == statePtr->currSize) {
+                freeBytes += statePtr->dataSize;
+            }
+            statePtr += 1;
+        }
+    }
+
+    return OP_OK;
 }
 
 FileSystemHandle* BaremetalFileSystem::getHandle() {

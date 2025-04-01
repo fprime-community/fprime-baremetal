@@ -255,62 +255,6 @@ namespace FileSystem {
 
 
 
-Status moveFile(const char* originPath, const char* destPath) {
-    Status copyStat = copyFile(originPath, destPath);
-    if (copyStat != OP_OK) {
-        return copyStat;
-    }
-
-    return removeFile(originPath);
-}
-
-Status copyFile(const char* originPath, const char* destPath) {
-    if ((not originPath) or (not destPath)) {
-        return INVALID_PATH;
-    }
-
-    // get file state
-    FwIndexType origIndex = getFileStateIndex(originPath);
-    if (origIndex == -1) {
-        return INVALID_PATH;
-    }
-
-    MicroFsFileState* origState = getFileStateFromIndex(origIndex);
-    FW_ASSERT(origState);
-
-    // get file state
-    FwIndexType destIndex = getFileStateIndex(destPath);
-    if (-1 == destIndex) {
-        return INVALID_PATH;
-    }
-
-    MicroFsFileState* destState = getFileStateFromIndex(destIndex);
-    FW_ASSERT(destState);
-
-    // make sure source exists
-    if (origState->currSize == -1) {
-        return INVALID_PATH;
-    }
-
-    // make sure neither is open so we don't corrupt operations
-    // in progress
-    if ((destState->loc != -1) or (origState->loc != -1)) {
-        return BUSY;
-    }
-
-    // check sizes to see if going from a bigger slot to a
-    // smaller slot
-
-    FwSizeType copySize = (origState->currSize < static_cast<FwNativeIntType>(destState->dataSize))
-                              ? origState->currSize
-                              : destState->dataSize;
-
-    (void)memcpy(destState->data, origState->data, copySize);
-    destState->currSize = copySize;
-
-    return OP_OK;
-}
-
 Status appendFile(const char* originPath, const char* destPath, bool createMissingDest) {
     if ((not originPath) or (not destPath)) {
         return INVALID_PATH;
