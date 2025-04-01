@@ -255,12 +255,6 @@ namespace FileSystem {
 
 
 
-Status removeDirectory(const char* path) {
-    // since we can't create or remove directories anyway,
-    // just borrow the createDirectory() logic
-    return createDirectory(path);
-}
-
 Status moveFile(const char* originPath, const char* destPath) {
     Status copyStat = copyFile(originPath, destPath);
     if (copyStat != OP_OK) {

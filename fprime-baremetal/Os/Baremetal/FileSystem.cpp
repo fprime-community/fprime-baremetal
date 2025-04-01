@@ -3,6 +3,7 @@
 // \brief Baremetal implementation for Os::FileSystem
 // ======================================================================
 #include "fprime-baremetal/Os/Baremetal/FileSystem.hpp"
+#include <cstdio>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include "fprime-baremetal/Os/Baremetal/error.hpp"
 
@@ -11,8 +12,26 @@ namespace Baremetal {
 namespace FileSystem {
 
 BaremetalFileSystem::Status BaremetalFileSystem::_removeDirectory(const char* path) {
-    Status status = OP_OK;
-    return status;
+    FW_ASSERT(path != nullptr);
+
+    const char* dirPathSpec = "/" MICROFS_BIN_STRING "%d";
+
+    // if the directory number can be scanned out following the directory path spec,
+    // the directory name has the correct format
+    PlatformSizeType binIndex = 0;
+
+    PlatformIntType stat = sscanf(path, dirPathSpec, &binIndex);
+    if (stat != 1) {
+        return NO_PERMISSION;
+    }
+
+    // If the path format is correct, check to see if it is in the
+    // range of bins
+    if (binIndex < static_cast<PlatformSizeType>(MicroFs::getSingleton().s_microFsConfig.numBins)) {
+        return OP_OK;
+    } else {
+        return NO_PERMISSION;
+    }
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
