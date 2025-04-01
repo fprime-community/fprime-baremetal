@@ -114,9 +114,17 @@ class MicroFs {
     };
 
   public:
+    //! \brief default constructor
     MicroFs() = default;
-    MicroFs(const MicroFs&) = delete;
-    MicroFs& operator=(const MicroFs&) = delete;
+
+    //! \brief copy construtor is forbidden due to singleton pattern
+    MicroFs(const MicroFs& other) = delete;
+
+    //! \brief copy construtor is forbidden due to singleton pattern
+    MicroFs(const MicroFs* other) = delete;
+
+    //! \brief assignment operator is forbidden due to singleton pattern
+    MicroFs& operator=(const MicroFs& other) = delete;
 
   public:
     //!< set the number of bins in config
