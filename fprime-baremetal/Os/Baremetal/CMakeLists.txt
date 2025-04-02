@@ -24,3 +24,12 @@ register_os_implementation("File;FileSystem;Directory" Baremetal Os_Baremetal_Sh
 register_os_implementation("Memory" Baremetal)
 register_os_implementation("Mutex;ConditionVariable" Baremetal)
 register_os_implementation("Task" Baremetal fprime-baremetal_Os_TaskRunner)
+
+add_library(fprime-baremetal_Os_Baremetal INTERFACE)
+set(UT_SOURCE_FILES
+    "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MicroFsTest.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/Tester.cpp"
+)
+choose_fprime_implementation(Os_File Os_File_Baremetal)
+set(UT_MOD_DEPS Os STest)
+register_fprime_ut()
