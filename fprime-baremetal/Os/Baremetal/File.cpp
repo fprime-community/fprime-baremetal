@@ -95,7 +95,7 @@ bool BaremetalFile::isOpen() const {
     return (this->m_handle.m_mode != OPEN_NO_MODE);
 }
 
-BaremetalFile::Status BaremetalFile::preallocate(FwSignedSizeType offset, FwSignedSizeType length) {
+BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType length) {
     // do nothing; in RAM
     return Os::File::Status::OP_OK;
 }
@@ -120,7 +120,7 @@ void BaremetalFile::close() {
     // clear
 }
 
-BaremetalFile::Status BaremetalFile::size(FwSignedSizeType& size_result) {
+BaremetalFile::Status BaremetalFile::size(FwSizeType& size_result) {
     MicroFs::MicroFsFileState* state =
         MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
@@ -128,7 +128,7 @@ BaremetalFile::Status BaremetalFile::size(FwSignedSizeType& size_result) {
     return OP_OK;
 }
 
-BaremetalFile::Status BaremetalFile::position(FwSignedSizeType& position_result) {
+BaremetalFile::Status BaremetalFile::position(FwSizeType& position_result) {
     MicroFs::MicroFsFileState* state =
         MicroFs::getFileStateFromIndex(this->m_handle.m_file_descriptor - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
@@ -194,7 +194,7 @@ BaremetalFile::Status BaremetalFile::flush() {
     return OP_OK;
 }
 
-BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSignedSizeType& size, BaremetalFile::WaitType wait) {
+BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, BaremetalFile::WaitType wait) {
     FW_ASSERT(buffer != nullptr);
 
     // make sure it has been opened
@@ -233,7 +233,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSignedSizeType& size, Ba
     return OP_OK;
 }
 
-BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSignedSizeType& size, BaremetalFile::WaitType wait) {
+BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, BaremetalFile::WaitType wait) {
     FW_ASSERT(buffer != nullptr);
 
     // make sure it has been opened in write mode
