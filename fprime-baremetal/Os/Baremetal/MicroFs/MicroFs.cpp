@@ -53,7 +53,7 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     }
 
     // request the memory
-    FwNativeUIntType reqMem = memSize;
+    FwSizeType reqMem = memSize;
 
     bool dontcare;
     MicroFs::getSingleton().s_microFsMem = allocator.allocate(id, reqMem, dontcare);

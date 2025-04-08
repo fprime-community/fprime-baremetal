@@ -164,7 +164,7 @@ class MicroFs {
     // user
     MicroFsConfig s_microFsConfig;
     // offset from zero for fds to allow zero checks
-    STATIC constexpr FwSizeType MICROFS_FD_OFFSET = 1;
+    static constexpr FwSizeType MICROFS_FD_OFFSET = 1;
 };
 
 }  // namespace Baremetal
