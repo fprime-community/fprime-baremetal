@@ -1,17 +1,17 @@
 #include <gtest/gtest.h>
+#include <Fw/Test/UnitTest.hpp>
+#include <Fw/Types/MallocAllocator.hpp>
+#include <Fw/Types/String.hpp>
 #include <Os/File.hpp>
 #include <Os/FileSystem.hpp>
-#include <Os/MicroFs/MicroFs.hpp>
-#include <Fw/Types/MallocAllocator.hpp>
-#include <Fw/Test/UnitTest.hpp>
-#include <Fw/Types/String.hpp>
+#include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include "Tester.hpp"
 
 #define FULL_TEST
 #define NUKE_TEST
 #define OFF_NOMINAL
 #define NEW_TEST
-//#define SIM_FILE_TEST
+// #define SIM_FILE_TEST
 
 #ifdef FULL_TEST
 
@@ -130,8 +130,7 @@ TEST(FileOps, NewTest) {
 }
 #endif
 
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
