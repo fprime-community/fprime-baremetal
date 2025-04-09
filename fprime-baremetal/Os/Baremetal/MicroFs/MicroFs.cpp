@@ -106,8 +106,8 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // after the file number.
     const char* filePathSpec = "/" MICROFS_BIN_STRING "%d/" MICROFS_FILE_STRING "%d.%1s";
 
-    FwSizeType binIndex;
-    FwSizeType fileIndex;
+    FwSizeType binIndex = 0;
+    FwSizeType fileIndex = 0;
     // crcExtension should be 2 bytes because scanf appends a null character at the end.
     char crcExtension[2];
     FwNativeIntType stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);

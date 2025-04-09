@@ -29,6 +29,8 @@ add_library(fprime-baremetal_Os_Baremetal INTERFACE)
 set(UT_SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MicroFsTest.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/Tester.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MyRules.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/SimFileSystem.cpp"
 )
 choose_fprime_implementation(Os_File Os_File_Baremetal)
 set(UT_MOD_DEPS Os STest)
