@@ -28,7 +28,7 @@ class Tester {
   public:
     class FileModel {
       public:
-        enum Mode { DOESNT_EXIST, CLOSED, OPEN_READ, OPEN_WRITE };
+        enum Mode { DOESNT_EXIST, OPEN_NO_MODE, OPEN_READ, OPEN_WRITE };
 
         FileModel();
         void clear();
