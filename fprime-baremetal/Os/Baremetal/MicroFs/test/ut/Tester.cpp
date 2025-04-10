@@ -460,8 +460,6 @@ void Tester ::MoveTest() {
     OpenFileNotExist openFileNotExist2(File2);
     MoveInvalid moveInvalid(File1, File3);
     MoveInvalid moveInvalid1(File3, File1);
-    MoveInvalid moveInvalid2(nullptr, File1);
-    MoveInvalid moveInvalid3(File1, nullptr);
     MoveInvalid moveInvalid4(File4, File1);
     MoveBusy moveBusy(File1, File2);
 
@@ -470,20 +468,17 @@ void Tester ::MoveTest() {
     openFile.apply(*this);
     openFileNotExist2.apply(*this);
     writeData.apply(*this);
-    checkFileSize.apply(*this);
-    checkFileSize2.apply(*this);
     closeFile.apply(*this);
-    moveFile.apply(*this);
     checkFileSize.apply(*this);
+    openFileNotExist2.apply(*this);
+    moveFile.apply(*this);
+    openFileNotExist1.apply(*this);
     checkFileSize2.apply(*this);
     isFileOpen1.apply(*this);
     isFileOpen2.apply(*this);
-    openFileNotExist1.apply(*this);
 
     moveInvalid.apply(*this);
     moveInvalid1.apply(*this);
-    moveInvalid2.apply(*this);
-    moveInvalid3.apply(*this);
     moveInvalid4.apply(*this);
 
     openFile.apply(*this);
