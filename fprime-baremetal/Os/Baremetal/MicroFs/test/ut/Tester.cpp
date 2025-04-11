@@ -280,6 +280,7 @@ void Tester ::CrcTest() {
     // Instantiate the Rules
     InitFileSystem initFileSystem(NumberBins, FILE_SIZE, NumberFiles);
     OpenFile openFile(File1);
+    OpenRead openReadFile(File1);
     WriteData writeData(File1);
     CheckFileSize checkFileSize(File1);
     CalcCRC32 calcCRC32(File1);
@@ -292,9 +293,10 @@ void Tester ::CrcTest() {
     initFileSystem.apply(*this);
     openFile.apply(*this);
     writeData.apply(*this);
-    checkFileSize.apply(*this);
+    closeFile.apply(*this);
     calcCRC32.apply(*this);
     checkFileSize.apply(*this);
+    openReadFile.apply(*this);
     resetFile.apply(*this);
     readData.apply(*this);
     readData.apply(*this);
