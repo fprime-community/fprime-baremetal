@@ -313,38 +313,6 @@ void Tester ::CrcTest() {
 }
 
 // ----------------------------------------------------------------------
-// BulkTest
-// ----------------------------------------------------------------------
-void Tester ::BulkTest() {
-    const U16 NumberBins = 1;
-    const U16 NumberFiles = 2;
-
-    const char* File1 = "/bin0/file0";
-
-    clearFileBuffer();
-
-    // Instantiate the Rules
-    InitFileSystem initFileSystem(NumberBins, FILE_SIZE, NumberFiles);
-    BulkWrite bulkWrite(File1);
-    OpenFile openFile(File1);
-    ReadData readData(File1);
-    ResetFile resetFile(File1);
-    Cleanup cleanup;
-
-    // Run the Rules
-    initFileSystem.apply(*this);
-    openFile.apply(*this);
-    bulkWrite.apply(*this);
-    resetFile.apply(*this);
-    readData.apply(*this);
-    readData.apply(*this);
-    readData.apply(*this);
-    readData.apply(*this);
-    readData.apply(*this);
-    cleanup.apply(*this);
-}
-
-// ----------------------------------------------------------------------
 // SeekTest
 // ----------------------------------------------------------------------
 void Tester ::SeekTest() {

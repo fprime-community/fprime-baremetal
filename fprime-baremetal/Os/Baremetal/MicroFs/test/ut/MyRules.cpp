@@ -733,47 +733,6 @@ void Os::Tester::SeekNFile::action(Os::Tester& state  //!< The test state
 }
 
 // ------------------------------------------------------------------------------------------------------
-// Rule:  BulkWrite
-//
-// ------------------------------------------------------------------------------------------------------
-
-Os::Tester::BulkWrite::BulkWrite(const char* filename) : STest::Rule<Os::Tester>("BulkWrite") {
-    this->filename = filename;
-}
-
-bool Os::Tester::BulkWrite::precondition(const Os::Tester& state  //!< The test state
-) {
-    this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
-    return ((fileModel->mode == Os::Tester::FileModel::OPEN_WRITE) ||
-            (fileModel->mode == Os::Tester::FileModel::OPEN_READ));
-}
-
-void Os::Tester::BulkWrite::action(Os::Tester& state  //!< The test state
-) {
-#if 0
-    NATIVE_UINT_TYPE fillSize = FILE_SIZE;
-
-    if ((fileModel->curPtr + fillSize) > Tester::FILE_SIZE) {
-        fillSize = Tester::FILE_SIZE - fileModel->curPtr;
-    }
-
-    Os::File::Status stat =
-        fileModel->fileDesc.bulkWrite(this->fileModel->buffOut + this->fileModel->curPtr, fillSize, fillSize);
-    ASSERT_EQ(stat, Os::File::OP_OK);
-
-    // Update FileModel
-    this->fileModel->curPtr += fillSize;
-    // Check if the currSize is to be increased.
-    if (fileModel->curPtr > fileModel->size) {
-        fileModel->size = fileModel->curPtr;
-    }
-
-    printf("--> Rule: %s %s %d bytes\n", this->getName(), this->filename, fillSize);
-#endif
-    printf("--> TODO Rule: %s %s\n", this->getName(), this->filename);
-}
-
-// ------------------------------------------------------------------------------------------------------
 // Rule:  CalcCRC32
 //
 // ------------------------------------------------------------------------------------------------------
