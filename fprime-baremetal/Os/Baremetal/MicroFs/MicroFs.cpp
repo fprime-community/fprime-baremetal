@@ -65,7 +65,7 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     FW_ASSERT(MicroFs::getSingleton().s_microFsMem != nullptr);
 
     // lay out the memory with the state and the buffers after the config section
-    MicroFsFileState* statePtr = reinterpret_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
+    MicroFsFileState* statePtr = static_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
 
     // point to memory after state structs for beginning of file data
     BYTE* currFileBuff = reinterpret_cast<BYTE*>(&statePtr[totalNumFiles]);
@@ -144,7 +144,7 @@ MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
     FW_ASSERT(index >= 0, index);
     FW_ASSERT(MicroFs::getSingleton().s_microFsMem);
     // Get base of state structures
-    MicroFsFileState* ptr = reinterpret_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
+    MicroFsFileState* ptr = static_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
     return &ptr[index];
 }
 

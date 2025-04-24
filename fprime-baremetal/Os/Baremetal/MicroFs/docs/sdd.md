@@ -81,7 +81,7 @@ void MicroFsInit(const MicroFsConfig& cfg,      //!< the configuration of the me
                  Fw::MemAllocator& allocator);  //!< Memory allocator to use for memory
 ``` 
 
-The initialization call computes the memory needed by the data structures specifies in 3.2.2, and does the following:
+The initialization call computes the memory needed by the data structures specified in 3.2.2, and does the following:
 
 1\) Requests the memory buffer via the allocator, passing the id in the event it is needed by the allocator.
 
