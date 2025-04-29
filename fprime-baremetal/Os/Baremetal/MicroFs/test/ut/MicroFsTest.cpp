@@ -11,7 +11,7 @@
 #define NUKE_TEST
 #define OFF_NOMINAL
 #define NEW_TEST
-// #define SIM_FILE_TEST
+#define SIM_FILE_TEST
 
 #ifdef FULL_TEST
 
