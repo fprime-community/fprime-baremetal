@@ -809,34 +809,6 @@ struct WriteNotOpen : public STest::Rule<Os::Tester> {
 };
 
 // ------------------------------------------------------------------------------------------------------
-// Rule:  BulkWriteNoOpen
-//
-// ------------------------------------------------------------------------------------------------------
-struct BulkWriteNoOpen : public STest::Rule<Os::Tester> {
-    // ----------------------------------------------------------------------
-    // Construction
-    // ----------------------------------------------------------------------
-
-    //! Constructor
-    BulkWriteNoOpen(const char* filename);
-
-    // ----------------------------------------------------------------------
-    // Public member functions
-    // ----------------------------------------------------------------------
-
-    //! Precondition
-    bool precondition(const Os::Tester& state  //!< The test state
-    );
-
-    //! Action
-    void action(Os::Tester& state  //!< The test state
-    );
-
-    const char* filename;
-    Os::Tester::FileModel* fileModel;
-};
-
-// ------------------------------------------------------------------------------------------------------
 // Rule:  FlushFile
 //
 // ------------------------------------------------------------------------------------------------------
@@ -847,34 +819,6 @@ struct FlushFile : public STest::Rule<Os::Tester> {
 
     //! Constructor
     FlushFile(const char* filename);
-
-    // ----------------------------------------------------------------------
-    // Public member functions
-    // ----------------------------------------------------------------------
-
-    //! Precondition
-    bool precondition(const Os::Tester& state  //!< The test state
-    );
-
-    //! Action
-    void action(Os::Tester& state  //!< The test state
-    );
-
-    const char* filename;
-    Os::Tester::FileModel* fileModel;
-};
-
-// ------------------------------------------------------------------------------------------------------
-// Rule:  GetErrors
-//
-// ------------------------------------------------------------------------------------------------------
-struct GetErrors : public STest::Rule<Os::Tester> {
-    // ----------------------------------------------------------------------
-    // Construction
-    // ----------------------------------------------------------------------
-
-    //! Constructor
-    GetErrors(const char* filename);
 
     // ----------------------------------------------------------------------
     // Public member functions

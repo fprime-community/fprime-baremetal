@@ -912,34 +912,6 @@ void Os::Tester::WriteNotOpen::action(Os::Tester& state  //!< The test state
 }
 
 // ------------------------------------------------------------------------------------------------------
-// Rule:  BulkWriteNoOpen
-//
-// ------------------------------------------------------------------------------------------------------
-
-Os::Tester::BulkWriteNoOpen::BulkWriteNoOpen(const char* filename) : STest::Rule<Os::Tester>("BulkWriteNoOpen") {
-    this->filename = filename;
-}
-
-bool Os::Tester::BulkWriteNoOpen::precondition(const Os::Tester& state  //!< The test state
-) {
-    this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
-    return ((fileModel->mode != Os::Tester::FileModel::OPEN_WRITE) &&
-            (fileModel->mode != Os::Tester::FileModel::OPEN_READ));
-}
-
-void Os::Tester::BulkWriteNoOpen::action(Os::Tester& state  //!< The test state
-) {
-#if 0
-    NATIVE_UINT_TYPE size = FILE_SIZE;
-    Os::File::Status stat =
-        fileModel->fileDesc.bulkWrite(this->fileModel->buffOut + this->fileModel->curPtr, size, size);
-    ASSERT_EQ(stat, Os::File::NOT_OPENED);
-#endif
-
-    printf("--> TODO Rule: %s %s\n", this->getName(), this->filename);
-}
-
-// ------------------------------------------------------------------------------------------------------
 // Rule:  FlushFile
 //
 // ------------------------------------------------------------------------------------------------------
@@ -966,34 +938,6 @@ void Os::Tester::FlushFile::action(Os::Tester& state  //!< The test state
     } else {
         ASSERT_EQ(stat, Os::File::NOT_OPENED);
     }
-}
-
-// ------------------------------------------------------------------------------------------------------
-// Rule:  GetErrors
-//
-// ------------------------------------------------------------------------------------------------------
-
-Os::Tester::GetErrors::GetErrors(const char* filename) : STest::Rule<Os::Tester>("GetErrors") {
-    this->filename = filename;
-}
-
-bool Os::Tester::GetErrors::precondition(const Os::Tester& state  //!< The test state
-) {
-    this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
-    return true;
-}
-
-void Os::Tester::GetErrors::action(Os::Tester& state  //!< The test state
-) {
-    printf("--> TODO Rule: %s %s\n", this->getName(), this->filename);
-
-#if 0
-    NATIVE_INT_TYPE lastError = fileModel->fileDesc.getLastError();
-    ASSERT_EQ(lastError, 0);
-
-    const char* lastErrorString = fileModel->fileDesc.getLastErrorString();
-    ASSERT_STREQ(lastErrorString, "Success");
-#endif
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -1078,8 +1022,12 @@ bool Os::Tester::MoveInvalid::precondition(const Os::Tester& state  //!< The tes
 
 void Os::Tester::MoveInvalid::action(Os::Tester& state  //!< The test state
 ) {
-    Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
-    ASSERT_EQ(Os::FileSystem::Status::DOESNT_EXIST, stat);
+    if (this->sourceFile == nullptr || this->destFile == nullptr) {
+        ASSERT_DEATH_IF_SUPPORTED(Os::FileSystem::moveFile(this->sourceFile, this->destFile), "");
+    } else {
+        Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
+        ASSERT_EQ(Os::FileSystem::Status::DOESNT_EXIST, stat);
+    }
 
     printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
 }
@@ -1123,15 +1071,15 @@ bool Os::Tester::ReadDirInvalid::precondition(const Os::Tester& state  //!< The 
 
 void Os::Tester::ReadDirInvalid::action(Os::Tester& state  //!< The test state
 ) {
-    Fw::String bins[MAX_BINS];
-    U32 totalBins = MAX_BINS;
+    printf("--> Rule: %s %s\n", this->getName(), this->binPath);
 
-    printf("--> TODO Rule: %s %s\n", this->getName(), this->binPath);
-
-#if 0
-    Os::FileSystem::Status stat = Os::FileSystem::readDirectory(this->binPath, MAX_BINS, bins, totalBins);
-    ASSERT_EQ(stat, Os::FileSystem::INVALID_PATH);
-#endif
+    Os::Directory dir;
+    if (this->binPath == nullptr) {
+        ASSERT_DEATH_IF_SUPPORTED(dir.open(this->binPath, Os::DirectoryInterface::OpenMode::READ), "");
+    } else {
+        Os::Directory::Status stat = dir.open(this->binPath, Os::DirectoryInterface::OpenMode::READ);
+        ASSERT_EQ(stat, Os::Directory::NO_PERMISSION);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -1152,8 +1100,12 @@ void Os::Tester::RemoveInvalid::action(Os::Tester& state  //!< The test state
 ) {
     printf("--> Rule: %s %s\n", this->getName(), this->filename);
 
-    Os::FileSystem::Status stat = Os::FileSystem::removeFile(this->filename);
-    ASSERT_EQ(Os::FileSystem::INVALID_PATH, stat);
+    if (this->filename == nullptr) {
+        ASSERT_DEATH_IF_SUPPORTED(Os::FileSystem::removeFile(this->filename), "");
+    } else {
+        Os::FileSystem::Status stat = Os::FileSystem::removeFile(this->filename);
+        ASSERT_EQ(Os::FileSystem::INVALID_PATH, stat);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------------

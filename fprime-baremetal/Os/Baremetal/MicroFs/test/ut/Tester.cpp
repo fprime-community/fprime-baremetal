@@ -206,16 +206,15 @@ void Tester ::OffNominalTests() {
     SeekRelative seekRelative3(File3, 1);
     ReadNotOpen readNotOpen(File3);
     WriteNotOpen writeNotOpen(File3);
-    BulkWriteNoOpen BulkWriteNoOpen(File3);
     FlushFile flushFile(File3);
-    GetErrors getErrors(File3);
     CopyFile copyFile(File1, File2);
     AppendFile appendFile(File1, File2);
     ReadDirInvalid readDirInvalid("/bin2");
     ReadDirInvalid readDirInvalid2(nullptr);
     ReadDirInvalid readDirInvalid3(" ");
 
-    RemoveInvalid removeInvalid("/bin0/file10");
+    RemoveInvalid removeInvalid(nullptr);
+    RemoveInvalid removeInvalid1("/bin0/file10");
 
     GetFileSizeInvalid getFileSizeInvalid("/bin0/file10");
 
@@ -246,15 +245,14 @@ void Tester ::OffNominalTests() {
     closeFile1.apply(*this);
     readNotOpen.apply(*this);
     writeNotOpen.apply(*this);
-    BulkWriteNoOpen.apply(*this);
     flushFile.apply(*this);
-    getErrors.apply(*this);
 
     readDirInvalid.apply(*this);
     readDirInvalid2.apply(*this);
     readDirInvalid3.apply(*this);
 
     removeInvalid.apply(*this);
+    removeInvalid1.apply(*this);
 
     getFileSizeInvalid.apply(*this);
 
@@ -426,6 +424,8 @@ void Tester ::MoveTest() {
     OpenFileNotExist openFileNotExist2(File2);
     MoveInvalid moveInvalid(File1, File3);
     MoveInvalid moveInvalid1(File3, File1);
+    MoveInvalid moveInvalid2(File1, nullptr);
+    MoveInvalid moveInvalid3(nullptr, File1);
     MoveInvalid moveInvalid4(File4, File1);
     MoveBusy moveBusy(File1, File2);
     MoveBusy moveBusy2(File2, File1);
@@ -446,6 +446,8 @@ void Tester ::MoveTest() {
 
     moveInvalid.apply(*this);
     moveInvalid1.apply(*this);
+    moveInvalid2.apply(*this);
+    moveInvalid3.apply(*this);
     moveInvalid4.apply(*this);
 
     openFile.apply(*this);
