@@ -217,7 +217,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // find size to copy
 
     // check to see if already at the end of the file. If so, return 0 for size
-    if (state->loc[this->m_handle.m_file_descriptor] == state->currSize - 1) {
+    if (state->loc[this->m_handle.m_file_descriptor] == (state->currSize - 1)) {
         size = 0;
         return OP_OK;
     }
@@ -225,7 +225,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // copy requested bytes, unless it would be more than the file size.
     // If it would be more than the file size, copy the remainder and set
     // the size to the actual copied
-    if (state->loc[this->m_handle.m_file_descriptor] + size > state->currSize - 1) {
+    if ((state->loc[this->m_handle.m_file_descriptor] + size) > (state->currSize - 1)) {
         size = state->currSize - state->loc[this->m_handle.m_file_descriptor];
     }
 
