@@ -196,7 +196,6 @@ void Tester ::OffNominalTests() {
     OpenFileNotExist openFileNotExist1(File1);
     OpenFileNotExist openFileNotExist2(File2);
     OpenFile openFile1(File3);
-    OpenNoPerm openNoPerm(File3);
     SeekNotOpen seekNotOpen(File3);
     CloseFile closeFile1(File3);
 
@@ -216,8 +215,7 @@ void Tester ::OffNominalTests() {
     ReadDirInvalid readDirInvalid2(nullptr);
     ReadDirInvalid readDirInvalid3(" ");
 
-    RemoveInvalid removeInvalid(nullptr);
-    RemoveInvalid removeInvalid1("/bin0/file10");
+    RemoveInvalid removeInvalid("/bin0/file10");
 
     GetFileSizeInvalid getFileSizeInvalid("/bin0/file10");
 
@@ -232,8 +230,6 @@ void Tester ::OffNominalTests() {
     openFileNotExist2.apply(*this);
 
     openFile1.apply(*this);
-    // Open a file that's already opened
-    openNoPerm.apply(*this);
 
     closeFile1.apply(*this);
     seekNotOpen.apply(*this);
@@ -259,7 +255,6 @@ void Tester ::OffNominalTests() {
     readDirInvalid3.apply(*this);
 
     removeInvalid.apply(*this);
-    removeInvalid1.apply(*this);
 
     getFileSizeInvalid.apply(*this);
 

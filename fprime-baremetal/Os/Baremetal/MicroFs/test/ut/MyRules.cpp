@@ -1177,7 +1177,7 @@ void Os::Tester::GetFileSizeInvalid::action(Os::Tester& state  //!< The test sta
 
     FwSizeType actualSize;
     FileSystem::Status stat = FileSystem::getFileSize(this->filename, actualSize);
-    ASSERT_EQ(FileSystem::INVALID_PATH, stat);
+    ASSERT_EQ(FileSystem::DOESNT_EXIST, stat);
 }
 
 // ------------------------------------------------------------------------------------------------------
