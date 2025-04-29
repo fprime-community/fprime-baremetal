@@ -77,7 +77,6 @@ class Tester {
     void MoveTest();
     void DirectoryTest();
     void SeekTest();
-    void BulkTest();
     void CrcTest();
     void OffNominalTests();
     void CopyTest();

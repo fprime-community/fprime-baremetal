@@ -280,7 +280,7 @@ void Tester ::CrcTest() {
     // Instantiate the Rules
     InitFileSystem initFileSystem(NumberBins, FILE_SIZE, NumberFiles);
     OpenFile openFile(File1);
-    OpenRead openReadFile(File1);
+    OpenRead openRead(File1);
     WriteData writeData(File1);
     CheckFileSize checkFileSize(File1);
     CalcCRC32 calcCRC32(File1);
@@ -293,10 +293,11 @@ void Tester ::CrcTest() {
     initFileSystem.apply(*this);
     openFile.apply(*this);
     writeData.apply(*this);
+    checkFileSize.apply(*this);
     closeFile.apply(*this);
     calcCRC32.apply(*this);
+    openRead.apply(*this);
     checkFileSize.apply(*this);
-    openReadFile.apply(*this);
     resetFile.apply(*this);
     readData.apply(*this);
     readData.apply(*this);
@@ -432,20 +433,21 @@ void Tester ::MoveTest() {
     MoveInvalid moveInvalid1(File3, File1);
     MoveInvalid moveInvalid4(File4, File1);
     MoveBusy moveBusy(File1, File2);
+    MoveBusy moveBusy2(File2, File1);
 
     // Run the Rules
     initFileSystem.apply(*this);
     openFile.apply(*this);
     openFileNotExist2.apply(*this);
     writeData.apply(*this);
-    closeFile.apply(*this);
     checkFileSize.apply(*this);
-    openFileNotExist2.apply(*this);
+    closeFile.apply(*this);
     moveFile.apply(*this);
     openFileNotExist1.apply(*this);
     checkFileSize2.apply(*this);
     isFileOpen1.apply(*this);
     isFileOpen2.apply(*this);
+    openFileNotExist1.apply(*this);
 
     moveInvalid.apply(*this);
     moveInvalid1.apply(*this);
@@ -456,7 +458,7 @@ void Tester ::MoveTest() {
 
     closeFile.apply(*this);
     openFile2.apply(*this);
-    moveBusy.apply(*this);
+    moveBusy2.apply(*this);
 
     cleanup.apply(*this);
 }
@@ -596,6 +598,7 @@ void Tester ::FileSizeTest() {
     openRead.apply(*this);
     closeFile.apply(*this);
     checkFileSize.apply(*this);
+
     cleanup.apply(*this);
 }
 
@@ -631,16 +634,16 @@ void Tester ::ReWriteTest() {
     printf("Part 1\n");
     openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
+    closeFile1.apply(*this);
 
     // Part 2: Open the file again and write max bytes,
     // check that the size does not exceed tha max
     printf("Part 2\n");
     openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
+    closeFile1.apply(*this);
 
     // Part 3: Open the file again, write half the bytes,
     // check that the size still equals the max, write the
@@ -648,12 +651,10 @@ void Tester ::ReWriteTest() {
     printf("Part 3\n");
     openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
-    openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
+    closeFile1.apply(*this);
 
     // Part 4: Cleanup and reinitialize
     // Open a new file, check the size is 0, write half and check half
@@ -661,12 +662,10 @@ void Tester ::ReWriteTest() {
     cleanup.apply(*this);
     initFileSystem.apply(*this);
     openFile1.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
-    openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
+    closeFile1.apply(*this);
 
     // Part 5:  Open the file again.  Check size is 1/2
     // Write a 1/4 and check file is still 1/2
@@ -674,23 +673,17 @@ void Tester ::ReWriteTest() {
     // Write a 1/4 and check file is 3/4
     // Write a 1/4 again and check file is full
     printf("Part 5\n");
-    checkFileSize.apply(*this);
     openFile1.apply(*this);
-    writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
-    openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
-    openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
-    openFile1.apply(*this);
     writeData.apply(*this);
-    closeFile1.apply(*this);
     checkFileSize.apply(*this);
+    writeData.apply(*this);
+    checkFileSize.apply(*this);
+    closeFile1.apply(*this);
 
     // Part
 

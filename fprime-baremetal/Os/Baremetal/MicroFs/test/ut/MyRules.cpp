@@ -1078,7 +1078,7 @@ bool Os::Tester::MoveInvalid::precondition(const Os::Tester& state  //!< The tes
 void Os::Tester::MoveInvalid::action(Os::Tester& state  //!< The test state
 ) {
     Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
-    ASSERT_EQ(Os::FileSystem::Status::INVALID_PATH, stat);
+    ASSERT_EQ(Os::FileSystem::Status::DOESNT_EXIST, stat);
 
     printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
 }

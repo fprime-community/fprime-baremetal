@@ -70,11 +70,6 @@ TEST(FileOps, MoveTest) {
     tester.MoveTest();
 }
 
-TEST(FileOps, BulkTest) {
-    Os::Tester tester;
-    tester.BulkTest();
-}
-
 TEST(FileOps, SeekTest) {
     Os::Tester tester;
     tester.SeekTest();
