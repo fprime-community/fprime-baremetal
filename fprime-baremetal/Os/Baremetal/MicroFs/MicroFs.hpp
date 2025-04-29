@@ -107,10 +107,10 @@ class MicroFs {
   public:
     // data structure for managing file state
     struct MicroFsFileState {
-        FwIndexType loc;           //!< location in file where last operation left off
-        FwNativeIntType currSize;  //!< current size of the file after writes were done. -1 = not created yet.
-        FwSizeType dataSize;       //!< alloted size of the file
-        BYTE* data;                //!< location of file data
+        FwIndexType loc[MAX_MICROFS_FD];  //!< location in file where last operation left off
+        FwNativeIntType currSize;         //!< current size of the file after writes were done. -1 = not created yet.
+        FwSizeType dataSize;              //!< alloted size of the file
+        BYTE* data;                       //!< location of file data
     };
 
   public:
@@ -152,6 +152,9 @@ class MicroFs {
 
     // helper to find file state entry from file name. Will return index if found, -1 if not
     static FwIndexType getFileStateIndex(const char* fileName);
+
+    // helper to find the next available file descriptor. Will return a file descriptor if available, -1 if not
+    static FwIndexType getFileStateNextFreeFd(const char* fileName);
 
     //! \brief get a reference to singleton
     //! \return reference to singleton

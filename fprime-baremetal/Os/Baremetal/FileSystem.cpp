@@ -49,19 +49,21 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
     MicroFs::MicroFsFileState* fState = MicroFs::getFileStateFromIndex(index);
     FW_ASSERT(fState != nullptr);
 
-    if (fState->loc != -1) {
-        return BUSY;
+    for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
+        if (fState->loc[i] != -1) {
+            return BUSY;
+        }
     }
 
     // delete the file by setting current size to be -1
     fState->currSize = -1;
-    fState->loc = -1;
 
     return OP_OK;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_rename(const char* originPath, const char* destPath) {
-    Status copyStat = this->copyFile(originPath, destPath);
+    // Status copyStat = this->copyFile(originPath, destPath);
+    Status copyStat = Os::FileSystem::copyFile(originPath, destPath);
     if (copyStat != OP_OK) {
         return copyStat;
     }
@@ -74,53 +76,6 @@ BaremetalFileSystem::Status BaremetalFileSystem::_getWorkingDirectory(char* path
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_changeWorkingDirectory(const char* path) {
-    return OP_OK;
-}
-
-BaremetalFileSystem::Status BaremetalFileSystem::copyFile(const char* originPath, const char* destPath) {
-    if ((originPath == nullptr) || (destPath == nullptr)) {
-        return INVALID_PATH;
-    }
-
-    // get file state of origin
-    FwIndexType origIndex = MicroFs::getFileStateIndex(originPath);
-    if (origIndex == -1) {
-        return INVALID_PATH;
-    }
-
-    MicroFs::MicroFsFileState* origState = MicroFs::getFileStateFromIndex(origIndex);
-    FW_ASSERT(origState != nullptr);
-
-    // get file state of dest
-    FwIndexType destIndex = MicroFs::getFileStateIndex(destPath);
-    if (-1 == destIndex) {
-        return INVALID_PATH;
-    }
-
-    MicroFs::MicroFsFileState* destState = MicroFs::getFileStateFromIndex(destIndex);
-    FW_ASSERT(destState != nullptr);
-
-    // make sure source exists
-    if (origState->currSize == -1) {
-        return INVALID_PATH;
-    }
-
-    // make sure neither is open so we don't corrupt operations
-    // in progress
-    if ((destState->loc != -1) or (origState->loc != -1)) {
-        return BUSY;
-    }
-
-    // check sizes to see if going from a bigger slot to a
-    // smaller slot
-
-    FwSizeType copySize = (origState->currSize < static_cast<FwNativeIntType>(destState->dataSize))
-                              ? origState->currSize
-                              : destState->dataSize;
-
-    (void)memcpy(destState->data, origState->data, copySize);
-    destState->currSize = copySize;
-
     return OP_OK;
 }
 

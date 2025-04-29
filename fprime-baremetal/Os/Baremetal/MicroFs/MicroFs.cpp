@@ -75,7 +75,9 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
             // clear state structure memory
             (void)memset(statePtr, 0, sizeof(MicroFsFileState));
             // initialize state
-            statePtr->loc = -1;                           // no operation in progress
+            for (FwIndexType fdIndex = 0; fdIndex < MAX_MICROFS_FD; fdIndex++) {
+                statePtr->loc[fdIndex] = -1;  // no operation in progress
+            }
             statePtr->currSize = -1;                      // nothing written yet
             statePtr->data = currFileBuff;                // point to data for the file
             statePtr->dataSize = cfg.bins[bin].fileSize;  // store allocated size for file data
@@ -92,7 +94,7 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
 
 void MicroFs::MicroFsCleanup(const FwNativeUIntType id, Fw::MemAllocator& allocator) {
     allocator.deallocate(id, MicroFs::getSingleton().s_microFsMem);
-    MicroFs::getSingleton().s_microFsMem = 0;
+    MicroFs::getSingleton().s_microFsMem = nullptr;
 }
 
 // helper to find file state entry from file name. Will return index if found, -1 if not
@@ -146,6 +148,28 @@ MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
     // Get base of state structures
     MicroFsFileState* ptr = static_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
     return &ptr[index];
+}
+
+FwIndexType MicroFs::getFileStateNextFreeFd(const char* fileName) {
+    FW_ASSERT(fileName != nullptr);
+    FwIndexType fd = -1;
+    auto fileStateEntry = MicroFs::getFileStateIndex(fileName);
+    if (fileStateEntry == -1) {
+        return -1;
+    }
+
+    auto statePtr = MicroFs::getFileStateFromIndex(fileStateEntry);
+    if (statePtr == nullptr) {
+        return -1;
+    }
+
+    for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
+        if (statePtr->loc[i] == -1) {
+            fd = i;
+            break;
+        }
+    }
+    return fd;
 }
 
 }  // namespace Baremetal

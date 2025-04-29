@@ -14,10 +14,12 @@ namespace File {
 //! FileHandle class definition for baremetal implementations.
 //!
 struct BaremetalFileHandle : public FileHandle {
-    static constexpr PlatformIntType INVALID_FILE_DESCRIPTOR = -1;
+    static constexpr PlatformIndexType INVALID_FILE_DESCRIPTOR = -1;
+    static constexpr PlatformIndexType INVALID_STATE_ENTRY = -1;
 
     //! Baremetal file descriptor
-    PlatformIntType m_file_descriptor = INVALID_FILE_DESCRIPTOR;
+    PlatformIndexType m_file_descriptor = INVALID_FILE_DESCRIPTOR;
+    PlatformIndexType m_state_entry = INVALID_STATE_ENTRY;
     //! File mode
     Os::FileInterface::Mode m_mode = Os::File::Mode::OPEN_NO_MODE;
 };
