@@ -58,7 +58,7 @@ user during initialization and is used for lookups later in the file system logi
 
 ```c++
 struct MicroFsFileState {
-    PlatformIntType loc;       //!< location in file where last operation left off
+    PlatformIntType loc[MAX_MICROFS_FD];       //!< location in file where last operation left off
     PlatformIntType currSize;  //!< current size of the file after writes were done
     PlatformIntType dataSize;  //!< alloted size of the file
     BYTE* data;                //!< location of file data
