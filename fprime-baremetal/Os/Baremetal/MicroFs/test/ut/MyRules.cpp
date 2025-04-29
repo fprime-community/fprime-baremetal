@@ -258,42 +258,31 @@ bool Os::Tester::Listings::precondition(const Os::Tester& state  //!< The test s
 
 void Os::Tester::Listings::action(Os::Tester& state  //!< The test state
 ) {
-    printf("--> TODO Rule: %s \n", this->getName());
+    printf("--> Rule: %s \n", this->getName());
 
-#if 0
-    Fw::String listDir;
-    Fw::String expectedFile;
-    Fw::String bins[MAX_BINS];
-    Fw::String files[MAX_FILES_PER_BIN];
-    U32 totalBins = MAX_BINS + 1;  // oversize to check return
-
-    COMMENT("Listing /");
-    listDir = "/";
-
-    // get root directory listing
-    ASSERT_EQ(Os::FileSystem::OP_OK, Os::FileSystem::readDirectory(listDir.toChar(), MAX_BINS, bins, totalBins));
-    ASSERT_EQ(this->numBins, totalBins);
-
-    for (U16 binIndex = 0; binIndex < this->numBins; binIndex++) {
-        printf("%s\n", bins[binIndex].toChar());
-        expectedFile.format("/%s%d", MICROFS_BIN_STRING, binIndex);
-        ASSERT_EQ(0, strcmp(expectedFile.toChar(), bins[binIndex].toChar()));
-    }
-
-    U32 totalFiles = MAX_FILES_PER_BIN + 1;  // oversize to check return
-    for (U16 binIndex = 0; binIndex < this->numBins; binIndex++) {
-        // get file listing
-        ASSERT_EQ(Os::FileSystem::OP_OK,
-                  Os::FileSystem::readDirectory(bins[binIndex].toChar(), this->numFiles, files, totalFiles));
-        ASSERT_EQ(this->numFiles, totalFiles);
-        COMMENT(bins[binIndex].toChar());
-        for (U16 fileIndex = 0; fileIndex < this->numFiles; fileIndex++) {
-            printf("%s\n", files[fileIndex].toChar());
-            expectedFile.format("/%s%d/%s%d", MICROFS_BIN_STRING, binIndex, MICROFS_FILE_STRING, fileIndex);
-            ASSERT_EQ(0, strcmp(expectedFile.toChar(), files[fileIndex].toChar()));
+    for (U16 i = 0; i < MAX_BINS; i++) {
+        Fw::String dirname;
+        dirname.format("/%s%d", MICROFS_BIN_STRING, i);
+        Os::Directory dir;
+        auto stat = dir.open(dirname.toChar(), Os::DirectoryInterface::READ);
+        ASSERT_EQ(stat, Os::DirectoryInterface::OP_OK);
+        Fw::String filenameArray[MAX_FILES_PER_BIN];
+        FwSizeType filenameCount = 0;
+        stat = dir.readDirectory(filenameArray, MAX_FILES_PER_BIN, filenameCount);
+        ASSERT_EQ(filenameCount, MAX_FILES_PER_BIN);
+        ASSERT_EQ(stat, Os::DirectoryInterface::OP_OK);
+        for (U16 j = 0; j < MAX_FILES_PER_BIN; j++) {
+            Fw::String expectedFile;
+            expectedFile.format("/%s%d/%s%d", MICROFS_BIN_STRING, i, MICROFS_FILE_STRING, j);
+            ASSERT_EQ(0, strcmp(expectedFile.toChar(), filenameArray[j].toChar()));
         }
     }
-#endif
+
+    Fw::String invalidDirname;
+    invalidDirname.format("/%s%d", MICROFS_BIN_STRING, MAX_BINS);
+    Os::Directory dir;
+    auto stat = dir.open(invalidDirname.toChar(), Os::DirectoryInterface::READ);
+    ASSERT_EQ(stat, Os::DirectoryInterface::NO_PERMISSION);
 }
 
 // ------------------------------------------------------------------------------------------------------

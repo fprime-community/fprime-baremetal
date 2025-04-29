@@ -87,6 +87,8 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
         if (fState->currSize != -1) {
             (void)memcpy(fileNameBuffer, fileStr.toChar(), bufSize);
             status = OP_OK;
+            // increment here too otherwise the break will cause the index to not increment
+            this->m_handle.m_file_index++;
             break;
         }
     }
