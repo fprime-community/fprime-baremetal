@@ -162,8 +162,7 @@ Os::Tester::ReadData::ReadData(const char* filename) : STest::Rule<Os::Tester>("
 bool Os::Tester::ReadData::precondition(const Os::Tester& state  //!< The test state
 ) {
     this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
-    return ((fileModel->mode == Os::Tester::FileModel::OPEN_READ) ||
-            (fileModel->mode == Os::Tester::FileModel::OPEN_WRITE));
+    return ((fileModel->mode == Os::Tester::FileModel::OPEN_READ) && (fileModel->size > 0));
 }
 
 void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
@@ -359,7 +358,9 @@ Os::Tester::CheckFileSize::CheckFileSize(const char* filename) : STest::Rule<Os:
 bool Os::Tester::CheckFileSize::precondition(const Os::Tester& state  //!< The test state
 ) {
     this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
-    return true;
+    Os::File file;
+    Os::File::Status status = file.open(this->filename, Os::File::OPEN_READ);
+    return status == Os::File::Status::OP_OK;
 }
 
 void Os::Tester::CheckFileSize::action(Os::Tester& state  //!< The test state
