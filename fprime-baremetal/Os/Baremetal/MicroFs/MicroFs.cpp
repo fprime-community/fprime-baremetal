@@ -58,6 +58,10 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     bool dontcare;
     MicroFs::getSingleton().s_microFsMem = allocator.allocate(id, reqMem, dontcare);
 
+    // make sure memory is aligned
+    FW_ASSERT((reinterpret_cast<PlatformPointerCastType>(MicroFs::getSingleton().s_microFsMem) %
+               alignof(MicroFsFileState)) == 0);
+
     // make sure got the amount requested.
     // improvement could be best effort based on received memory
     FW_ASSERT(reqMem >= memSize, reqMem, memSize);
