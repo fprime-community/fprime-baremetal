@@ -80,12 +80,13 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwEnumStoreType id, Fw
             (void)memset(statePtr, 0, sizeof(MicroFsFileState));
             // initialize state
             for (FwIndexType fdIndex = 0; fdIndex < MAX_MICROFS_FD; fdIndex++) {
-                statePtr->loc[fdIndex] = 0;  // no operation in progress
+                statePtr->loc[fdIndex] = 0;                   // no operation in progress
+                statePtr->status[fdIndex] = Status::INVALID;  // no operation in progress
             }
-            statePtr->status = MicroFs::Status::NOT_VALID;  // not created yet
-            statePtr->currSize = 0;                         // nothing written yet
-            statePtr->data = currFileBuff;                  // point to data for the file
-            statePtr->dataSize = cfg.bins[bin].fileSize;    // store allocated size for file data
+            statePtr->created = false;                    // has not been created
+            statePtr->currSize = 0;                       // nothing written yet
+            statePtr->data = currFileBuff;                // point to data for the file
+            statePtr->dataSize = cfg.bins[bin].fileSize;  // store allocated size for file data
 #if MICROFS_INIT_FILE_DATA
             (void)::memset(currFileBuff, 0, cfg.bins[bin].fileSize);
 #endif
@@ -111,7 +112,7 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // Scan the string for the bin and file numbers.
     // We want a failure to find the file if there is any extension
     // after the file number.
-    const char* filePathSpec = "/" MICROFS_BIN_STRING "%d/" MICROFS_FILE_STRING "%d.%1s";
+    const char* filePathSpec = "/" MICROFS_BIN_STRING "%hd/" MICROFS_FILE_STRING "%hd.%1s";
 
     FwIndexType binIndex = 0;
     FwIndexType fileIndex = 0;
@@ -169,7 +170,7 @@ FwIndexType MicroFs::getFileStateNextFreeFd(const char* fileName) {
     }
 
     for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
-        if (statePtr->loc[i] == -1) {
+        if (statePtr->status[i] == Status::INVALID) {
             fd = i;
             break;
         }

@@ -47,7 +47,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
     switch (mode) {
         case OPEN_READ:
             // if not written to yet, doesn't exist for read
-            if (-1 == state->currSize) {
+            if (!state->created) {
                 return Os::File::Status::DOESNT_EXIST;
             }
             state->loc[fdEntry] = 0;
@@ -56,7 +56,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
         case OPEN_SYNC_WRITE:  // fall through; same for microfs
             // If the file has never previously been opened, then initialize the
             // size to 0.
-            if (-1 == state->currSize) {
+            if (!state->created) {
                 state->currSize = 0;
             }
             state->loc[fdEntry] = 0;
@@ -70,7 +70,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
             // initialize write location to length of file for append
             // If the file has never previously been opened, then initialize the
             // size to 0.
-            if (-1 == state->currSize) {
+            if (!state->created) {
                 state->currSize = 0;
             }
 
@@ -80,6 +80,9 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
             FW_ASSERT(0, mode);
             break;
     }
+
+    state->created = true;
+    state->status[fdEntry] = MicroFs::Status::VALID;
 
     // store mode
     this->m_handle.m_mode = mode;
@@ -114,7 +117,8 @@ void BaremetalFile::close() {
             MicroFs::MicroFsFileState* state =
                 MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
             FW_ASSERT(state != nullptr);
-            state->loc[this->m_handle.m_file_descriptor] = -1;
+            state->loc[this->m_handle.m_file_descriptor] = 0;
+            state->status[this->m_handle.m_file_descriptor] = MicroFs::Status::INVALID;
         }
     }
     // reset fd

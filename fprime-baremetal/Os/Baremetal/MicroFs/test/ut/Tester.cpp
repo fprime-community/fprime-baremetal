@@ -925,7 +925,7 @@ void Tester::clearFileBuffer() {
 }
 
 FwIndexType Tester::getIndex(const char* fileName) const {
-    const char* filePathSpec = "/bin%d/file%d";
+    const char* filePathSpec = "/bin%hd/file%hd";
 
     FwIndexType binIndex = 0;
     FwIndexType fileIndex = 0;

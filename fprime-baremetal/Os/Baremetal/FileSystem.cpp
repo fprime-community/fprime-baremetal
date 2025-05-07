@@ -99,7 +99,7 @@ BaremetalFileSystem::Status BaremetalFileSystem::_getFreeSpace(const char* path,
              currFile++) {
             totalBytes += statePtr->dataSize;
             // only add unused file slots to free space
-            if (-1 == statePtr->currSize) {
+            if (!statePtr->created) {
                 freeBytes += statePtr->dataSize;
             }
             statePtr += 1;

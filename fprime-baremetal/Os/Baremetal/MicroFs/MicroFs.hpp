@@ -113,8 +113,9 @@ class MicroFs {
     // data structure for managing file state
     struct MicroFsFileState {
         FwSizeType loc[MAX_MICROFS_FD];  //!< location in file where last operation left off
-        Status status;                   //!< Keep track if the file is valid or not
-        FwSizeType currSize;             //!< current size of the file after writes were done. -1 = not created yet.
+        Status status[MAX_MICROFS_FD];   //!< status of each FD
+        bool created;                    //!< Flag to indicate if created or not. True if created else false.
+        FwSizeType currSize;             //!< current size of the file after writes were done.
         FwSizeType dataSize;             //!< alloted size of the file
         BYTE* data;                      //!< location of file data
     };
