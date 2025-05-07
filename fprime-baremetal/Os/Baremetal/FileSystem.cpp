@@ -50,13 +50,13 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
     FW_ASSERT(fState != nullptr);
 
     for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
-        if (fState->loc[i] != -1) {
+        if (fState->status[i] != MicroFs::Status::INVALID) {
             return BUSY;
         }
     }
 
-    // delete the file by setting current size to be -1
-    fState->currSize = -1;
+    // delete the file by setting created to false
+    fState->created = false;
 
     return OP_OK;
 }
