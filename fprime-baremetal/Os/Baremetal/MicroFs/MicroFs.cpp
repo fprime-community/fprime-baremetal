@@ -9,7 +9,7 @@ namespace Os {
 namespace Baremetal {
 
 //!< set the number of bins in config
-void MicroFs::MicroFsSetCfgBins(MicroFsConfig& cfg, const FwSizeType numBins) {
+void MicroFs::MicroFsSetCfgBins(MicroFsConfig& cfg, const FwIndexType numBins) {
     FW_ASSERT(numBins <= MAX_MICROFS_BINS, numBins);
     cfg.numBins = numBins;
 }
@@ -29,7 +29,7 @@ MicroFs& MicroFs::getSingleton() {
     return s_singleton;
 }
 
-void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, Fw::MemAllocator& allocator) {
+void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwEnumStoreType id, Fw::MemAllocator& allocator) {
     // Force trigger on the fly singleton setup
     (void)MicroFs::getSingleton();
 
@@ -46,7 +46,7 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     FwSizeType memSize = 0;
     FwSizeType totalNumFiles = 0;
     // iterate through the bins
-    for (FwSizeType bin = 0; bin < cfg.numBins; bin++) {
+    for (FwIndexType bin = 0; bin < cfg.numBins; bin++) {
         // memory per file needed is struct for file state + file buffer size
         memSize += cfg.bins[bin].numFiles * (sizeof(MicroFsFileState) + cfg.bins[bin].fileSize);
         totalNumFiles += cfg.bins[bin].numFiles;
@@ -74,17 +74,18 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     // point to memory after state structs for beginning of file data
     BYTE* currFileBuff = reinterpret_cast<BYTE*>(&statePtr[totalNumFiles]);
     // fill in the file state structs
-    for (FwSizeType bin = 0; bin < cfg.numBins; bin++) {
+    for (FwIndexType bin = 0; bin < cfg.numBins; bin++) {
         for (FwSizeType file = 0; file < cfg.bins[bin].numFiles; file++) {
             // clear state structure memory
             (void)memset(statePtr, 0, sizeof(MicroFsFileState));
             // initialize state
             for (FwIndexType fdIndex = 0; fdIndex < MAX_MICROFS_FD; fdIndex++) {
-                statePtr->loc[fdIndex] = -1;  // no operation in progress
+                statePtr->loc[fdIndex] = 0;  // no operation in progress
             }
-            statePtr->currSize = -1;                      // nothing written yet
-            statePtr->data = currFileBuff;                // point to data for the file
-            statePtr->dataSize = cfg.bins[bin].fileSize;  // store allocated size for file data
+            statePtr->status = MicroFs::Status::NOT_VALID;  // not created yet
+            statePtr->currSize = 0;                         // nothing written yet
+            statePtr->data = currFileBuff;                  // point to data for the file
+            statePtr->dataSize = cfg.bins[bin].fileSize;    // store allocated size for file data
 #if MICROFS_INIT_FILE_DATA
             (void)::memset(currFileBuff, 0, cfg.bins[bin].fileSize);
 #endif
@@ -96,7 +97,7 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwNativeUIntType id, F
     }
 }
 
-void MicroFs::MicroFsCleanup(const FwNativeUIntType id, Fw::MemAllocator& allocator) {
+void MicroFs::MicroFsCleanup(const FwEnumStoreType id, Fw::MemAllocator& allocator) {
     allocator.deallocate(id, MicroFs::getSingleton().s_microFsMem);
     MicroFs::getSingleton().s_microFsMem = nullptr;
 }
@@ -112,11 +113,11 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // after the file number.
     const char* filePathSpec = "/" MICROFS_BIN_STRING "%d/" MICROFS_FILE_STRING "%d.%1s";
 
-    FwSizeType binIndex = 0;
-    FwSizeType fileIndex = 0;
+    FwIndexType binIndex = 0;
+    FwIndexType fileIndex = 0;
     // crcExtension should be 2 bytes because scanf appends a null character at the end.
     char crcExtension[2];
-    FwNativeIntType stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);
+    int stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);
     if (stat != 2) {
         return -1;
     }
@@ -134,7 +135,7 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // compute file state index
 
     // add each chunk of file numbers from full bins
-    for (FwSizeType currBin = 0; currBin < binIndex; currBin++) {
+    for (FwIndexType currBin = 0; currBin < binIndex; currBin++) {
         stateIndex += MicroFs::getSingleton().s_microFsConfig.bins[currBin].numFiles;
     }
 

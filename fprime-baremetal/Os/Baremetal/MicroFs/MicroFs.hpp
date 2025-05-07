@@ -44,7 +44,7 @@
 // myConfig.bins[1].fileSize = 10*1024;
 // myConfig.bins[1].numFiles = 10;
 //
-// FwNativeUIntType id = 0; // only needed if allocator needs an id
+// FwSizeType id = 0; // only needed if allocator needs an id
 //
 // Fw::MallocAllocator mallocator; // memory from the heap for this example
 //
@@ -94,23 +94,29 @@ namespace Os {
 namespace Baremetal {
 class MicroFs {
   public:
+    enum Status {
+        INVALID,
+        VALID,
+    };
+
     struct MicroFsBin {
         FwSizeType fileSize;  //<! The size of the files in the bin
         FwSizeType numFiles;  //<! The number of files in the bin
     };
 
     struct MicroFsConfig {
-        FwSizeType numBins;                 //!< The number of bins configured. Must be <= than MAX_MICROFS_BINS
+        FwIndexType numBins;                //!< The number of bins configured. Must be <= than MAX_MICROFS_BINS
         MicroFsBin bins[MAX_MICROFS_BINS];  //!< The bins containing file sizes and numbers of files
     };
 
   public:
     // data structure for managing file state
     struct MicroFsFileState {
-        FwIndexType loc[MAX_MICROFS_FD];  //!< location in file where last operation left off
-        FwNativeIntType currSize;         //!< current size of the file after writes were done. -1 = not created yet.
-        FwSizeType dataSize;              //!< alloted size of the file
-        BYTE* data;                       //!< location of file data
+        FwSizeType loc[MAX_MICROFS_FD];  //!< location in file where last operation left off
+        Status status;                   //!< Keep track if the file is valid or not
+        FwSizeType currSize;             //!< current size of the file after writes were done. -1 = not created yet.
+        FwSizeType dataSize;             //!< alloted size of the file
+        BYTE* data;                      //!< location of file data
     };
 
   public:
@@ -128,7 +134,7 @@ class MicroFs {
 
   public:
     //!< set the number of bins in config
-    static void MicroFsSetCfgBins(MicroFsConfig& cfg, const FwSizeType numBins);
+    static void MicroFsSetCfgBins(MicroFsConfig& cfg, const FwIndexType numBins);
 
     //!< add a bin to the config
     static void MicroFsAddBin(MicroFsConfig& cfg,
@@ -140,11 +146,11 @@ class MicroFs {
 
     static void MicroFsInit(
         const MicroFsConfig& cfg,      //!< the configuration of the memory space
-        const FwNativeUIntType id,     //!< The memory id. Value doesn't matter if allocator doesn't need it
+        const FwEnumStoreType id,      //!< The memory id. Value doesn't matter if allocator doesn't need it
         Fw::MemAllocator& allocator);  //!< Memory allocator to use for memory
 
     static void MicroFsCleanup(
-        const FwNativeUIntType id,     //!< The memory id. Value doesn't matter if allocator doesn't need it
+        const FwEnumStoreType id,      //!< The memory id. Value doesn't matter if allocator doesn't need it
         Fw::MemAllocator& allocator);  //!< Memory allocator to to deallocate. Should match MicroFsInit allocator
 
     // helper to get state pointer from index
@@ -167,7 +173,7 @@ class MicroFs {
     // user
     MicroFsConfig s_microFsConfig;
     // offset from zero for fds to allow zero checks
-    static constexpr FwSizeType MICROFS_FD_OFFSET = 1;
+    static constexpr FwIndexType MICROFS_FD_OFFSET = 1;
 };
 
 }  // namespace Baremetal

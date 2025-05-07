@@ -153,13 +153,13 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
         MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
-    FwNativeIntType oldSize = state->currSize;
+    FwSizeType oldSize = state->currSize;
 
     // compute new operation location
     switch (seekType) {
         case SeekType::ABSOLUTE:
             // make sure not too far
-            if ((offset >= static_cast<NATIVE_INT_TYPE>(state->dataSize)) or (offset < 0)) {
+            if ((offset >= static_cast<FwSignedSizeType>(state->dataSize)) or (offset < 0)) {
                 return BAD_SIZE;
             }
             state->loc[this->m_handle.m_file_descriptor] = offset;
