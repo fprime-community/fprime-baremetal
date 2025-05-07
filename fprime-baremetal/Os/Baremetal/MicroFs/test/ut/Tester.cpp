@@ -924,13 +924,13 @@ void Tester::clearFileBuffer() {
     }
 }
 
-I16 Tester::getIndex(const char* fileName) const {
+FwIndexType Tester::getIndex(const char* fileName) const {
     const char* filePathSpec = "/bin%d/file%d";
 
-    FwNativeUIntType binIndex = 0;
-    FwNativeUIntType fileIndex = 0;
+    FwIndexType binIndex = 0;
+    FwIndexType fileIndex = 0;
 
-    I16 stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex);
+    int stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex);
     if (stat != 2) {
         return -1;
 

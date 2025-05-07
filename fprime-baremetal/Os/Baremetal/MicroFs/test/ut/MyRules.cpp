@@ -116,10 +116,10 @@ bool Os::Tester::WriteData::precondition(const Os::Tester& state  //!< The test 
 
 void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
 ) {
-    NATIVE_UINT_TYPE fillSize;
+    FwSizeType fillSize;
 
     // Randomize how many bytes are written to the file
-    NATIVE_INT_TYPE randSize = rand() % Tester::FILE_SIZE + 1;
+    FwSizeType randSize = rand() % Tester::FILE_SIZE + 1;
 
     if ((fileModel->curPtr + randSize) > Tester::FILE_SIZE) {
         fillSize = Tester::FILE_SIZE - fileModel->curPtr;
@@ -131,7 +131,7 @@ void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
 
     // Fill the memory buffer with random numbers between 0 and 0xFF inclusive
 
-    NATIVE_INT_TYPE offset = fileModel->curPtr;
+    FwSizeType offset = fileModel->curPtr;
     for (U32 i = 0; i < fillSize; i++) {
         assert(offset + i < Tester::FILE_SIZE);
         this->fileModel->buffOut[offset + i] = rand() % 256;
@@ -168,7 +168,7 @@ bool Os::Tester::ReadData::precondition(const Os::Tester& state  //!< The test s
 void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
 ) {
     // Randomize how much data is read
-    NATIVE_INT_TYPE randSize = rand() % Tester::FILE_SIZE + 1;
+    FwSizeType randSize = rand() % Tester::FILE_SIZE + 1;
 
     BYTE buffIn[state.testCfg.bins[0].fileSize];
     memset(buffIn, 0xA5, sizeof(buffIn));
@@ -665,7 +665,7 @@ bool Os::Tester::SeekFile::precondition(const Os::Tester& state  //!< The test s
 void Os::Tester::SeekFile::action(Os::Tester& state  //!< The test state
 ) {
     // Seek random
-    NATIVE_INT_TYPE randSeek = rand() % Tester::FILE_SIZE;
+    FwSizeType randSeek = rand() % Tester::FILE_SIZE;
     Os::File::Status stat = this->fileModel->fileDesc.seek_absolute(randSeek);
     ASSERT_EQ(Os::File::OP_OK, stat);
 
@@ -689,7 +689,7 @@ void Os::Tester::SeekFile::action(Os::Tester& state  //!< The test state
 //
 // ------------------------------------------------------------------------------------------------------
 
-Os::Tester::SeekNFile::SeekNFile(const char* filename, NATIVE_INT_TYPE seek) : STest::Rule<Os::Tester>("SeekNFile") {
+Os::Tester::SeekNFile::SeekNFile(const char* filename, FwSignedSizeType seek) : STest::Rule<Os::Tester>("SeekNFile") {
     this->filename = filename;
     this->seek = seek;
 }
@@ -785,7 +785,7 @@ void Os::Tester::SeekNotOpen::action(Os::Tester& state  //!< The test state
 //
 // ------------------------------------------------------------------------------------------------------
 
-Os::Tester::SeekBadSize::SeekBadSize(const char* filename, NATIVE_INT_TYPE seek)
+Os::Tester::SeekBadSize::SeekBadSize(const char* filename, FwSignedSizeType seek)
     : STest::Rule<Os::Tester>("SeekBadSize") {
     this->filename = filename;
     this->seek = seek;
@@ -811,7 +811,7 @@ void Os::Tester::SeekBadSize::action(Os::Tester& state  //!< The test state
 //
 // ------------------------------------------------------------------------------------------------------
 
-Os::Tester::SeekRelative::SeekRelative(const char* filename, NATIVE_INT_TYPE seek)
+Os::Tester::SeekRelative::SeekRelative(const char* filename, FwSignedSizeType seek)
     : STest::Rule<Os::Tester>("SeekRelative") {
     this->filename = filename;
     this->seek = seek;
@@ -1184,7 +1184,7 @@ void Os::Tester::WriteRandomFile::action(Os::Tester& state  //!< The test state
     FwSizeType fillSize = rand() % Tester::FILE_SIZE + 1;
 
     // Fill the memory buffer with random numbers between 0 and 0xFF inclusive
-    for (NATIVE_INT_TYPE i = 0; i < fillSize; i++) {
+    for (FwSizeType i = 0; i < fillSize; i++) {
         vbytes.push_back(rand() % 256);
     }
 

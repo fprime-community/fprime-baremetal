@@ -36,7 +36,7 @@ class Tester {
         Mode mode;
         Os::File fileDesc;
         BYTE buffOut[FILE_SIZE];
-        NATIVE_INT_TYPE curPtr;
+        FwSizeType curPtr;
         I32 size;
     };
 

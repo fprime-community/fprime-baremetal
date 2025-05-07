@@ -1,5 +1,4 @@
 
-
 // ------------------------------------------------------------------------------------------------------
 // Rule:  InitFileSystem
 //
@@ -621,7 +620,7 @@ struct SeekNFile : public STest::Rule<Os::Tester> {
     // ----------------------------------------------------------------------
 
     //! Constructor
-    SeekNFile(const char* filename, NATIVE_INT_TYPE seek);
+    SeekNFile(const char* filename, FwSignedSizeType seek);
 
     // ----------------------------------------------------------------------
     // Public member functions
@@ -637,7 +636,7 @@ struct SeekNFile : public STest::Rule<Os::Tester> {
 
     const char* filename;
     Os::Tester::FileModel* fileModel;
-    NATIVE_INT_TYPE seek;
+    FwSignedSizeType seek;
 };
 
 // ------------------------------------------------------------------------------------------------------
@@ -704,7 +703,7 @@ struct SeekBadSize : public STest::Rule<Os::Tester> {
     // ----------------------------------------------------------------------
 
     //! Constructor
-    SeekBadSize(const char* filename, NATIVE_INT_TYPE seek);
+    SeekBadSize(const char* filename, FwSignedSizeType seek);
 
     // ----------------------------------------------------------------------
     // Public member functions
@@ -720,7 +719,7 @@ struct SeekBadSize : public STest::Rule<Os::Tester> {
 
     const char* filename;
     Os::Tester::FileModel* fileModel;
-    NATIVE_INT_TYPE seek;
+    FwSignedSizeType seek;
 };
 
 // ------------------------------------------------------------------------------------------------------
@@ -733,7 +732,7 @@ struct SeekRelative : public STest::Rule<Os::Tester> {
     // ----------------------------------------------------------------------
 
     //! Constructor
-    SeekRelative(const char* filename, NATIVE_INT_TYPE seek);
+    SeekRelative(const char* filename, FwSignedSizeType seek);
 
     // ----------------------------------------------------------------------
     // Public member functions
@@ -749,7 +748,7 @@ struct SeekRelative : public STest::Rule<Os::Tester> {
 
     const char* filename;
     Os::Tester::FileModel* fileModel;
-    NATIVE_INT_TYPE seek;
+    FwSignedSizeType seek;
 };
 
 // ------------------------------------------------------------------------------------------------------
