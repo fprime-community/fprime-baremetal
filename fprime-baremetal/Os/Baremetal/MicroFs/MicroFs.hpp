@@ -95,8 +95,8 @@ namespace Baremetal {
 class MicroFs {
   public:
     enum Status {
-        INVALID,
-        VALID,
+        INVALID,  //<! Status is invalid
+        VALID,    //<! Status is valid
     };
 
     struct MicroFsBin {
