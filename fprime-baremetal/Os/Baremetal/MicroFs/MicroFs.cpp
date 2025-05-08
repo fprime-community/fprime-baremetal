@@ -112,7 +112,8 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // Scan the string for the bin and file numbers.
     // We want a failure to find the file if there is any extension
     // after the file number.
-    const char* filePathSpec = "/" MICROFS_BIN_STRING "%hd/" MICROFS_FILE_STRING "%hd.%1s";
+    const char* filePathSpec =
+        "/" MICROFS_BIN_STRING "%" MICROFS_INDEX_SCN_FORMAT "/" MICROFS_FILE_STRING "%" MICROFS_INDEX_SCN_FORMAT ".%1s";
 
     FwIndexType binIndex = 0;
     FwIndexType fileIndex = 0;

@@ -925,7 +925,7 @@ void Tester::clearFileBuffer() {
 }
 
 FwIndexType Tester::getIndex(const char* fileName) const {
-    const char* filePathSpec = "/bin%hd/file%hd";
+    const char* filePathSpec = "/bin%" MICROFS_INDEX_SCN_FORMAT "/file%" MICROFS_INDEX_SCN_FORMAT;
 
     FwIndexType binIndex = 0;
     FwIndexType fileIndex = 0;

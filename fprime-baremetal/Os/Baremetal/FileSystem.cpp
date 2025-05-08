@@ -15,7 +15,7 @@ namespace FileSystem {
 BaremetalFileSystem::Status BaremetalFileSystem::_removeDirectory(const char* path) {
     FW_ASSERT(path != nullptr);
 
-    const char* dirPathSpec = "/" MICROFS_BIN_STRING "%d";
+    const char* dirPathSpec = "/" MICROFS_BIN_STRING "%" MICROFS_INDEX_SCN_FORMAT;
 
     // if the directory number can be scanned out following the directory path spec,
     // the directory name has the correct format
