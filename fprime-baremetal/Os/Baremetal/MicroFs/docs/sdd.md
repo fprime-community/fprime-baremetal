@@ -9,6 +9,8 @@ was written to provide a very basic RAM-based file system that implements the F 
 data stored will be lost when the system is rebooted, but it will allow files to be stored, used, and uplinked/downlinked for as long as the system is up. Services that rely on
 non-volatile files (like `Svc/PrmDb`) wouldn't make sense in this context.
 
+NOTE: This file system is not thread safe.
+
 ## 2. Requirements
 
 The requirements for `Os::Baremetal::MicroFs` are as follows:
@@ -58,10 +60,11 @@ user during initialization and is used for lookups later in the file system logi
 
 ```c++
 struct MicroFsFileState {
-    PlatformIntType loc[MAX_MICROFS_FD];       //!< location in file where last operation left off
-    PlatformIntType currSize;  //!< current size of the file after writes were done
-    PlatformIntType dataSize;  //!< alloted size of the file
-    BYTE* data;                //!< location of file data
+    MicroFsFd fd[MAX_MICROFS_FD];  //!< File descriptors for this file
+    bool created;                  //!< Flag to indicate if created or not. True if created else false.
+    FwSizeType currSize;           //!< current size of the file after writes were done.
+    FwSizeType dataSize;           //!< alloted size of the file
+    BYTE* data;                    //!< location of file data
 };
 ```
 
@@ -77,7 +80,7 @@ The state structures fill the memory after the copy of `MicroFsConfig`.
 
 ```c++
 void MicroFsInit(const MicroFsConfig& cfg,      //!< the configuration of the memory space
-                 const PlatformUIntType id,     //!< The memory id. Value doesn't matter if allocator doesn't need it
+                 const FwEnumStoreType id,     //!< The memory id. Value doesn't matter if allocator doesn't need it
                  Fw::MemAllocator& allocator);  //!< Memory allocator to use for memory
 ``` 
 
@@ -120,7 +123,7 @@ to zero as well as the `currSize`. The file is now ready for writing and a file 
 NOTE that at this point the file descriptor can be used for reads as well. If the file was previously created and is opened
 with the `OPEN_READ` flag, the `loc` member is initialized to zero. An attempt to open a file for reading that does not exist yet will
 return a `DOESNT_EXIST` error. An attempt to open a file that doesn't comply with the file naming scheme will return a `DOESNT_EXIST`
-error.
+error. An attempt to open a file that does not have anymore file descriptors will return a `NO_MORE_RESOURCES` error.
 
 ##### 3.2.3.2 Write
 
@@ -128,6 +131,8 @@ When the file is written to, the data is copied into the file buffer starting at
 incremented by that value. If the remaining buffer space is smaller than the write request, only enough data to fill the
 buffer is copied and the actual number of bytes copied is returned. Subsequent writes will not copy any data or move the 
 `loc` value, and will return zero bytes written.
+
+Opening the same file for write more than once and writing to all file objects will result the file data to be overwritten by each other.
 
 ##### 3.2.3.3 Read
 

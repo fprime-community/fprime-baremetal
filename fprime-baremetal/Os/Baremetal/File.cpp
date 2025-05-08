@@ -41,7 +41,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
 
     FwIndexType fdEntry = MicroFs::getFileStateNextFreeFd(path);
     if (fdEntry == BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
-        return Os::File::Status::NO_PERMISSION;
+        return Os::File::Status::NO_MORE_RESOURCES;
     }
 
     switch (mode) {
