@@ -80,8 +80,8 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwEnumStoreType id, Fw
             (void)memset(statePtr, 0, sizeof(MicroFsFileState));
             // initialize state
             for (FwIndexType fdIndex = 0; fdIndex < MAX_MICROFS_FD; fdIndex++) {
-                statePtr->loc[fdIndex] = 0;                   // no operation in progress
-                statePtr->status[fdIndex] = Status::INVALID;  // no operation in progress
+                statePtr->fd[fdIndex].loc = 0;                   // no operation in progress
+                statePtr->fd[fdIndex].status = Status::INVALID;  // no operation in progress
             }
             statePtr->created = false;                    // has not been created
             statePtr->currSize = 0;                       // nothing written yet
@@ -171,7 +171,7 @@ FwIndexType MicroFs::getFileStateNextFreeFd(const char* fileName) {
     }
 
     for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
-        if (statePtr->status[i] == Status::INVALID) {
+        if (statePtr->fd[i].status == Status::INVALID) {
             fd = i;
             break;
         }

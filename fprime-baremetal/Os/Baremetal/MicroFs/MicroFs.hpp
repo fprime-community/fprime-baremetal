@@ -109,15 +109,19 @@ class MicroFs {
         MicroFsBin bins[MAX_MICROFS_BINS];  //!< The bins containing file sizes and numbers of files
     };
 
+    struct MicroFsFd {
+        FwSizeType loc;  //!< location in file where last operation left off
+        Status status;   //!< status of each FD
+    };
+
   public:
     // data structure for managing file state
     struct MicroFsFileState {
-        FwSizeType loc[MAX_MICROFS_FD];  //!< location in file where last operation left off
-        Status status[MAX_MICROFS_FD];   //!< status of each FD
-        bool created;                    //!< Flag to indicate if created or not. True if created else false.
-        FwSizeType currSize;             //!< current size of the file after writes were done.
-        FwSizeType dataSize;             //!< alloted size of the file
-        BYTE* data;                      //!< location of file data
+        MicroFsFd fd[MAX_MICROFS_FD];  //!< File descriptors for this file
+        bool created;                  //!< Flag to indicate if created or not. True if created else false.
+        FwSizeType currSize;           //!< current size of the file after writes were done.
+        FwSizeType dataSize;           //!< alloted size of the file
+        BYTE* data;                    //!< location of file data
     };
 
   public:

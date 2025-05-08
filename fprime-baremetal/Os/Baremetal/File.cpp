@@ -50,7 +50,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
             if (!state->created) {
                 return Os::File::Status::DOESNT_EXIST;
             }
-            state->loc[fdEntry] = 0;
+            state->fd[fdEntry].loc = 0;
             break;
         case OPEN_WRITE:
         case OPEN_SYNC_WRITE:  // fall through; same for microfs
@@ -59,12 +59,12 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
             if (!state->created) {
                 state->currSize = 0;
             }
-            state->loc[fdEntry] = 0;
+            state->fd[fdEntry].loc = 0;
             break;
         case OPEN_CREATE:
             // truncate file length to zero
             state->currSize = 0;
-            state->loc[fdEntry] = 0;
+            state->fd[fdEntry].loc = 0;
             break;
         case OPEN_APPEND:
             // initialize write location to length of file for append
@@ -74,7 +74,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
                 state->currSize = 0;
             }
 
-            state->loc[fdEntry] = state->currSize;
+            state->fd[fdEntry].loc = state->currSize;
             break;
         default:
             FW_ASSERT(0, mode);
@@ -82,7 +82,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
     }
 
     state->created = true;
-    state->status[fdEntry] = MicroFs::Status::VALID;
+    state->fd[fdEntry].status = MicroFs::Status::VALID;
 
     // store mode
     this->m_handle.m_mode = mode;
@@ -117,8 +117,8 @@ void BaremetalFile::close() {
             MicroFs::MicroFsFileState* state =
                 MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
             FW_ASSERT(state != nullptr);
-            state->loc[this->m_handle.m_file_descriptor] = 0;
-            state->status[this->m_handle.m_file_descriptor] = MicroFs::Status::INVALID;
+            state->fd[this->m_handle.m_file_descriptor].loc = 0;
+            state->fd[this->m_handle.m_file_descriptor].status = MicroFs::Status::INVALID;
         }
     }
     // reset fd
@@ -140,7 +140,7 @@ BaremetalFile::Status BaremetalFile::position(FwSizeType& position_result) {
     MicroFs::MicroFsFileState* state =
         MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
-    position_result = state->loc[this->m_handle.m_file_descriptor];
+    position_result = state->fd[this->m_handle.m_file_descriptor].loc;
 
     return OP_OK;
 }
@@ -166,14 +166,14 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
             if ((offset >= static_cast<FwSignedSizeType>(state->dataSize)) or (offset < 0)) {
                 return BAD_SIZE;
             }
-            state->loc[this->m_handle.m_file_descriptor] = offset;
+            state->fd[this->m_handle.m_file_descriptor].loc = offset;
             break;
         case SeekType::RELATIVE:
             // make sure not too far
-            if (state->loc[this->m_handle.m_file_descriptor] + offset >= static_cast<FwIndexType>(state->dataSize)) {
+            if (state->fd[this->m_handle.m_file_descriptor].loc + offset >= static_cast<FwIndexType>(state->dataSize)) {
                 return BAD_SIZE;
             }
-            state->loc[this->m_handle.m_file_descriptor] = state->loc[this->m_handle.m_file_descriptor] + offset;
+            state->fd[this->m_handle.m_file_descriptor].loc = state->fd[this->m_handle.m_file_descriptor].loc + offset;
             break;
         default:
             FW_ASSERT(0, seekType);
@@ -181,8 +181,8 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
     }
 
     // move current size as well if needed
-    if (state->loc[this->m_handle.m_file_descriptor] > state->currSize) {
-        state->currSize = state->loc[this->m_handle.m_file_descriptor];
+    if (state->fd[this->m_handle.m_file_descriptor].loc > state->currSize) {
+        state->currSize = state->fd[this->m_handle.m_file_descriptor].loc;
     }
 
     // fill with zeros if seek went past old size
@@ -221,7 +221,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // find size to copy
 
     // check to see if already at the end of the file. If so, return 0 for size
-    if (state->loc[this->m_handle.m_file_descriptor] == (state->currSize - 1)) {
+    if (state->fd[this->m_handle.m_file_descriptor].loc == (state->currSize - 1)) {
         size = 0;
         return OP_OK;
     }
@@ -229,15 +229,15 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // copy requested bytes, unless it would be more than the file size.
     // If it would be more than the file size, copy the remainder and set
     // the size to the actual copied
-    if ((state->loc[this->m_handle.m_file_descriptor] + size) > (state->currSize - 1)) {
-        size = state->currSize - state->loc[this->m_handle.m_file_descriptor];
+    if ((state->fd[this->m_handle.m_file_descriptor].loc + size) > (state->currSize - 1)) {
+        size = state->currSize - state->fd[this->m_handle.m_file_descriptor].loc;
     }
 
     // copy data from location to buffer
-    (void)memcpy(buffer, state->data + state->loc[this->m_handle.m_file_descriptor], size);
+    (void)memcpy(buffer, state->data + state->fd[this->m_handle.m_file_descriptor].loc, size);
 
     // move location pointer
-    state->loc[this->m_handle.m_file_descriptor] += size;
+    state->fd[this->m_handle.m_file_descriptor].loc += size;
 
     return OP_OK;
 }
@@ -269,19 +269,19 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     // write up to the end of the allocated buffer
     // if write size is greater, truncate the write
     // and set size to what was actually written
-    if (state->loc[this->m_handle.m_file_descriptor] + size > static_cast<FwIndexType>(state->dataSize)) {
-        size = state->dataSize - state->loc[this->m_handle.m_file_descriptor];
+    if (state->fd[this->m_handle.m_file_descriptor].loc + size > static_cast<FwIndexType>(state->dataSize)) {
+        size = state->dataSize - state->fd[this->m_handle.m_file_descriptor].loc;
     }
 
     // copy data to file buffer
-    (void)memcpy(&state->data[state->loc[this->m_handle.m_file_descriptor]], buffer, size);
+    (void)memcpy(&state->data[state->fd[this->m_handle.m_file_descriptor].loc], buffer, size);
 
     // increment location
-    state->loc[this->m_handle.m_file_descriptor] += size;
+    state->fd[this->m_handle.m_file_descriptor].loc += size;
 
     // Check if the currSize is to be increased.
-    if (state->loc[this->m_handle.m_file_descriptor] > state->currSize) {
-        state->currSize = state->loc[this->m_handle.m_file_descriptor];
+    if (state->fd[this->m_handle.m_file_descriptor].loc > state->currSize) {
+        state->currSize = state->fd[this->m_handle.m_file_descriptor].loc;
     }
 
     return OP_OK;
