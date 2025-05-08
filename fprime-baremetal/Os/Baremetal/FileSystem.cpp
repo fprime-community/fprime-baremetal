@@ -41,8 +41,9 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
     }
 
     // get file state
-    FwIndexType index = MicroFs::getFileStateIndex(path);
-    if (index == -1) {
+    FwIndexType index = 0;
+    auto status = MicroFs::getFileStateIndex(path, index);
+    if (status == MicroFs::Status::INVALID) {
         return INVALID_PATH;
     }
 

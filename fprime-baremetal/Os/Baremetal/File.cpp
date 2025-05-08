@@ -30,17 +30,19 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
 
     // common checks
     // retrieve index to file entry
-    FwIndexType entry = MicroFs::getFileStateIndex(path);
+    FwIndexType entry = 0;
+    auto status = MicroFs::getFileStateIndex(path, entry);
     // not found
-    if (BaremetalFileHandle::INVALID_STATE_ENTRY == entry) {
+    if (status == MicroFs::INVALID) {
         return Os::File::Status::DOESNT_EXIST;
     }
 
     MicroFs::MicroFsFileState* state = MicroFs::getFileStateFromIndex(entry);
     FW_ASSERT(state != nullptr);
 
-    FwIndexType fdEntry = MicroFs::getFileStateNextFreeFd(path);
-    if (fdEntry == BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
+    FwIndexType fdEntry = 0;
+    status = MicroFs::getFileStateNextFreeFd(path, fdEntry);
+    if (status == MicroFs::Status::INVALID) {
         return Os::File::Status::NO_MORE_RESOURCES;
     }
 

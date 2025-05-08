@@ -161,11 +161,11 @@ class MicroFs {
     // helper to get state pointer from index
     static MicroFsFileState* getFileStateFromIndex(FwIndexType index);
 
-    // helper to find file state entry from file name. Will return index if found, -1 if not
-    static FwIndexType getFileStateIndex(const char* fileName);
+    // helper to find file state entry from file name. Will return VALID if found, INVALID if not
+    static Status getFileStateIndex(const char* fileName, FwIndexType& stateIndex);
 
-    // helper to find the next available file descriptor. Will return a file descriptor if available, -1 if not
-    static FwIndexType getFileStateNextFreeFd(const char* fileName);
+    // helper to find the next available file descriptor. Will return VALID if available, INVALID if not
+    static Status getFileStateNextFreeFd(const char* fileName, FwIndexType& nextFreeFd);
 
     //! \brief get a reference to singleton
     //! \return reference to singleton

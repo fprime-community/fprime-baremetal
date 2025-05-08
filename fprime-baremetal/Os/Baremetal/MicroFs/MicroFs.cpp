@@ -102,8 +102,8 @@ void MicroFs::MicroFsCleanup(const FwEnumStoreType id, Fw::MemAllocator& allocat
     MicroFs::getSingleton().s_microFsMem = nullptr;
 }
 
-// helper to find file state entry from file name. Will return index if found, -1 if not
-FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
+// helper to find file state entry from file name. Will return VALID if found, INVALID if not
+MicroFs::Status MicroFs::getFileStateIndex(const char* fileName, FwIndexType& stateIndex) {
     // the directory/filename rule is very strict - it has to be /MICROFS_BIN_STRING<n>/MICROFS_FILE_STRING<m>,
     // where n = number of file bins, and m = number of files in a particular bin
     // any other name will return an error
@@ -120,21 +120,21 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     char crcExtension[2];
     int stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);
     if (stat != 2) {
-        return -1;
+        return MicroFs::Status::INVALID;
     }
 
     MicroFs& microfs = MicroFs::getSingleton();
 
     // check to see that indexes don't exceed config
     if (binIndex >= microfs.s_microFsConfig.numBins) {
-        return -1;
+        return MicroFs::Status::INVALID;
     }
 
     if (fileIndex >= microfs.s_microFsConfig.bins[binIndex].numFiles) {
-        return -1;
+        return MicroFs::Status::INVALID;
     }
 
-    FwIndexType stateIndex = 0;
+    stateIndex = 0;
     // compute file state index
 
     // add each chunk of file numbers from full bins
@@ -145,7 +145,7 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
     // get residual file number from last bin
     stateIndex += fileIndex;
 
-    return stateIndex;
+    return MicroFs::Status::VALID;
 }
 
 // helper to get state pointer from index
@@ -158,26 +158,26 @@ MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
     return &ptr[index];
 }
 
-FwIndexType MicroFs::getFileStateNextFreeFd(const char* fileName) {
+MicroFs::Status MicroFs::getFileStateNextFreeFd(const char* fileName, FwIndexType& nextFreeFd) {
     FW_ASSERT(fileName != nullptr);
-    FwIndexType fd = -1;
-    auto fileStateEntry = MicroFs::getFileStateIndex(fileName);
-    if (fileStateEntry == -1) {
-        return -1;
+    nextFreeFd = -1;
+    auto status = MicroFs::getFileStateIndex(fileName, nextFreeFd);
+    if (status == MicroFs::Status::INVALID) {
+        return MicroFs::Status::INVALID;
     }
 
-    auto statePtr = MicroFs::getFileStateFromIndex(fileStateEntry);
+    auto statePtr = MicroFs::getFileStateFromIndex(nextFreeFd);
     if (statePtr == nullptr) {
-        return -1;
+        return MicroFs::Status::INVALID;
     }
 
     for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
         if (statePtr->fd[i].status == Status::INVALID) {
-            fd = i;
+            nextFreeFd = i;
             break;
         }
     }
-    return fd;
+    return MicroFs::Status::VALID;
 }
 
 }  // namespace Baremetal

@@ -77,9 +77,10 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
         fileStr.format(filePathSpec, this->m_handle.m_dir_index, this->m_handle.m_file_index);
 
         // get file state
-        FwIndexType fileIndex = MicroFs::getFileStateIndex(fileStr.toChar());
+        FwIndexType fileIndex = 0;
+        auto stateStatus = MicroFs::getFileStateIndex(fileStr.toChar(), fileIndex);
         // should always find it, since it is from a known valid bin
-        FW_ASSERT(fileIndex != -1);
+        FW_ASSERT(stateStatus != MicroFs::Status::INVALID);
         MicroFs::MicroFsFileState* fState = MicroFs::getFileStateFromIndex(fileIndex);
         FW_ASSERT(fState != nullptr);
 
