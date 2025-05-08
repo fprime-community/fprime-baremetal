@@ -19,13 +19,14 @@ set(HEADER_FILES
 )
 register_fprime_module(Os_Baremetal_MicroFs)
 
+add_library(fprime-baremetal_Os_Baremetal INTERFACE)
+
 register_os_implementation("Cpu" Baremetal)
 register_os_implementation("File;FileSystem;Directory" Baremetal_MicroFs Os_Baremetal_Shared Os_Baremetal_MicroFs)
 register_os_implementation("Memory" Baremetal)
 register_os_implementation("Mutex;ConditionVariable" Baremetal)
 register_os_implementation("Task" Baremetal fprime-baremetal_Os_TaskRunner)
 
-add_library(fprime-baremetal_Os_Baremetal INTERFACE)
 set(UT_SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MicroFsTest.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/Tester.cpp"
