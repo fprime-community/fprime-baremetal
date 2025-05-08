@@ -7,8 +7,8 @@
 #ifndef TESTER_HPP
 #define TESTER_HPP
 
-#include "GTestBase.hpp"
-#include "Svc/TlmLinearChan/TlmLinearChan.hpp"
+#include "TlmLinearChanGTestBase.hpp"
+#include "fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp"
 
 namespace Baremetal {
 
