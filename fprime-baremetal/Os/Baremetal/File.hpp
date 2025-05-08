@@ -62,11 +62,6 @@ class BaremetalFile : public FileInterface {
     //!
     Os::FileInterface::Status open(const char* path, Mode mode, OverwriteType overwrite) override;
 
-    //! \brief determine if the file is open
-    //! \return true if file is open, false otherwise
-    //!
-    bool isOpen() const;
-
     //! \brief close the file, if not opened then do nothing
     //!
     //! Closes the file, if open. Otherwise this function does nothing. Delegates to the chosen implementation's
@@ -174,6 +169,11 @@ class BaremetalFile : public FileInterface {
     FileHandle* getHandle() override;
 
   private:
+    //! \brief determine if the file is open. Needed for internal usage.
+    //! \return true if file is open, false otherwise
+    //!
+    bool _isOpen() const;
+
     //! File handle for BaremetalFile
     BaremetalFileHandle m_handle;
 };

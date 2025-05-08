@@ -31,14 +31,14 @@ MicroFs& MicroFs::getSingleton() {
 
 void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwEnumStoreType id, Fw::MemAllocator& allocator) {
     // Force trigger on the fly singleton setup
-    (void)MicroFs::getSingleton();
+    MicroFs& microfs = MicroFs::getSingleton();
 
     // check things...
     FW_ASSERT(cfg.numBins <= MAX_MICROFS_BINS, cfg.numBins, MAX_MICROFS_BINS);
-    FW_ASSERT((not MICROFS_SKIP_NULL_CHECK) and (MicroFs::getSingleton().s_microFsMem == nullptr));
+    FW_ASSERT((not MICROFS_SKIP_NULL_CHECK) and (microfs.s_microFsMem == nullptr));
 
     // copy config to private copy
-    MicroFs::getSingleton().s_microFsConfig = cfg;
+    microfs.s_microFsConfig = cfg;
 
     // compute the amount of memory needed to hold the file system state
     // and data
@@ -56,20 +56,19 @@ void MicroFs::MicroFsInit(const MicroFsConfig& cfg, const FwEnumStoreType id, Fw
     FwSizeType reqMem = memSize;
 
     bool dontcare;
-    MicroFs::getSingleton().s_microFsMem = allocator.allocate(id, reqMem, dontcare);
+    microfs.s_microFsMem = allocator.allocate(id, reqMem, dontcare);
 
     // make sure memory is aligned
-    FW_ASSERT((reinterpret_cast<PlatformPointerCastType>(MicroFs::getSingleton().s_microFsMem) %
-               alignof(MicroFsFileState)) == 0);
+    FW_ASSERT((reinterpret_cast<PlatformPointerCastType>(microfs.s_microFsMem) % alignof(MicroFsFileState)) == 0);
 
     // make sure got the amount requested.
     // improvement could be best effort based on received memory
     FW_ASSERT(reqMem >= memSize, reqMem, memSize);
     // make sure we got a non-null pointer
-    FW_ASSERT(MicroFs::getSingleton().s_microFsMem != nullptr);
+    FW_ASSERT(microfs.s_microFsMem != nullptr);
 
     // lay out the memory with the state and the buffers after the config section
-    MicroFsFileState* statePtr = static_cast<MicroFsFileState*>(MicroFs::getSingleton().s_microFsMem);
+    MicroFsFileState* statePtr = static_cast<MicroFsFileState*>(microfs.s_microFsMem);
 
     // point to memory after state structs for beginning of file data
     BYTE* currFileBuff = reinterpret_cast<BYTE*>(&statePtr[totalNumFiles]);
@@ -124,12 +123,14 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
         return -1;
     }
 
+    MicroFs& microfs = MicroFs::getSingleton();
+
     // check to see that indexes don't exceed config
-    if (binIndex >= MicroFs::getSingleton().s_microFsConfig.numBins) {
+    if (binIndex >= microfs.s_microFsConfig.numBins) {
         return -1;
     }
 
-    if (fileIndex >= MicroFs::getSingleton().s_microFsConfig.bins[binIndex].numFiles) {
+    if (fileIndex >= microfs.s_microFsConfig.bins[binIndex].numFiles) {
         return -1;
     }
 
@@ -138,7 +139,7 @@ FwIndexType MicroFs::getFileStateIndex(const char* fileName) {
 
     // add each chunk of file numbers from full bins
     for (FwIndexType currBin = 0; currBin < binIndex; currBin++) {
-        stateIndex += MicroFs::getSingleton().s_microFsConfig.bins[currBin].numFiles;
+        stateIndex += microfs.s_microFsConfig.bins[currBin].numFiles;
     }
 
     // get residual file number from last bin

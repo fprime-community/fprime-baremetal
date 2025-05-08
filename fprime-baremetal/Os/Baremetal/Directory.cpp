@@ -62,15 +62,15 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
         return BAD_DESCRIPTOR;
     }
 
-    if (this->m_handle.m_file_index >=
-        MicroFs::getSingleton().s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles) {
+    MicroFs& microfs = MicroFs::getSingleton();
+
+    if (this->m_handle.m_file_index >= microfs.s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles) {
         return NO_MORE_FILES;
     }
 
     Status status = NO_MORE_FILES;
 
-    for (; this->m_handle.m_file_index <
-           MicroFs::getSingleton().s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles;
+    for (; this->m_handle.m_file_index < microfs.s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles;
          this->m_handle.m_file_index++) {
         Fw::String fileStr;
         const char* filePathSpec = "/" MICROFS_BIN_STRING "%d/" MICROFS_FILE_STRING "%d";

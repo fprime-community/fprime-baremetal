@@ -15,7 +15,7 @@ namespace Baremetal {
 namespace File {
 
 BaremetalFile::~BaremetalFile() {
-    if (this->isOpen()) {
+    if (this->_isOpen()) {
         this->close();
     }
 }
@@ -96,7 +96,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
     return stat;
 }
 
-bool BaremetalFile::isOpen() const {
+bool BaremetalFile::_isOpen() const {
     FW_ASSERT((0 <= this->m_handle.m_mode) && (this->m_handle.m_mode < Mode::MAX_OPEN_MODE), this->m_handle.m_mode);
     return (this->m_handle.m_mode != OPEN_NO_MODE);
 }
@@ -147,7 +147,7 @@ BaremetalFile::Status BaremetalFile::position(FwSizeType& position_result) {
 
 BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile::SeekType seekType) {
     // make sure it has been opened
-    if (!this->isOpen()) {
+    if (!this->_isOpen()) {
         return NOT_OPENED;
     }
     // get file state entry
@@ -170,7 +170,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
             break;
         case SeekType::RELATIVE:
             // make sure not too far
-            if (state->fd[this->m_handle.m_file_descriptor].loc + offset >= static_cast<FwIndexType>(state->dataSize)) {
+            if (static_cast<FwSizeType>(state->fd[this->m_handle.m_file_descriptor].loc + offset) >= state->dataSize) {
                 return BAD_SIZE;
             }
             state->fd[this->m_handle.m_file_descriptor].loc = state->fd[this->m_handle.m_file_descriptor].loc + offset;
@@ -195,7 +195,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
 
 BaremetalFile::Status BaremetalFile::flush() {
     // make sure it has been opened
-    if (!this->isOpen()) {
+    if (!this->_isOpen()) {
         return NOT_OPENED;
     }
 
@@ -207,7 +207,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     FW_ASSERT(buffer != nullptr);
 
     // make sure it has been opened
-    if (!this->isOpen()) {
+    if (!this->_isOpen()) {
         size = 0;
         return NOT_OPENED;
     }
@@ -269,7 +269,7 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     // write up to the end of the allocated buffer
     // if write size is greater, truncate the write
     // and set size to what was actually written
-    if (state->fd[this->m_handle.m_file_descriptor].loc + size > static_cast<FwIndexType>(state->dataSize)) {
+    if (state->fd[this->m_handle.m_file_descriptor].loc + size > state->dataSize) {
         size = state->dataSize - state->fd[this->m_handle.m_file_descriptor].loc;
     }
 
