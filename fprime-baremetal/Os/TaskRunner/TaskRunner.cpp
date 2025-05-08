@@ -106,5 +106,20 @@ void TaskRunner::run() {
         }
     }
 }
+
+void TaskRunner::runAll() {
+    if (this->m_cycling) {
+        for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
+            Task* task = this->m_task_table[i];
+            // Run a single task
+            if (task != nullptr && isRunning(*task)) {
+                this->runOne(*task);
+                // FIXME: Task exits are not supported when using runAll().
+                FW_ASSERT(task->getState() != Os::Task::State::EXITED);
+            }
+        }
+        this->m_index = 0;
+    }
+}
 }  // End namespace Baremetal
 }  // End Namespace Os

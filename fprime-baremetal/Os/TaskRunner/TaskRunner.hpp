@@ -68,6 +68,9 @@ class TaskRunner : TaskRegistry {
     //! ```
     void run();
 
+    //! \brief run each ready-to-run task once
+    void runAll();
+
     //! \brief get a singleton instance of the global task runner
     static TaskRunner& getSingleton();
   private:
