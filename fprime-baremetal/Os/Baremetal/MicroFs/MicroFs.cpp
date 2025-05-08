@@ -160,7 +160,6 @@ MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
 
 MicroFs::Status MicroFs::getFileStateNextFreeFd(const char* fileName, FwIndexType& nextFreeFd) {
     FW_ASSERT(fileName != nullptr);
-    nextFreeFd = -1;
     auto status = MicroFs::getFileStateIndex(fileName, nextFreeFd);
     if (status == MicroFs::Status::INVALID) {
         return MicroFs::Status::INVALID;
