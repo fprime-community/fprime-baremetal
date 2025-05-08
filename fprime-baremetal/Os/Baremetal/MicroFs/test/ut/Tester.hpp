@@ -103,7 +103,7 @@ class Tester {
     //!
     void initComponents();
 
-    I16 getIndex(const char* fileName) const;
+    FwIndexType getIndex(const char* fileName) const;
 
   private:
     // ----------------------------------------------------------------------

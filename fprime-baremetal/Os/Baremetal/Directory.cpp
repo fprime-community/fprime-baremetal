@@ -33,16 +33,16 @@ BaremetalDirectory::Status BaremetalDirectory::open(const char* path, OpenMode /
 
     // if the directory number can be scanned out following the directory path spec,
     // the directory name has the correct format
-    PlatformSizeType binIndex = 0;
+    FwIndexType binIndex = 0;
 
-    PlatformIntType stat = sscanf(path, dirPathSpec, &binIndex);
+    int stat = sscanf(path, dirPathSpec, &binIndex);
     if (stat != 1) {
         return NO_PERMISSION;
     }
 
     // If the path format is correct, check to see if it is in the
     // range of bins
-    if (binIndex < static_cast<PlatformSizeType>(MicroFs::getSingleton().s_microFsConfig.numBins)) {
+    if (binIndex < MicroFs::getSingleton().s_microFsConfig.numBins) {
         this->m_handle.m_dir_index = binIndex;
         this->m_handle.m_file_index = 0;
         return OP_OK;
@@ -84,7 +84,7 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
         FW_ASSERT(fState != nullptr);
 
         // check to see if it has been written
-        if (fState->currSize != -1) {
+        if (fState->created) {
             (void)memcpy(fileNameBuffer, fileStr.toChar(), bufSize);
             status = OP_OK;
             // increment here too otherwise the break will cause the index to not increment

@@ -11,10 +11,10 @@ namespace Baremetal {
 namespace Directory {
 
 struct BaremetalDirectoryHandle : public DirectoryHandle {
-    static constexpr PlatformSizeType INVALID_DIR_DESCRIPTOR = std::numeric_limits<PlatformSizeType>::max();
+    static constexpr FwIndexType INVALID_DIR_DESCRIPTOR = std::numeric_limits<FwIndexType>::max();
 
-    PlatformSizeType m_dir_index = INVALID_DIR_DESCRIPTOR;  // The current open directory
-    PlatformSizeType m_file_index = 0;                      // Keep track of the last file index to read
+    FwIndexType m_dir_index = INVALID_DIR_DESCRIPTOR;  // The current open directory
+    FwIndexType m_file_index = 0;                      // Keep track of the last file index to read
 };
 
 //! \brief Baremetal implementation of Os::Directory

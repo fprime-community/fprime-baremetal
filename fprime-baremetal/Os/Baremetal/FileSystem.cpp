@@ -19,16 +19,16 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeDirectory(const char* pa
 
     // if the directory number can be scanned out following the directory path spec,
     // the directory name has the correct format
-    PlatformSizeType binIndex = 0;
+    FwIndexType binIndex = 0;
 
-    PlatformIntType stat = sscanf(path, dirPathSpec, &binIndex);
+    int stat = sscanf(path, dirPathSpec, &binIndex);
     if (stat != 1) {
         return NO_PERMISSION;
     }
 
     // If the path format is correct, check to see if it is in the
     // range of bins
-    if (binIndex < static_cast<PlatformSizeType>(MicroFs::getSingleton().s_microFsConfig.numBins)) {
+    if (binIndex < MicroFs::getSingleton().s_microFsConfig.numBins) {
         return OP_OK;
     } else {
         return NO_PERMISSION;
