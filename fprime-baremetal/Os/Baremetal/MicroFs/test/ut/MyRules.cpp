@@ -66,7 +66,8 @@ void Os::Tester::OpenFile::action(Os::Tester& state  //!< The test state
     printf("--> Rule: %s %s\n", this->getName(), this->filename);
 
     this->fileModel->curPtr = 0;
-    Os::File::Status stat = this->fileModel->fileDesc.open(this->filename, Os::File::OPEN_WRITE);
+    Os::File::Status stat =
+        this->fileModel->fileDesc.open(this->filename, Os::File::OPEN_WRITE, Os::File::OverwriteType::OVERWRITE);
     ASSERT_EQ(Os::File::OP_OK, stat);
 
     // This is just a dummy call to get code coverage.  Nothing happens here for this file system.
@@ -74,6 +75,7 @@ void Os::Tester::OpenFile::action(Os::Tester& state  //!< The test state
     ASSERT_EQ(Os::File::OP_OK, stat);
 
     this->fileModel->mode = Os::Tester::FileModel::OPEN_WRITE;
+    this->fileModel->created = true;
     if (this->fileModel->size == -1) {
         this->fileModel->size = 0;
     }
@@ -449,7 +451,7 @@ bool Os::Tester::OpenCreate::precondition(const Os::Tester& state  //!< The test
 ) {
     this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
     return ((this->fileModel->mode != Os::Tester::FileModel::OPEN_READ) &&
-            (this->fileModel->mode != Os::Tester::FileModel::OPEN_WRITE));
+            (this->fileModel->mode != Os::Tester::FileModel::OPEN_WRITE) && !this->fileModel->created);
 }
 
 void Os::Tester::OpenCreate::action(Os::Tester& state  //!< The test state
@@ -459,6 +461,7 @@ void Os::Tester::OpenCreate::action(Os::Tester& state  //!< The test state
     ASSERT_EQ(Os::File::OP_OK, stat);
 
     this->fileModel->mode = Os::Tester::FileModel::OPEN_WRITE;
+    this->fileModel->created = true;
     this->fileModel->curPtr = 0;
     this->fileModel->size = 0;
 }
@@ -487,6 +490,7 @@ void Os::Tester::OpenAppend::action(Os::Tester& state  //!< The test state
     ASSERT_EQ(Os::File::OP_OK, stat);
 
     this->fileModel->mode = Os::Tester::FileModel::OPEN_WRITE;
+    this->fileModel->created = true;
     if (this->fileModel->size == -1) {
         this->fileModel->size = 0;
     }
@@ -516,6 +520,7 @@ void Os::Tester::RemoveFile::action(Os::Tester& state  //!< The test state
     Os::FileSystem::Status stat = Os::FileSystem::removeFile(this->filename);
     ASSERT_EQ(Os::FileSystem::OP_OK, stat);
 
+    this->fileModel->created = false;
     this->fileModel->mode = Os::Tester::FileModel::DOESNT_EXIST;
     this->fileModel->curPtr = 0;
     this->fileModel->size = -1;
@@ -534,7 +539,7 @@ bool Os::Tester::RemoveBusyFile::precondition(const Os::Tester& state  //!< The 
 ) {
     this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
     return ((this->fileModel->mode != Os::Tester::FileModel::OPEN_NO_MODE) &&
-            (this->fileModel->mode != Os::Tester::FileModel::DOESNT_EXIST));
+            (this->fileModel->mode != Os::Tester::FileModel::DOESNT_EXIST) && this->fileModel->created);
 }
 
 void Os::Tester::RemoveBusyFile::action(Os::Tester& state  //!< The test state
@@ -1039,7 +1044,7 @@ bool Os::Tester::MoveBusy::precondition(const Os::Tester& state  //!< The test s
 void Os::Tester::MoveBusy::action(Os::Tester& state  //!< The test state
 ) {
     Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
-    ASSERT_EQ(Os::FileSystem::Status::BUSY, stat);
+    ASSERT_EQ(Os::FileSystem::Status::OTHER_ERROR, stat);
 
     printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
 }
@@ -1139,7 +1144,7 @@ void Os::Tester::OpenRandomFile::action(Os::Tester& state  //!< The test state
     printf("--> Rule: %s %s\n", this->getName(), filename.c_str());
 
     Os::File* filePtr = state.simFileSystem->getFileDesc(filename);
-    Os::File::Status stat = filePtr->open(filename.c_str(), Os::File::OPEN_WRITE);
+    Os::File::Status stat = filePtr->open(filename.c_str(), Os::File::OPEN_WRITE, Os::File::OverwriteType::OVERWRITE);
     ASSERT_EQ(Os::File::OP_OK, stat);
 }
 

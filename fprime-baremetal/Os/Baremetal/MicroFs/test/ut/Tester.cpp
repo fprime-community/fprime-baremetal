@@ -16,11 +16,12 @@ Tester ::Tester() : alloc() {
 
 Tester ::~Tester() {}
 
-Tester ::FileModel ::FileModel() : mode(DOESNT_EXIST), size(-1) {}
+Tester ::FileModel ::FileModel() : mode(DOESNT_EXIST), created(false), size(-1) {}
 
 void Tester ::FileModel ::clear() {
     this->curPtr = 0;
     this->size = -1;
+    this->created = false;
     memset(this->buffOut, 0xA5, FILE_SIZE);
 }
 

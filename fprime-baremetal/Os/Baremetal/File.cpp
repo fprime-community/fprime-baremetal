@@ -58,12 +58,17 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
         case OPEN_SYNC_WRITE:  // fall through; same for microfs
             // If the file has never previously been opened, then initialize the
             // size to 0.
-            if (!state->created) {
+            if (state->created && (overwrite == BaremetalFile::OverwriteType::NO_OVERWRITE)) {
+                return Os::File::Status::FILE_EXISTS;
+            } else if (!state->created) {
                 state->currSize = 0;
             }
             state->fd[fdEntry].loc = 0;
             break;
         case OPEN_CREATE:
+            if (state->created && (overwrite == BaremetalFile::OverwriteType::NO_OVERWRITE)) {
+                return Os::File::Status::FILE_EXISTS;
+            }
             // truncate file length to zero
             state->currSize = 0;
             state->fd[fdEntry].loc = 0;
