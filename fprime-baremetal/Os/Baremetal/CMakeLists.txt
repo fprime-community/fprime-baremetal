@@ -27,12 +27,27 @@ register_os_implementation("Memory" Baremetal)
 register_os_implementation("Mutex;ConditionVariable" Baremetal)
 register_os_implementation("Task" Baremetal fprime-baremetal_Os_TaskRunner)
 
+# -----------------------------------------
+# MicroFs Full Test Section
+# -----------------------------------------
+
 set(UT_SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MicroFsTest.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/Tester.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MyRules.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/SimFileSystem.cpp"
 )
-choose_fprime_implementation(Os_File Os_File_Baremetal_MicroFs)
-set(UT_MOD_DEPS Os STest)
-register_fprime_ut()
+
+add_fprime_os_test(MicroFsFullTest "${UT_SOURCE_FILES}" "Os/File\;Os/File/Baremetal/MicroFs")
+
+# -----------------------------------------
+# MicroFs File Test Section
+# -----------------------------------------
+
+set(UT_SOURCE_FILES
+    "${FPRIME_FRAMEWORK_PATH}/Os/test/ut/file/CommonTests.cpp"
+    "${FPRIME_FRAMEWORK_PATH}/Os/test/ut/file/FileRules.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MicroFsFileTests.cpp"
+)
+
+add_fprime_os_test(MicroFsFileTest "${UT_SOURCE_FILES}" "Os/File\;Os/File/Baremetal/MicroFs" Os_Test_File_SyntheticFileSystem)
