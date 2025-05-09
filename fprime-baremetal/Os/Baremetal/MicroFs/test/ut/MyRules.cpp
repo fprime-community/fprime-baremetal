@@ -1044,7 +1044,7 @@ bool Os::Tester::MoveBusy::precondition(const Os::Tester& state  //!< The test s
 void Os::Tester::MoveBusy::action(Os::Tester& state  //!< The test state
 ) {
     Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
-    ASSERT_EQ(Os::FileSystem::Status::OTHER_ERROR, stat);
+    ASSERT_EQ(Os::FileSystem::Status::BUSY, stat);
 
     printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
 }
