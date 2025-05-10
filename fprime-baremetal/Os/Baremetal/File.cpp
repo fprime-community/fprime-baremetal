@@ -107,7 +107,11 @@ bool BaremetalFile::_isOpen() const {
 }
 
 BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType length) {
-    // do nothing; in RAM
+    MicroFs::MicroFsFileState* state =
+        MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
+    FW_ASSERT(state != nullptr);
+    FwSizeType sum = offset + length;
+    state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
     return Os::File::Status::OP_OK;
 }
 
@@ -155,6 +159,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
     if (!this->_isOpen()) {
         return NOT_OPENED;
     }
+
     // get file state entry
     FW_ASSERT(this->m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY);
 
@@ -169,14 +174,14 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
         case SeekType::ABSOLUTE:
             // make sure not too far
             if ((offset >= static_cast<FwSignedSizeType>(state->dataSize)) or (offset < 0)) {
-                return BAD_SIZE;
+                return INVALID_ARGUMENT;
             }
             state->fd[this->m_handle.m_file_descriptor].loc = offset;
             break;
         case SeekType::RELATIVE:
             // make sure not too far
             if (static_cast<FwSizeType>(state->fd[this->m_handle.m_file_descriptor].loc + offset) >= state->dataSize) {
-                return BAD_SIZE;
+                return INVALID_ARGUMENT;
             }
             state->fd[this->m_handle.m_file_descriptor].loc = state->fd[this->m_handle.m_file_descriptor].loc + offset;
             break;
@@ -185,14 +190,15 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
             break;
     }
 
-    // move current size as well if needed
+    // Calculate new size. New size to be used below
+    FwSizeType newSize = 0;
     if (state->fd[this->m_handle.m_file_descriptor].loc > state->currSize) {
-        state->currSize = state->fd[this->m_handle.m_file_descriptor].loc;
+        newSize = state->fd[this->m_handle.m_file_descriptor].loc;
     }
 
     // fill with zeros if seek went past old size
-    if (state->currSize > oldSize) {
-        (void)memset(&state->data[oldSize], 0, state->currSize - oldSize);
+    if (newSize > oldSize) {
+        (void)memset(&state->data[oldSize], 0, newSize - oldSize);
     }
 
     return OP_OK;

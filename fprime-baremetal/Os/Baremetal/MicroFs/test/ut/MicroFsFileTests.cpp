@@ -25,6 +25,11 @@ static const U32 MAX_FILES = 100;
 static constexpr U16 MAX_FILE_PATH = 256;
 static const char BASE_PATH[] = "/" MICROFS_BIN_STRING "0";
 static const char TEST_FILE[] = MICROFS_FILE_STRING;
+static constexpr U32 MAX_BINS = 10;
+// Use 32K because that is what F Prime's Os::File UTs uses
+static constexpr U32 FILE_SIZE = 32 * 1024;
+static constexpr U32 MAX_FILES_PER_BIN = MAX_FILES;
+
 //! Check if we can use the file. F_OK file exists, R_OK, W_OK are read and write.
 //! \return true if it exists, false otherwise.
 //!
@@ -43,7 +48,7 @@ std::shared_ptr<std::string> get_test_filename(bool random) {
     // When random, select random characters
     FwIndexType fileIndex = 0;
     if (random) {
-        fileIndex = STest::Pick::lowerUpper(0, 255);
+        fileIndex = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN);
     }
     (void)snprintf(full_buffer, MAX_FILE_PATH, "%s/%s%" PRI_FwIndexType, BASE_PATH, filename, fileIndex);
     // Create a shared pointer wrapping our filename buffer
@@ -76,13 +81,9 @@ void setUp(bool requires_io) {
         }
     }
 
-    static constexpr U32 MAX_BINS = 10;
-    static constexpr U32 FILE_SIZE = 100;
-    static constexpr U32 MAX_FILES_PER_BIN = 10;
-
     U32 numBins = STest::Pick::lowerUpper(1, MAX_BINS);
-    U32 fileSize = STest::Pick::lowerUpper(1, FILE_SIZE);
-    U32 numFiles = STest::Pick::lowerUpper(1, MAX_FILES_PER_BIN);
+    U32 fileSize = FILE_SIZE;
+    U32 numFiles = MAX_FILES_PER_BIN;
 
     Os::Baremetal::MicroFs::MicroFsConfig testCfg;
 
@@ -115,7 +116,7 @@ class MicroFsTester : public Tester {
     //! \return: filename to use for testing
     //!
     std::shared_ptr<const std::string> get_filename(bool random) const override {
-        U32 pick = STest::Pick::lowerUpper(0, MAX_FILES);
+        U32 pick = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN);
         if (random && pick < FILES.size()) {
             return FILES[pick];
         }
