@@ -38,7 +38,7 @@ class BaremetalFile : public FileInterface {
 
     //! \brief destructor
     //!
-    ~BaremetalFile() override;
+    ~BaremetalFile() = default;
 
     // ------------------------------------
     // Functions overrides

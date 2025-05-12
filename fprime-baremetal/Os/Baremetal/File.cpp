@@ -14,12 +14,6 @@ namespace Os {
 namespace Baremetal {
 namespace File {
 
-BaremetalFile::~BaremetalFile() {
-    if (this->_isOpen()) {
-        this->close();
-    }
-}
-
 BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::Mode mode,
                                           BaremetalFile::OverwriteType overwrite) {
