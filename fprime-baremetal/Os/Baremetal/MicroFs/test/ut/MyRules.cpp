@@ -71,7 +71,7 @@ void Os::Tester::OpenFile::action(Os::Tester& state  //!< The test state
     ASSERT_EQ(Os::File::OP_OK, stat);
 
     // This is just a dummy call to get code coverage.  Nothing happens here for this file system.
-    stat = this->fileModel->fileDesc.preallocate(0, 0);
+    stat = this->fileModel->fileDesc.preallocate(0, Tester::FILE_SIZE);
     ASSERT_EQ(Os::File::OP_OK, stat);
 
     this->fileModel->mode = Os::Tester::FileModel::OPEN_WRITE;
@@ -808,7 +808,7 @@ void Os::Tester::SeekBadSize::action(Os::Tester& state  //!< The test state
     printf("--> Rule: %s %s\n", this->getName(), this->filename);
 
     Os::File::Status stat = this->fileModel->fileDesc.seek_absolute(this->seek);
-    ASSERT_EQ(Os::File::BAD_SIZE, stat);
+    ASSERT_EQ(Os::File::INVALID_ARGUMENT, stat);
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -833,7 +833,7 @@ void Os::Tester::SeekRelative::action(Os::Tester& state  //!< The test state
 ) {
     Os::File::Status stat = this->fileModel->fileDesc.seek(this->seek, Os::File::SeekType::RELATIVE);
     if (this->fileModel->curPtr + this->seek >= FILE_SIZE) {
-        ASSERT_EQ(Os::File::BAD_SIZE, stat);
+        ASSERT_EQ(Os::File::INVALID_ARGUMENT, stat);
 
     } else {
         ASSERT_EQ(Os::File::OP_OK, stat);
