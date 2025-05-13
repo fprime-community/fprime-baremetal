@@ -74,7 +74,7 @@ class Tester : public TlmLinearChanGTestBase {
 
     void sendBuff(FwChanIdType id, U32 val);
     bool doRun(bool check);
-    void checkBuff(FwIndexType chanNum, FwIndexType totalChan, FwChanIdType id, U32 val);
+    void checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdType id, U32 val);
 
     void clearBuffs();
 

@@ -12,7 +12,7 @@
 #define QUEUE_DEPTH 10
 
 static const FwSizeType TEST_CHAN_SIZE = sizeof(FwChanIdType) + Fw::Time::SERIALIZED_SIZE + sizeof(U32);
-static const FwIndexType CHANS_PER_COMBUFFER =
+static const FwChanIdType CHANS_PER_COMBUFFER =
     (FW_COM_BUFFER_MAX_SIZE - sizeof(FwPacketDescriptorType)) / TEST_CHAN_SIZE;
 
 namespace Baremetal {
@@ -154,7 +154,7 @@ bool Tester::doRun(bool check) {
     return this->m_bufferRecv;
 }
 
-void Tester::checkBuff(FwIndexType chanNum, FwIndexType totalChan, FwChanIdType id, U32 val) {
+void Tester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdType id, U32 val) {
     Fw::Time timeTag;
     // deserialize packet
     Fw::SerializeStatus stat;
@@ -166,7 +166,7 @@ void Tester::checkBuff(FwIndexType chanNum, FwIndexType totalChan, FwChanIdType 
         tlc004 = true;
     }
 
-    FwIndexType currentChan = 0;
+    FwChanIdType currentChan = 0;
 
     // Search for channel ID
     for (FwIndexType packet = 0; packet < this->m_numBuffs; packet++) {
@@ -178,7 +178,7 @@ void Tester::checkBuff(FwIndexType chanNum, FwIndexType totalChan, FwChanIdType 
         ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
         ASSERT_EQ(desc, static_cast<FwPacketDescriptorType>(Fw::ComPacket::FW_PACKET_TELEM));
 
-        for (FwIndexType chan = 0; chan < CHANS_PER_COMBUFFER; chan++) {
+        for (FwChanIdType chan = 0; chan < CHANS_PER_COMBUFFER; chan++) {
             // decode channel ID
             FwEventIdType sentId;
             stat = this->m_rcvdBuffer[packet].deserialize(sentId);
