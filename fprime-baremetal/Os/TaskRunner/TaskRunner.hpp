@@ -75,7 +75,8 @@ class TaskRunner : TaskRegistry {
     static TaskRunner& getSingleton();
   private:
     //! \brief helper to run a single unit of work, from this task
-    void runOne(Task& task);
+    static void runOne(Task& task);
+    bool runNext();
     Task* m_task_table[TASK_CAPACITY]; //!< Task table of registered tasks
     FwSizeType m_index = 0; //!< Index of current task
     bool m_cycling = true; //!< Is the task runner cycling
