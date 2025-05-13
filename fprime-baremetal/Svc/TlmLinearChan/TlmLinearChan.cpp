@@ -13,7 +13,7 @@ namespace Baremetal {
 
 TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name) {
     // clear buckets
-    for (NATIVE_UINT_TYPE entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
+    for (U32 entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
         this->m_tlmEntries[entry].updated = false;
         this->m_tlmEntries[entry].id = 0;
         this->m_tlmEntries[entry].used = false;
@@ -22,21 +22,21 @@ TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name
 
 TlmLinearChan::~TlmLinearChan() {}
 
-void TlmLinearChan::init(NATIVE_INT_TYPE queueDepth, /*!< The queue depth*/
-                   NATIVE_INT_TYPE instance    /*!< The instance number*/
+void TlmLinearChan::init(FwSizeType queueDepth, /*!< The queue depth*/
+                         FwEnumStoreType instance    /*!< The instance number*/
 ) {
     TlmLinearChanComponentBase::init(queueDepth, instance);
 }
 
-void TlmLinearChan::pingIn_handler(const NATIVE_INT_TYPE portNum, U32 key) {
+void TlmLinearChan::pingIn_handler(const FwIndexType portNum, U32 key) {
     // return key
     this->pingOut_out(0, key);
 }
 
-void TlmLinearChan::TlmGet_handler(NATIVE_INT_TYPE portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
+void TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
     // Compute index for entry
 
-    NATIVE_UINT_TYPE entry;
+    U32 entry;
     for (entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
         if (this->m_tlmEntries[entry].id == id) {  // If bucket exists, check id
             break;
@@ -53,10 +53,10 @@ void TlmLinearChan::TlmGet_handler(NATIVE_INT_TYPE portNum, FwChanIdType id, Fw:
     }
 }
 
-void TlmLinearChan::TlmRecv_handler(NATIVE_INT_TYPE portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
+void TlmLinearChan::TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
     // Compute index for entry
 
-    NATIVE_UINT_TYPE entry;
+    U32 entry;
     for (entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
         if (this->m_tlmEntries[entry].id == id || this->m_tlmEntries[entry].used == false) {  
             break;
@@ -72,7 +72,7 @@ void TlmLinearChan::TlmRecv_handler(NATIVE_INT_TYPE portNum, FwChanIdType id, Fw
     this->m_tlmEntries[entry].buffer = val;
 }
 
-void TlmLinearChan::Run_handler(NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context) {
+void TlmLinearChan::Run_handler(FwIndexType portNum, U32 context) {
     // Only write packets if connected
     if (not this->isConnected_PktSend_OutputPort(0)) {
         return;
@@ -98,12 +98,12 @@ void TlmLinearChan::Run_handler(NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE contex
                 Fw::SerializeStatus stat = pkt.addValue(p_entry.id, p_entry.lastUpdate, p_entry.buffer);
                 // if this doesn't work, that means packet isn't big enough for
                 // even one channel, so assert
-                FW_ASSERT(Fw::FW_SERIALIZE_OK == stat, static_cast<NATIVE_INT_TYPE>(stat));
+                FW_ASSERT(Fw::FW_SERIALIZE_OK == stat, static_cast<FwAssertArgType>(stat));
             } else if (Fw::FW_SERIALIZE_OK == stat) {
                 // if there was still room, do nothing move on to the next channel in the packet
             } else  // any other status is an assert, since it shouldn't happen
             {
-                FW_ASSERT(0, static_cast<NATIVE_INT_TYPE>(stat));
+                FW_ASSERT(0, static_cast<FwAssertArgType>(stat));
             }
         }
     }
