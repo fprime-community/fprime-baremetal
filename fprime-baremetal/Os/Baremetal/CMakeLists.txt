@@ -1,4 +1,3 @@
 add_fprime_supplied_os_module(Cpu Baremetal)
 add_fprime_supplied_os_module(Memory Baremetal)
-add_fprime_supplied_os_module("Mutex;ConditionVariable" Baremetal)
 add_fprime_supplied_os_module(Task Baremetal fprime-baremetal_Os_TaskRunner)
