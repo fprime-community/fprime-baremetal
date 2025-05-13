@@ -15,9 +15,6 @@ namespace Baremetal {
 namespace File {
 
 BaremetalFile::BaremetalFile(const BaremetalFile& other) {
-    printf("baremetal: Calling copy constructor\n");
-    fflush(stdout);
-
     this->m_handle.m_state_entry = other.m_handle.m_state_entry;
     this->m_handle.m_file_descriptor = other.m_handle.m_file_descriptor;
     this->m_handle.m_mode = other.m_handle.m_mode;
@@ -35,14 +32,10 @@ BaremetalFile::BaremetalFile(const BaremetalFile& other) {
 
         // store file descriptor for this file
         this->m_handle.m_file_descriptor = fdEntry;
-        printf("baremetal: copy constructor old fd, new fd -> %d %d\n", other.m_handle.m_file_descriptor, this->m_handle.m_file_descriptor);
-        fflush(stdout);
     }
 }
 
 BaremetalFile& BaremetalFile::operator=(const BaremetalFile& other) {
-    printf("baremetal: assignment operator\n");
-    fflush(stdout);
     if (this != &other) {
         //this->m_handle.m_file_descriptor = fcntl(other.m_handle.m_file_descriptor, F_DUPFD, 0);
         this->m_handle.m_state_entry = other.m_handle.m_state_entry;
@@ -62,8 +55,6 @@ BaremetalFile& BaremetalFile::operator=(const BaremetalFile& other) {
 
             // store file descriptor for this file
             this->m_handle.m_file_descriptor = fdEntry;
-            printf("baremetal: assignment operator old fd, new fd -> %d %d\n", other.m_handle.m_file_descriptor, this->m_handle.m_file_descriptor);
-            fflush(stdout);
         }
     }
     return *this;
@@ -90,7 +81,7 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
     FW_ASSERT(state != nullptr);
 
     FwIndexType fdEntry = 0;
-    status = MicroFs::getFileStateNextFreeFd(path, fdEntry);
+    status = MicroFs::getFileStateNextFreeFd(state, fdEntry);
     if (status == MicroFs::Status::INVALID) {
         return Os::File::Status::NO_MORE_RESOURCES;
     }
@@ -162,7 +153,9 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType l
     FwSizeType sum = offset + length;
     auto status = (sum > state->dataSize) ? Os::File::Status::BAD_SIZE : Os::File::Status::OP_OK;
     if (status == Os::File::Status::OP_OK) {
-        state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
+        if(state->currSize < sum) {
+            state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
+        }
     }
     return status;
 }
@@ -287,7 +280,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // find size to copy
 
     // check to see if already at the end of the file. If so, return 0 for size
-    if (loc >= (state->currSize - 1)) {
+    if (loc >= (state->currSize)) {
         size = 0;
         return OP_OK;
     }
@@ -295,7 +288,7 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // copy requested bytes, unless it would be more than the file size.
     // If it would be more than the file size, copy the remainder and set
     // the size to the actual copied
-    if ((loc + size) > (state->currSize - 1)) {
+    if ((loc + size) > (state->currSize)) {
         size = state->currSize - loc;
     }
 
@@ -335,19 +328,23 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     // write up to the end of the allocated buffer
     // if write size is greater, truncate the write
     // and set size to what was actually written
-    if (state->fd[this->m_handle.m_file_descriptor].loc + size > state->dataSize) {
-        size = state->dataSize - state->fd[this->m_handle.m_file_descriptor].loc;
+    FwSizeType &loc = state->fd[this->m_handle.m_file_descriptor].loc;
+
+    printf("baremetal write: loc, size, datasize -> %u %u %u\n", loc, size, state->dataSize);
+    if (loc + size > state->dataSize) {
+        size = state->dataSize - loc;
     }
 
     // copy data to file buffer
-    (void)memcpy(&state->data[state->fd[this->m_handle.m_file_descriptor].loc], buffer, size);
+    (void)memcpy(&state->data[loc], buffer, size);
 
     // increment location
-    state->fd[this->m_handle.m_file_descriptor].loc += size;
+    loc += size;
 
     // Check if the currSize is to be increased.
-    if (state->fd[this->m_handle.m_file_descriptor].loc > state->currSize) {
-        state->currSize = state->fd[this->m_handle.m_file_descriptor].loc;
+    if (loc > state->currSize) {
+        state->currSize = loc;
+        printf("baremetal write: updating currSize to %u\n", state->currSize);
     }
 
     return OP_OK;
