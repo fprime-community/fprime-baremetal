@@ -73,7 +73,7 @@ void Tester::runMultiChannel() {
     // do a run, and all the packets should be sent
     this->doRun(true);
     ASSERT_TRUE(this->m_bufferRecv);
-    ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_0) / CHANS_PER_COMBUFFER) + 1, this->m_numBuffs);
+    ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_0) + CHANS_PER_COMBUFFER - 1) / CHANS_PER_COMBUFFER, this->m_numBuffs);
 
     // verify packets
     for (NATIVE_UINT_TYPE n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_0); n++) {
@@ -97,7 +97,7 @@ void Tester::runMultiChannel() {
     // do a run, and all the packets should be sent
     this->doRun(true);
     ASSERT_TRUE(this->m_bufferRecv);
-    ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_1) / CHANS_PER_COMBUFFER) + 1, this->m_numBuffs);
+    ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_1) + CHANS_PER_COMBUFFER - 1) / CHANS_PER_COMBUFFER, this->m_numBuffs);
     
     // verify packets
     for (NATIVE_UINT_TYPE n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_1); n++) {
