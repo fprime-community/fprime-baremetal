@@ -105,8 +105,11 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType l
         MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
     FwSizeType sum = offset + length;
-    state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
-    return Os::File::Status::OP_OK;
+    auto status = (sum > state->dataSize) ? Os::File::Status::BAD_SIZE : Os::File::Status::OP_OK;
+    if (status == Os::File::Status::OP_OK) {
+        state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
+    }
+    return status;
 }
 
 void BaremetalFile::close() {

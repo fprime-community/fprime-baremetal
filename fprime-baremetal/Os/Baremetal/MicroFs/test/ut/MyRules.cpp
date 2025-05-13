@@ -70,10 +70,6 @@ void Os::Tester::OpenFile::action(Os::Tester& state  //!< The test state
         this->fileModel->fileDesc.open(this->filename, Os::File::OPEN_WRITE, Os::File::OverwriteType::OVERWRITE);
     ASSERT_EQ(Os::File::OP_OK, stat);
 
-    // This is just a dummy call to get code coverage.  Nothing happens here for this file system.
-    stat = this->fileModel->fileDesc.preallocate(0, Tester::FILE_SIZE);
-    ASSERT_EQ(Os::File::OP_OK, stat);
-
     this->fileModel->mode = Os::Tester::FileModel::OPEN_WRITE;
     this->fileModel->created = true;
     if (this->fileModel->size == -1) {
