@@ -48,7 +48,7 @@ std::shared_ptr<std::string> get_test_filename(bool random) {
     // When random, select random characters
     FwIndexType fileIndex = 0;
     if (random) {
-        fileIndex = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN);
+        fileIndex = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN - 1);
     }
     (void)snprintf(full_buffer, MAX_FILE_PATH, "%s/%s%" PRI_FwIndexType, BASE_PATH, filename, fileIndex);
     // Create a shared pointer wrapping our filename buffer
@@ -116,7 +116,7 @@ class MicroFsTester : public Tester {
     //! \return: filename to use for testing
     //!
     std::shared_ptr<const std::string> get_filename(bool random) const override {
-        U32 pick = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN);
+        U32 pick = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN-1);
         if (random && pick < FILES.size()) {
             return FILES[pick];
         }
