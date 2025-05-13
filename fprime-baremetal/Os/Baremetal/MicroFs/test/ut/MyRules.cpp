@@ -139,7 +139,7 @@ void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
         this->fileModel->buffOut[offset + i] = rand() % 256;
     }
 
-    FwSizeType retSize = randSize;
+    FwSizeType retSize = fillSize;
     Os::File::Status stat = fileModel->fileDesc.write(this->fileModel->buffOut + this->fileModel->curPtr, retSize);
     ASSERT_EQ(stat, Os::File::OP_OK);
     ASSERT_LE(this->fileModel->curPtr + retSize, Tester::FILE_SIZE);
@@ -169,6 +169,7 @@ bool Os::Tester::ReadData::precondition(const Os::Tester& state  //!< The test s
 
 void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s \n", this->getName());
     // Randomize how much data is read
     FwSizeType randSize = rand() % Tester::FILE_SIZE + 1;
 
@@ -670,6 +671,7 @@ bool Os::Tester::SeekFile::precondition(const Os::Tester& state  //!< The test s
 void Os::Tester::SeekFile::action(Os::Tester& state  //!< The test state
 ) {
     // Seek random
+    printf("--> Rule: %s \n");
     FwSizeType randSeek = rand() % Tester::FILE_SIZE;
     Os::File::Status stat = this->fileModel->fileDesc.seek_absolute(randSeek);
     ASSERT_EQ(Os::File::OP_OK, stat);
@@ -677,16 +679,15 @@ void Os::Tester::SeekFile::action(Os::Tester& state  //!< The test state
     // Update the model
     I32 oldSize = this->fileModel->size;
     this->fileModel->curPtr = randSeek;
+    FwSizeType newSize = 0;
     if (this->fileModel->curPtr > this->fileModel->size) {
-        this->fileModel->size = this->fileModel->curPtr;
+        newSize = this->fileModel->curPtr;
     }
 
     // fill with zeros if seek went past old size
-    if (this->fileModel->size > oldSize) {
-        memset(&this->fileModel->buffOut[oldSize], 0, this->fileModel->size - oldSize);
+    if (newSize > oldSize) {
+        memset(&this->fileModel->buffOut[oldSize], 0, newSize - oldSize);
     }
-
-    printf("--> Rule: %s %s %d\n", this->getName(), this->filename, randSeek);
 }
 
 // ------------------------------------------------------------------------------------------------------

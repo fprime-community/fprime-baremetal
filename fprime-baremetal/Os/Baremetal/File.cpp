@@ -223,10 +223,13 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
         MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
+    // Make code more readable
+    auto& loc = state->fd[this->m_handle.m_file_descriptor].loc;
+
     // find size to copy
 
     // check to see if already at the end of the file. If so, return 0 for size
-    if (state->fd[this->m_handle.m_file_descriptor].loc == (state->currSize - 1)) {
+    if (loc >= (state->currSize - 1)) {
         size = 0;
         return OP_OK;
     }
@@ -234,15 +237,15 @@ BaremetalFile::Status BaremetalFile::read(U8* buffer, FwSizeType& size, Baremeta
     // copy requested bytes, unless it would be more than the file size.
     // If it would be more than the file size, copy the remainder and set
     // the size to the actual copied
-    if ((state->fd[this->m_handle.m_file_descriptor].loc + size) > (state->currSize - 1)) {
-        size = state->currSize - state->fd[this->m_handle.m_file_descriptor].loc;
+    if ((loc + size) > (state->currSize - 1)) {
+        size = state->currSize - loc;
     }
 
     // copy data from location to buffer
-    (void)memcpy(buffer, state->data + state->fd[this->m_handle.m_file_descriptor].loc, size);
+    (void)memcpy(buffer, state->data + loc, size);
 
     // move location pointer
-    state->fd[this->m_handle.m_file_descriptor].loc += size;
+    loc += size;
 
     return OP_OK;
 }
