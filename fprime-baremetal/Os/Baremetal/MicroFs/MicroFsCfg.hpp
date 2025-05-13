@@ -20,7 +20,7 @@
 namespace Os {
 
 static const FwIndexType MAX_MICROFS_BINS = 10;  //!< Maximum number of bin configurations
-static const FwIndexType MAX_MICROFS_FD = 10;    //!< Maximum number of file descriptors
+static const FwIndexType MAX_MICROFS_FD = 20;    //!< Maximum number of file descriptors
 #define MICROFS_BIN_STRING "bin"                 //!< path name for bin directory
 #define MICROFS_FILE_STRING "file"               //!< name for file slot prefix
 static const bool MICROFS_SKIP_NULL_CHECK =

@@ -165,7 +165,7 @@ class MicroFs {
     static Status getFileStateIndex(const char* fileName, FwIndexType& stateIndex);
 
     // helper to find the next available file descriptor. Will return VALID if available, INVALID if not
-    static Status getFileStateNextFreeFd(const char* fileName, FwIndexType& nextFreeFd);
+    static Status getFileStateNextFreeFd(const MicroFs::MicroFsFileState* state, FwIndexType& nextFreeFd);
 
     //! \brief get a reference to singleton
     //! \return reference to singleton

@@ -158,25 +158,21 @@ MicroFs::MicroFsFileState* MicroFs::getFileStateFromIndex(FwIndexType index) {
     return &ptr[index];
 }
 
-MicroFs::Status MicroFs::getFileStateNextFreeFd(const char* fileName, FwIndexType& nextFreeFd) {
-    FW_ASSERT(fileName != nullptr);
-    auto status = MicroFs::getFileStateIndex(fileName, nextFreeFd);
-    if (status == MicroFs::Status::INVALID) {
+MicroFs::Status MicroFs::getFileStateNextFreeFd(const MicroFs::MicroFsFileState* state, FwIndexType& nextFreeFd) {
+    if (state == nullptr) {
         return MicroFs::Status::INVALID;
     }
 
-    auto statePtr = MicroFs::getFileStateFromIndex(nextFreeFd);
-    if (statePtr == nullptr) {
-        return MicroFs::Status::INVALID;
-    }
+    auto status = MicroFs::Status::INVALID;
 
     for (FwIndexType i = 0; i < MAX_MICROFS_FD; i++) {
-        if (statePtr->fd[i].status == Status::INVALID) {
+        if (state->fd[i].status == Status::INVALID) {
             nextFreeFd = i;
+            status = MicroFs::Status::VALID;
             break;
         }
     }
-    return MicroFs::Status::VALID;
+    return status;
 }
 
 }  // namespace Baremetal
