@@ -83,26 +83,47 @@ void TaskRunner::runOne(Task& task) {
     baremetal_handle.m_routine(baremetal_handle.m_argument);
 }
 
+bool TaskRunner::runNext() {
+    Task* task = this->m_task_table[this->m_index];
+    // Run a single task
+    if (task != nullptr && isRunning(*task)) {
+        this->runOne(*task);
+        // Check and remove exited task
+        if (task->getState() == Os::Task::State::EXITED) {
+            this->removeTask(task);
+        }
+        // Otherwise bump the next start task
+        else {
+            this->m_index = (this->m_index + 1) % Os::Baremetal::TASK_CAPACITY;
+        }
+        return true;
+    }
+    this->m_index = (this->m_index + 1) % Os::Baremetal::TASK_CAPACITY;
+    return false;
+}
+
 void TaskRunner::run() {
     // While cycling run a task and increment to the next
     if (this->m_cycling) {
         // Start at the next task
         for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
-            Task* task = this->m_task_table[this->m_index];
-            // Run a single task
-            if (task != nullptr && isRunning(*task)) {
-                this->runOne(*task);
-                // Check and remove exited task
-                if (task->getState() == Os::Task::State::EXITED) {
-                    this->removeTask(task);
-                }
-                // Otherwise bump the next start task
-                else {
-                    this->m_index = (this->m_index + 1) % Os::Baremetal::TASK_CAPACITY;
-                }
+            // Run only one task.
+            if (runNext()) {
                 break;
             }
-            this->m_index = (this->m_index + 1) % Os::Baremetal::TASK_CAPACITY;
+        }
+    }
+}
+
+void TaskRunner::runAll() {
+    if (this->m_cycling) {
+        this->m_index = 0;
+        for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
+            // Run each task exactly once.
+            (void) runNext();
+            if (this->m_index == 0) {
+                break;
+            }
         }
     }
 }
