@@ -14,6 +14,61 @@ namespace Os {
 namespace Baremetal {
 namespace File {
 
+BaremetalFile::BaremetalFile(const BaremetalFile& other) {
+    printf("baremetal: Calling copy constructor\n");
+    fflush(stdout);
+
+    this->m_handle.m_state_entry = other.m_handle.m_state_entry;
+    this->m_handle.m_file_descriptor = other.m_handle.m_file_descriptor;
+    this->m_handle.m_mode = other.m_handle.m_mode;
+
+    if(other.m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY && other.m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
+        MicroFs::MicroFsFileState* state = MicroFs::getFileStateFromIndex(other.m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
+        FW_ASSERT(state != nullptr);
+
+        FwIndexType fdEntry = 0;
+        auto status = MicroFs::getFileStateNextFreeFd(state, fdEntry);
+        FW_ASSERT(status != MicroFs::Status::INVALID);
+
+        state->fd[fdEntry].loc = state->fd[other.m_handle.m_file_descriptor].loc;
+        state->fd[fdEntry].status = state->fd[other.m_handle.m_file_descriptor].status;
+
+        // store file descriptor for this file
+        this->m_handle.m_file_descriptor = fdEntry;
+        printf("baremetal: copy constructor old fd, new fd -> %d %d\n", other.m_handle.m_file_descriptor, this->m_handle.m_file_descriptor);
+        fflush(stdout);
+    }
+}
+
+BaremetalFile& BaremetalFile::operator=(const BaremetalFile& other) {
+    printf("baremetal: assignment operator\n");
+    fflush(stdout);
+    if (this != &other) {
+        //this->m_handle.m_file_descriptor = fcntl(other.m_handle.m_file_descriptor, F_DUPFD, 0);
+        this->m_handle.m_state_entry = other.m_handle.m_state_entry;
+        this->m_handle.m_file_descriptor = other.m_handle.m_file_descriptor;
+        this->m_handle.m_mode = other.m_handle.m_mode;
+
+        if(other.m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY && other.m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
+            MicroFs::MicroFsFileState* state = MicroFs::getFileStateFromIndex(other.m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
+            FW_ASSERT(state != nullptr);
+
+            FwIndexType fdEntry = 0;
+            auto status = MicroFs::getFileStateNextFreeFd(state, fdEntry);
+            FW_ASSERT(status != MicroFs::Status::INVALID);
+
+            state->fd[fdEntry].loc = state->fd[other.m_handle.m_file_descriptor].loc;
+            state->fd[fdEntry].status = state->fd[other.m_handle.m_file_descriptor].status;
+
+            // store file descriptor for this file
+            this->m_handle.m_file_descriptor = fdEntry;
+            printf("baremetal: assignment operator old fd, new fd -> %d %d\n", other.m_handle.m_file_descriptor, this->m_handle.m_file_descriptor);
+            fflush(stdout);
+        }
+    }
+    return *this;
+}
+
 BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::Mode mode,
                                           BaremetalFile::OverwriteType overwrite) {

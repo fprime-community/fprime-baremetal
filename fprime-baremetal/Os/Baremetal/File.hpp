@@ -40,6 +40,12 @@ class BaremetalFile : public FileInterface {
     //!
     ~BaremetalFile() = default;
 
+    //!\brief default copy constructor
+    BaremetalFile(const BaremetalFile& other);
+
+    //! \brief assignment operator that copies the internal representation
+    BaremetalFile& operator=(const BaremetalFile& other);
+
     // ------------------------------------
     // Functions overrides
     // ------------------------------------
