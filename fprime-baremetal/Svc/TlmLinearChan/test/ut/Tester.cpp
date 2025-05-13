@@ -11,8 +11,8 @@
 #define MAX_HISTORY_SIZE 10
 #define QUEUE_DEPTH 10
 
-static const NATIVE_UINT_TYPE TEST_CHAN_SIZE = sizeof(FwChanIdType) + Fw::Time::SERIALIZED_SIZE + sizeof(U32);
-static const NATIVE_UINT_TYPE CHANS_PER_COMBUFFER =
+static const FwSizeType TEST_CHAN_SIZE = sizeof(FwChanIdType) + Fw::Time::SERIALIZED_SIZE + sizeof(U32);
+static const FwIndexType CHANS_PER_COMBUFFER =
     (FW_COM_BUFFER_MAX_SIZE - sizeof(FwPacketDescriptorType)) / TEST_CHAN_SIZE;
 
 namespace Baremetal {
@@ -66,7 +66,7 @@ void Tester::runMultiChannel() {
 
     this->clearBuffs();
     // send all updates
-    for (NATIVE_UINT_TYPE n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_0); n++) {
+    for (U32 n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_0); n++) {
         this->sendBuff(ID_0[n], n);
     }
 
@@ -76,7 +76,7 @@ void Tester::runMultiChannel() {
     ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_0) / CHANS_PER_COMBUFFER) + 1, this->m_numBuffs);
 
     // verify packets
-    for (NATIVE_UINT_TYPE n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_0); n++) {
+    for (U32 n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_0); n++) {
         // printf("#: %d\n",n);
         this->checkBuff(n, FW_NUM_ARRAY_ELEMENTS(ID_0), ID_0[n], n);
     }
@@ -90,7 +90,7 @@ void Tester::runMultiChannel() {
 
     this->clearBuffs();
     // send all updates
-    for (NATIVE_UINT_TYPE n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_1); n++) {
+    for (U32 n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_1); n++) {
         this->sendBuff(ID_1[n], n);
     }
 
@@ -100,7 +100,7 @@ void Tester::runMultiChannel() {
     ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_1) / CHANS_PER_COMBUFFER) + 1, this->m_numBuffs);
     
     // verify packets
-    for (NATIVE_UINT_TYPE n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_1); n++) {
+    for (U32 n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_1); n++) {
         // printf("#: %d\n",n);
         this->checkBuff(n, FW_NUM_ARRAY_ELEMENTS(ID_1), ID_1[n], n);
     }
@@ -127,14 +127,14 @@ void Tester::runOffNominal() {
 // Handlers for typed from ports
 // ----------------------------------------------------------------------
 
-void Tester ::from_PktSend_handler(const NATIVE_INT_TYPE portNum, Fw::ComBuffer& data, U32 context) {
+void Tester ::from_PktSend_handler(const FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
     this->pushFromPortEntry_PktSend(data, context);
     this->m_bufferRecv = true;
     this->m_rcvdBuffer[this->m_numBuffs] = data;
     this->m_numBuffs++;
 }
 
-void Tester ::from_pingOut_handler(const NATIVE_INT_TYPE portNum, U32 key) {
+void Tester ::from_pingOut_handler(const FwIndexType portNum, U32 key) {
     this->pushFromPortEntry_pingOut(key);
 }
 
@@ -154,7 +154,7 @@ bool Tester::doRun(bool check) {
     return this->m_bufferRecv;
 }
 
-void Tester::checkBuff(NATIVE_UINT_TYPE chanNum, NATIVE_UINT_TYPE totalChan, FwChanIdType id, U32 val) {
+void Tester::checkBuff(FwIndexType chanNum, FwIndexType totalChan, FwChanIdType id, U32 val) {
     Fw::Time timeTag;
     // deserialize packet
     Fw::SerializeStatus stat;
@@ -166,10 +166,10 @@ void Tester::checkBuff(NATIVE_UINT_TYPE chanNum, NATIVE_UINT_TYPE totalChan, FwC
         tlc004 = true;
     }
 
-    NATIVE_UINT_TYPE currentChan = 0;
+    FwIndexType currentChan = 0;
 
     // Search for channel ID
-    for (NATIVE_UINT_TYPE packet = 0; packet < this->m_numBuffs; packet++) {
+    for (FwIndexType packet = 0; packet < this->m_numBuffs; packet++) {
         // Look at packet descriptor for current packet
         this->m_rcvdBuffer[packet].resetDeser();
         // first piece should be tlm packet descriptor
@@ -178,7 +178,7 @@ void Tester::checkBuff(NATIVE_UINT_TYPE chanNum, NATIVE_UINT_TYPE totalChan, FwC
         ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
         ASSERT_EQ(desc, static_cast<FwPacketDescriptorType>(Fw::ComPacket::FW_PACKET_TELEM));
 
-        for (NATIVE_UINT_TYPE chan = 0; chan < CHANS_PER_COMBUFFER; chan++) {
+        for (FwIndexType chan = 0; chan < CHANS_PER_COMBUFFER; chan++) {
             // decode channel ID
             FwEventIdType sentId;
             stat = this->m_rcvdBuffer[packet].deserialize(sentId);
@@ -249,7 +249,7 @@ void Tester::sendBuff(FwChanIdType id, U32 val) {
 
 void Tester::clearBuffs() {
     this->m_numBuffs = 0;
-    for (NATIVE_INT_TYPE n = 0; n < TLMCHAN_HASH_BUCKETS; n++) {
+    for (U32 n = 0; n < TLMCHAN_HASH_BUCKETS; n++) {
         this->m_rcvdBuffer[n].resetSer();
     }
 }
