@@ -214,6 +214,9 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
 
     FwSizeType oldSize = state->currSize;
 
+    auto &loc = state->fd[this->m_handle.m_file_descriptor].loc;
+    auto oldLoc = loc;
+
     // compute new operation location
     switch (seekType) {
         case SeekType::ABSOLUTE:
@@ -221,14 +224,14 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
             if ((offset >= static_cast<FwSignedSizeType>(state->dataSize)) or (offset < 0)) {
                 return INVALID_ARGUMENT;
             }
-            state->fd[this->m_handle.m_file_descriptor].loc = offset;
+            loc = offset;
             break;
         case SeekType::RELATIVE:
             // make sure not too far
-            if (static_cast<FwSizeType>(state->fd[this->m_handle.m_file_descriptor].loc + offset) >= state->dataSize) {
+            if (static_cast<FwSizeType>(loc + offset) >= state->dataSize) {
                 return INVALID_ARGUMENT;
             }
-            state->fd[this->m_handle.m_file_descriptor].loc = state->fd[this->m_handle.m_file_descriptor].loc + offset;
+            loc += offset;
             break;
         default:
             FW_ASSERT(0, seekType);
@@ -237,8 +240,8 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
 
     // Calculate new size. New size to be used below
     FwSizeType newSize = 0;
-    if (state->fd[this->m_handle.m_file_descriptor].loc > state->currSize) {
-        newSize = state->fd[this->m_handle.m_file_descriptor].loc;
+    if (loc > state->currSize) {
+        newSize = loc;
     }
 
     // fill with zeros if seek went past old size
@@ -330,7 +333,11 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     // and set size to what was actually written
     FwSizeType &loc = state->fd[this->m_handle.m_file_descriptor].loc;
 
-    printf("baremetal write: loc, size, datasize -> %u %u %u\n", loc, size, state->dataSize);
+    // Make sure we write to the end of file when appending
+    if(this->m_handle.m_mode == OPEN_APPEND) {
+        loc = state->currSize;
+    }
+
     if (loc + size > state->dataSize) {
         size = state->dataSize - loc;
     }
@@ -344,7 +351,6 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     // Check if the currSize is to be increased.
     if (loc > state->currSize) {
         state->currSize = loc;
-        printf("baremetal write: updating currSize to %u\n", state->currSize);
     }
 
     return OP_OK;

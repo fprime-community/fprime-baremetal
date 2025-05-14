@@ -109,15 +109,21 @@ Os::Tester::WriteData::WriteData(const char* filename) : STest::Rule<Os::Tester>
 bool Os::Tester::WriteData::precondition(const Os::Tester& state  //!< The test state
 ) {
     this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
-    return (fileModel->mode == Os::Tester::FileModel::OPEN_WRITE);
+    return ((fileModel->mode == Os::Tester::FileModel::OPEN_WRITE) ||
+            (fileModel->mode == Os::Tester::FileModel::OPEN_APPEND));
 }
 
 void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s \n", this->getName());
     FwSizeType fillSize;
 
     // Randomize how many bytes are written to the file
     FwSizeType randSize = rand() % Tester::FILE_SIZE + 1;
+
+    if(fileModel->mode == Os::Tester::FileModel::OPEN_APPEND) {
+        fileModel->curPtr = fileModel->size;
+    }
 
     if ((fileModel->curPtr + randSize) > Tester::FILE_SIZE) {
         fillSize = Tester::FILE_SIZE - fileModel->curPtr;
@@ -125,10 +131,9 @@ void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
         fillSize = randSize;
     }
 
-    printf("--> Rule: %s %s %d bytes\n", this->getName(), this->filename, fillSize);
+    printf("%s: filename %s write %d bytes\n", this->getName(), this->filename, fillSize);
 
     // Fill the memory buffer with random numbers between 0 and 0xFF inclusive
-
     FwSizeType offset = fileModel->curPtr;
     for (U32 i = 0; i < fillSize; i++) {
         assert(offset + i < Tester::FILE_SIZE);
@@ -476,7 +481,8 @@ bool Os::Tester::OpenAppend::precondition(const Os::Tester& state  //!< The test
 ) {
     this->fileModel = const_cast<Os::Tester&>(state).getFileModel(this->filename);
     return ((this->fileModel->mode != Os::Tester::FileModel::OPEN_READ) &&
-            (this->fileModel->mode != Os::Tester::FileModel::OPEN_WRITE));
+            (this->fileModel->mode != Os::Tester::FileModel::OPEN_WRITE) &&
+            (this->fileModel->mode != Os::Tester::FileModel::OPEN_APPEND));
 }
 
 void Os::Tester::OpenAppend::action(Os::Tester& state  //!< The test state
@@ -486,7 +492,7 @@ void Os::Tester::OpenAppend::action(Os::Tester& state  //!< The test state
     Os::File::Status stat = this->fileModel->fileDesc.open(this->filename, Os::File::OPEN_APPEND);
     ASSERT_EQ(Os::File::OP_OK, stat);
 
-    this->fileModel->mode = Os::Tester::FileModel::OPEN_WRITE;
+    this->fileModel->mode = Os::Tester::FileModel::OPEN_APPEND;
     this->fileModel->created = true;
     if (this->fileModel->size == -1) {
         this->fileModel->size = 0;
@@ -573,6 +579,7 @@ void Os::Tester::IsFileOpen::action(Os::Tester& state  //!< The test state
             break;
         case Os::Tester::FileModel::OPEN_READ:
         case Os::Tester::FileModel::OPEN_WRITE:
+        case Os::Tester::FileModel::OPEN_APPEND:
             expState = true;
             break;
     }
@@ -667,7 +674,7 @@ bool Os::Tester::SeekFile::precondition(const Os::Tester& state  //!< The test s
 void Os::Tester::SeekFile::action(Os::Tester& state  //!< The test state
 ) {
     // Seek random
-    printf("--> Rule: %s \n");
+    printf("--> Rule: %s \n", this->getName());
     FwSizeType randSeek = rand() % Tester::FILE_SIZE;
     Os::File::Status stat = this->fileModel->fileDesc.seek_absolute(randSeek);
     ASSERT_EQ(Os::File::OP_OK, stat);
