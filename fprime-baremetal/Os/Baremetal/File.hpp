@@ -180,6 +180,9 @@ class BaremetalFile : public FileInterface {
     //!
     bool _isOpen() const;
 
+    //! \brief helper function used for copy and assignment of BaremetaFile
+    void helpAssign(const BaremetalFile& other);
+
     //! File handle for BaremetalFile
     BaremetalFileHandle m_handle;
 };
