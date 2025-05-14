@@ -178,7 +178,9 @@ void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
     memset(buffIn, 0xA5, sizeof(buffIn));
     ASSERT_LE(randSize, sizeof(buffIn));
     FwSizeType retSize = randSize;
+    printf("%s: filename %s request to read %d bytes\n", this->getName(), this->filename, retSize);
     Os::File::Status stat = this->fileModel->fileDesc.read(buffIn, retSize);
+    printf("%s: filename %s actually read %d bytes\n", this->getName(), this->filename, retSize);
 
     ASSERT_EQ(stat, Os::File::OP_OK);
 
@@ -191,8 +193,6 @@ void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
 
     // Update the FileModel
     fileModel->curPtr += retSize;
-
-    printf("--> Rule: %s %s %d bytes\n", this->getName(), this->filename, retSize);
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -358,12 +358,12 @@ bool Os::Tester::CheckFileSize::precondition(const Os::Tester& state  //!< The t
 
 void Os::Tester::CheckFileSize::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s %s, size = %d\n", this->getName(), this->filename);
     FwSizeType actualSize;
     FileSystem::Status stat = FileSystem::getFileSize(this->filename, actualSize);
     ASSERT_EQ(FileSystem::OP_OK, stat);
 
     ASSERT_EQ(actualSize, this->fileModel->size);
-    printf("--> Rule: %s %s, size = %d\n", this->getName(), this->filename, this->fileModel->size);
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -712,6 +712,7 @@ bool Os::Tester::SeekNFile::precondition(const Os::Tester& state  //!< The test 
 
 void Os::Tester::SeekNFile::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s %s %d\n", this->getName(), this->filename, this->seek);
     Os::File::Status stat = this->fileModel->fileDesc.seek_absolute(this->seek);
     ASSERT_EQ(Os::File::OP_OK, stat);
 
@@ -727,8 +728,6 @@ void Os::Tester::SeekNFile::action(Os::Tester& state  //!< The test state
     if (this->fileModel->size > oldSize) {
         memset(&this->fileModel->buffOut[oldSize], 0, this->fileModel->size - oldSize);
     }
-
-    printf("--> Rule: %s %s %d\n", this->getName(), this->filename, this->seek);
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -835,6 +834,7 @@ bool Os::Tester::SeekRelative::precondition(const Os::Tester& state  //!< The te
 
 void Os::Tester::SeekRelative::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s %s %d\n", this->getName(), this->filename, this->seek);
     Os::File::Status stat = this->fileModel->fileDesc.seek(this->seek, Os::File::SeekType::RELATIVE);
     if (this->fileModel->curPtr + this->seek >= FILE_SIZE) {
         ASSERT_EQ(Os::File::INVALID_ARGUMENT, stat);
@@ -855,8 +855,6 @@ void Os::Tester::SeekRelative::action(Os::Tester& state  //!< The test state
             memset(&this->fileModel->buffOut[oldSize], 0, this->fileModel->size - oldSize);
         }
     }
-
-    printf("--> Rule: %s %s %d\n", this->getName(), this->filename, this->seek);
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -1020,14 +1018,13 @@ bool Os::Tester::MoveInvalid::precondition(const Os::Tester& state  //!< The tes
 
 void Os::Tester::MoveInvalid::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
     if (this->sourceFile == nullptr || this->destFile == nullptr) {
         ASSERT_DEATH_IF_SUPPORTED(Os::FileSystem::moveFile(this->sourceFile, this->destFile), "");
     } else {
         Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
         ASSERT_EQ(Os::FileSystem::Status::DOESNT_EXIST, stat);
     }
-
-    printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
 }
 
 // ------------------------------------------------------------------------------------------------------
@@ -1047,10 +1044,9 @@ bool Os::Tester::MoveBusy::precondition(const Os::Tester& state  //!< The test s
 
 void Os::Tester::MoveBusy::action(Os::Tester& state  //!< The test state
 ) {
+    printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
     Os::FileSystem::Status stat = Os::FileSystem::moveFile(this->sourceFile, this->destFile);
     ASSERT_EQ(Os::FileSystem::Status::BUSY, stat);
-
-    printf("--> Rule: %s %s to %s\n", this->getName(), this->sourceFile, this->destFile);
 }
 
 // ------------------------------------------------------------------------------------------------------
