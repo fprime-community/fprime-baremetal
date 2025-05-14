@@ -7,8 +7,8 @@
 #ifndef TESTER_HPP
 #define TESTER_HPP
 
-#include "GTestBase.hpp"
-#include "Svc/TlmLinearChan/TlmLinearChan.hpp"
+#include "TlmLinearChanGTestBase.hpp"
+#include "fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp"
 
 namespace Baremetal {
 
@@ -42,7 +42,7 @@ class Tester : public TlmLinearChanGTestBase {
 
     //! Handler for from_PktSend
     //!
-    void from_PktSend_handler(const NATIVE_INT_TYPE portNum, /*!< The port number*/
+    void from_PktSend_handler(FwIndexType portNum, /*!< The port number*/
                               Fw::ComBuffer& data,           /*!<
                                     Buffer containing packet data
                                     */
@@ -53,7 +53,7 @@ class Tester : public TlmLinearChanGTestBase {
 
     //! Handler for from_pingOut
     //!
-    void from_pingOut_handler(const NATIVE_INT_TYPE portNum, /*!< The port number*/
+    void from_pingOut_handler(FwIndexType portNum, /*!< The port number*/
                               U32 key                        /*!<
                                                  Value to return to pinger
                                                  */
@@ -74,7 +74,7 @@ class Tester : public TlmLinearChanGTestBase {
 
     void sendBuff(FwChanIdType id, U32 val);
     bool doRun(bool check);
-    void checkBuff(NATIVE_UINT_TYPE chanNum, NATIVE_UINT_TYPE totalChan, FwChanIdType id, U32 val);
+    void checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdType id, U32 val);
 
     void clearBuffs();
 
@@ -90,7 +90,7 @@ class Tester : public TlmLinearChanGTestBase {
     //!
     TlmLinearChan component;
     // Keep a history
-    NATIVE_UINT_TYPE m_numBuffs;
+    FwIndexType m_numBuffs;
     Fw::ComBuffer m_rcvdBuffer[TLMCHAN_HASH_BUCKETS];
     bool m_bufferRecv;
 };

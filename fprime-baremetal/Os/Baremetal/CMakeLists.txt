@@ -21,11 +21,10 @@ register_fprime_module(Os_Baremetal_MicroFs)
 
 add_library(fprime-baremetal_Os_Baremetal INTERFACE)
 
-register_os_implementation("Cpu" Baremetal)
+add_fprime_supplied_os_module(Cpu Baremetal)
 register_os_implementation("File;FileSystem;Directory" Baremetal_MicroFs Os_Baremetal_Shared Os_Baremetal_MicroFs)
-register_os_implementation("Memory" Baremetal)
-register_os_implementation("Mutex;ConditionVariable" Baremetal)
-register_os_implementation("Task" Baremetal fprime-baremetal_Os_TaskRunner)
+add_fprime_supplied_os_module(Memory Baremetal)
+add_fprime_supplied_os_module(Task Baremetal fprime-baremetal_Os_TaskRunner)
 
 # -----------------------------------------
 # MicroFs Full Test Section

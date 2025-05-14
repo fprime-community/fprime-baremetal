@@ -27,7 +27,7 @@ FatalHandler ::~FatalHandler() {}
 // Handler implementations for user-defined typed input ports
 // ----------------------------------------------------------------------
 
-void FatalHandler::FatalReceive_handler(const NATIVE_INT_TYPE portNum, FwEventIdType Id) {
+void FatalHandler::FatalReceive_handler(FwIndexType portNum, FwEventIdType Id) {
     // for **nix, delay then exit with error code
     Fw::Logger::log("FATAL %" PRI_FwEventIdType "handled.\n", Id);
     while (true) {}  // Returning might be bad

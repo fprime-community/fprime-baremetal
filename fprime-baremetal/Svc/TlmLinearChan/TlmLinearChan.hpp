@@ -17,19 +17,19 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
   public:
     TlmLinearChan(const char* compName);
     virtual ~TlmLinearChan();
-    void init(NATIVE_INT_TYPE queueDepth, /*!< The queue depth*/
-              NATIVE_INT_TYPE instance    /*!< The instance number*/
+    void init(FwSizeType queueDepth, /*!< The queue depth*/
+              FwEnumStoreType instance    /*!< The instance number*/
     );
 
   PRIVATE:
     // Port functions
-    void TlmRecv_handler(NATIVE_INT_TYPE portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
-    void TlmGet_handler(NATIVE_INT_TYPE portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
-    void Run_handler(NATIVE_INT_TYPE portNum, NATIVE_UINT_TYPE context);
+    void TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
+    void TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
+    void Run_handler(FwIndexType portNum, U32 context);
     //! Handler implementation for pingIn
     //!
-    void pingIn_handler(const NATIVE_INT_TYPE portNum, /*!< The port number*/
-                        U32 key                        /*!< Value to return to pinger*/
+    void pingIn_handler(const FwIndexType portNum, /*!< The port number*/
+                        U32 key                    /*!< Value to return to pinger*/
     );
 
     typedef struct tlmEntry {
