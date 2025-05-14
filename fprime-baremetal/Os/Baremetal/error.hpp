@@ -44,19 +44,6 @@ Os::RawTime::Status errno_to_rawtime_status(int errno_input);
 //!
 Os::Task::Status baremetal_status_to_task_status(int baremetal_status);
 
-//! Convert a Baremetal return status (int) for mutex operations to the Os::Mutex::Status representation.
-//! \param baremetal_status: return status
-//! \return: Os::Mutex::Status representation of the error
-//!
-Os::Mutex::Status baremetal_status_to_mutex_status(int baremetal_status);
-
-//! Convert a Baremetal return status (int) for Conditional Variable operations to the Os::ConditionVariable::Status
-//! representation.
-//! \param baremetal_status: return status
-//! \return: Os::ConditionVariable::Status representation of the error
-//!
-Os::ConditionVariable::Status baremetal_status_to_conditional_status(int baremetal_status);
-
 }  // namespace Baremetal
 }  // namespace Os
 #endif

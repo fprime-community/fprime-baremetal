@@ -165,40 +165,5 @@ Task::Status baremetal_status_to_task_status(int baremetal_status) {
     }
     return status;
 }
-
-Mutex::Status baremetal_status_to_mutex_status(int baremetal_status) {
-    Mutex::Status status = Mutex::Status::ERROR_OTHER;
-    switch (baremetal_status) {
-        case 0:
-            status = Mutex::Status::OP_OK;
-            break;
-        case EBUSY:
-            status = Mutex::Status::ERROR_BUSY;
-            break;
-        case EDEADLK:
-            status = Mutex::Status::ERROR_DEADLOCK;
-            break;
-        default:
-            status = Mutex::Status::ERROR_OTHER;
-            break;
-    }
-    return status;
-}
-
-ConditionVariable::Status baremetal_status_to_conditional_status(int baremetal_status) {
-    ConditionVariable::Status status = ConditionVariable::Status::ERROR_OTHER;
-    switch (baremetal_status) {
-        case 0:
-            status = ConditionVariable::Status::OP_OK;
-            break;
-        case EPERM:
-            status = ConditionVariable::Status::ERROR_MUTEX_NOT_HELD;
-            break;
-        default:
-            status = ConditionVariable::Status::ERROR_OTHER;
-            break;
-    }
-    return status;
-}
 }  // namespace Baremetal
 }  // namespace Os
