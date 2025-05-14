@@ -63,7 +63,6 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_rename(const char* originPath, const char* destPath) {
-    // Status copyStat = this->copyFile(originPath, destPath);
     Status copyStat = Os::FileSystem::copyFile(originPath, destPath);
     if (copyStat != OP_OK) {
         return copyStat;
