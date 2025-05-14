@@ -9,10 +9,10 @@
 #include <cstdio>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include <list>
+#include "MicroFsCfg.hpp"
 #include "Os/File.hpp"
 #include "Os/test/ut/file/CommonTests.hpp"
 #include "STest/Pick/Pick.hpp"
-#include "config/MicroFsCfg.hpp"
 namespace Os {
 namespace Test {
 namespace File {
@@ -116,7 +116,7 @@ class MicroFsTester : public Tester {
     //! \return: filename to use for testing
     //!
     std::shared_ptr<const std::string> get_filename(bool random) const override {
-        U32 pick = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN-1);
+        U32 pick = STest::Pick::lowerUpper(0, MAX_FILES_PER_BIN - 1);
         if (random && pick < FILES.size()) {
             return FILES[pick];
         }
