@@ -19,8 +19,10 @@ BaremetalFile::BaremetalFile(const BaremetalFile& other) {
     this->m_handle.m_file_descriptor = other.m_handle.m_file_descriptor;
     this->m_handle.m_mode = other.m_handle.m_mode;
 
-    if(other.m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY && other.m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
-        MicroFs::MicroFsFileState* state = MicroFs::getFileStateFromIndex(other.m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
+    if (other.m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY &&
+        other.m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
+        MicroFs::MicroFsFileState* state =
+            MicroFs::getFileStateFromIndex(other.m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
         FW_ASSERT(state != nullptr);
 
         FwIndexType fdEntry = 0;
@@ -37,13 +39,14 @@ BaremetalFile::BaremetalFile(const BaremetalFile& other) {
 
 BaremetalFile& BaremetalFile::operator=(const BaremetalFile& other) {
     if (this != &other) {
-        //this->m_handle.m_file_descriptor = fcntl(other.m_handle.m_file_descriptor, F_DUPFD, 0);
         this->m_handle.m_state_entry = other.m_handle.m_state_entry;
         this->m_handle.m_file_descriptor = other.m_handle.m_file_descriptor;
         this->m_handle.m_mode = other.m_handle.m_mode;
 
-        if(other.m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY && other.m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
-            MicroFs::MicroFsFileState* state = MicroFs::getFileStateFromIndex(other.m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
+        if (other.m_handle.m_state_entry != BaremetalFileHandle::INVALID_STATE_ENTRY &&
+            other.m_handle.m_file_descriptor != BaremetalFileHandle::INVALID_FILE_DESCRIPTOR) {
+            MicroFs::MicroFsFileState* state =
+                MicroFs::getFileStateFromIndex(other.m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
             FW_ASSERT(state != nullptr);
 
             FwIndexType fdEntry = 0;
@@ -153,7 +156,7 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType l
     FwSizeType sum = offset + length;
     auto status = (sum > state->dataSize) ? Os::File::Status::BAD_SIZE : Os::File::Status::OP_OK;
     if (status == Os::File::Status::OP_OK) {
-        if(state->currSize < sum) {
+        if (state->currSize < sum) {
             state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
         }
     }
@@ -214,7 +217,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
 
     FwSizeType oldSize = state->currSize;
 
-    auto &loc = state->fd[this->m_handle.m_file_descriptor].loc;
+    auto& loc = state->fd[this->m_handle.m_file_descriptor].loc;
     auto oldLoc = loc;
 
     // compute new operation location
@@ -331,10 +334,10 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     // write up to the end of the allocated buffer
     // if write size is greater, truncate the write
     // and set size to what was actually written
-    FwSizeType &loc = state->fd[this->m_handle.m_file_descriptor].loc;
+    FwSizeType& loc = state->fd[this->m_handle.m_file_descriptor].loc;
 
     // Make sure we write to the end of file when appending
-    if(this->m_handle.m_mode == OPEN_APPEND) {
+    if (this->m_handle.m_mode == OPEN_APPEND) {
         loc = state->currSize;
     }
 
