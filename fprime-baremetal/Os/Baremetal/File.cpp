@@ -51,9 +51,7 @@ void BaremetalFile::helpAssign(const BaremetalFile& other) {
 BaremetalFile::Status BaremetalFile::open(const char* path,
                                           BaremetalFile::Mode mode,
                                           BaremetalFile::OverwriteType overwrite) {
-    if (path == nullptr) {
-        return OTHER_ERROR;
-    }
+    FW_ASSERT(path != nullptr);
     Status stat = OP_OK;
 
     // common checks
