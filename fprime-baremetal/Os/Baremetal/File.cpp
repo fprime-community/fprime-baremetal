@@ -98,14 +98,14 @@ BaremetalFile::Status BaremetalFile::open(const char* path,
             state->fd[fdEntry].loc = 0;
             break;
         case OPEN_APPEND:
-            // initialize write location to length of file for append
             // If the file has never previously been opened, then initialize the
             // size to 0.
             if (!state->created) {
                 state->currSize = 0;
             }
 
-            state->fd[fdEntry].loc = state->currSize;
+            // Set to 0. On write, this loc should update to file size
+            state->fd[fdEntry].loc = 0;
             break;
         default:
             FW_ASSERT(0, mode);
@@ -140,7 +140,8 @@ BaremetalFile::Status BaremetalFile::preallocate(FwSizeType offset, FwSizeType l
     auto status = (sum > state->dataSize) ? Os::File::Status::BAD_SIZE : Os::File::Status::OP_OK;
     if (status == Os::File::Status::OP_OK) {
         if (state->currSize < sum) {
-            state->currSize = (sum > state->dataSize) ? state->dataSize : sum;
+            (void)memset(&state->data[state->currSize], 0, sum - state->currSize);
+            state->currSize = sum;
         }
     }
     return status;
@@ -207,14 +208,14 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
     switch (seekType) {
         case SeekType::ABSOLUTE:
             // make sure not too far
-            if ((offset >= static_cast<FwSignedSizeType>(state->dataSize)) or (offset < 0)) {
+            if ((offset > static_cast<FwSignedSizeType>(state->dataSize)) or (offset < 0)) {
                 return INVALID_ARGUMENT;
             }
             loc = offset;
             break;
         case SeekType::RELATIVE:
             // make sure not too far
-            if (static_cast<FwSizeType>(loc + offset) >= state->dataSize) {
+            if (static_cast<FwSizeType>(loc + offset) > state->dataSize) {
                 return INVALID_ARGUMENT;
             }
             loc += offset;

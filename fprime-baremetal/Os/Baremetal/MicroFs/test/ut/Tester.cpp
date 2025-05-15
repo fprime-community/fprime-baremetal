@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <Fw/Test/UnitTest.hpp>
 #include <Fw/Types/Assert.hpp>
+#include "STest/Random/Random.hpp"
 
 namespace Os {
 
@@ -11,7 +12,6 @@ namespace Os {
 // ----------------------------------------------------------------------
 
 Tester ::Tester() : alloc() {
-    srand(time(NULL));
 }
 
 Tester ::~Tester() {}
