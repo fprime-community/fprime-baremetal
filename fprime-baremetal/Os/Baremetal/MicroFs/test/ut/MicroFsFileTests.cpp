@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include <list>
-#include "MicroFsCfg.hpp"
+#include "config/MicroFsCfg.hpp"
 #include "Os/File.hpp"
 #include "Os/test/ut/file/CommonTests.hpp"
 #include "STest/Pick/Pick.hpp"

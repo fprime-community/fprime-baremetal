@@ -8,6 +8,7 @@ set(SOURCE_FILES
 set(HEADER_FILES
     "${CMAKE_CURRENT_LIST_DIR}/error.hpp"
 )
+set(MOD_DEPS Fw_Types)
 register_fprime_module(Os_Baremetal_Shared)
 
 # Setup MicroFs
@@ -17,6 +18,8 @@ set(SOURCE_FILES
 set(HEADER_FILES
     "${CMAKE_CURRENT_LIST_DIR}/MicroFs/MicroFs.hpp"
 )
+set(MOD_DEPS Fw_Types)
+
 register_fprime_module(Os_Baremetal_MicroFs)
 
 add_library(fprime-baremetal_Os_Baremetal INTERFACE)

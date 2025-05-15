@@ -4,7 +4,6 @@
 // ======================================================================
 #ifndef OS_BAREMETAL_ERRNO_HPP
 #define OS_BAREMETAL_ERRNO_HPP
-#include "Os/Condition.hpp"
 #include "Os/Directory.hpp"
 #include "Os/File.hpp"
 #include "Os/FileSystem.hpp"

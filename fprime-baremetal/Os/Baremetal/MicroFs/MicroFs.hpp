@@ -3,7 +3,7 @@
 
 #include <Fw/Types/BasicTypes.hpp>
 #include <Fw/Types/MemAllocator.hpp>
-#include <MicroFsCfg.hpp>
+#include "config/MicroFsCfg.hpp"
 
 // MicroFs - F Prime Micro Filesystem
 //
