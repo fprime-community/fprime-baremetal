@@ -836,7 +836,7 @@ void Os::Tester::SeekRelative::action(Os::Tester& state  //!< The test state
 ) {
     printf("--> Rule: %s %s %d\n", this->getName(), this->filename, this->seek);
     Os::File::Status stat = this->fileModel->fileDesc.seek(this->seek, Os::File::SeekType::RELATIVE);
-    if (this->fileModel->curPtr + this->seek >= FILE_SIZE) {
+    if (this->fileModel->curPtr + this->seek > FILE_SIZE) {
         ASSERT_EQ(Os::File::INVALID_ARGUMENT, stat);
 
     } else {
