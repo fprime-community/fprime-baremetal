@@ -9,7 +9,7 @@
 
 #include <Fw/Tlm/TlmPacket.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
-#include <TlmChanImplCfg.hpp>
+#include <config/TlmChanImplCfg.hpp>
 
 namespace Baremetal {
 
@@ -24,7 +24,7 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
   PRIVATE:
     // Port functions
     void TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
-    void TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
+    Fw::TlmValid TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
     void Run_handler(FwIndexType portNum, U32 context);
     //! Handler implementation for pingIn
     //!
