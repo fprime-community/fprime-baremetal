@@ -4,7 +4,7 @@
 // \brief  Implementation file for channelized telemetry storage component
 // ======================================================================
 
-#include <FpConfig.hpp>
+#include <config/FpConfig.hpp>
 #include <Fw/Com/ComBuffer.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
@@ -33,7 +33,7 @@ void TlmLinearChan::pingIn_handler(const FwIndexType portNum, U32 key) {
     this->pingOut_out(0, key);
 }
 
-void TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
+Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
     // Compute index for entry
 
     U32 entry;
@@ -51,6 +51,8 @@ void TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Tim
     {  // requested entry may not be written yet; empty buffer
         val.resetSer();
     }
+
+    return Fw::TlmValid::VALID;
 }
 
 void TlmLinearChan::TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
