@@ -6,6 +6,7 @@
 #include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Os/Baremetal/Task.hpp>
 #include <fprime-baremetal/Os/TaskRunner/TaskRunner.hpp>
+
 namespace Os {
 namespace Baremetal {
 
