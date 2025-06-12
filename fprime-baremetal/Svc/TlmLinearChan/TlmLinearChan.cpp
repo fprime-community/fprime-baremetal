@@ -43,13 +43,13 @@ Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id,
         }
     }
 
-    if(entry < TLMCHAN_HASH_BUCKETS)
-    {
+    if(entry < TLMCHAN_HASH_BUCKETS) {
         val = this->m_tlmEntries[entry].buffer;
         timeTag = this->m_tlmEntries[entry].lastUpdate;
-    } else 
-    {  // requested entry may not be written yet; empty buffer
+        return Fw::TlmValid::VALID;
+    } else {  // requested entry may not be written yet; empty buffer
         val.resetSer();
+        return Fw::TlmValid::INVALID;
     }
 
     return Fw::TlmValid::VALID;
