@@ -8,7 +8,7 @@
 #include <Fw/Test/UnitTest.hpp>
 
 #define INSTANCE 0
-#define MAX_HISTORY_SIZE 10
+#define MAX_HISTORY_SIZE 20
 #define QUEUE_DEPTH 10
 
 static const FwSizeType TEST_CHAN_SIZE = sizeof(FwChanIdType) + Fw::Time::SERIALIZED_SIZE + sizeof(U32);
