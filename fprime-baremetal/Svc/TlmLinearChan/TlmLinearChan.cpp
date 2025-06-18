@@ -51,8 +51,6 @@ Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id,
         val.resetSer();
         return Fw::TlmValid::INVALID;
     }
-
-    return Fw::TlmValid::VALID;
 }
 
 void TlmLinearChan::TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
