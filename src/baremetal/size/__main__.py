@@ -54,9 +54,20 @@ def main():
             print(f'File not found: {binary}')
             continue
 
+        print('------------------------------')
+        print(f'    Size for F\' Components   ')
+        print('------------------------------')
         exists_tlm_chan, exists_cmd_disp = print_component_size(deployment, toolchain_path_suffix, binary)
-        print_channel_size(exists_tlm_chan, f'{_PATH_BUILD_ARTIFACTS}/{build}/{deployment}/dict/{deployment}TopologyAppDictionary.xml')
-        print_command_size(exists_cmd_disp, f'{_PATH_BUILD_ARTIFACTS}/{build}/{deployment}/dict/{deployment}TopologyAppDictionary.xml')
+
+        print('\n\n----------------------------------')
+        print(f'    Minimum F\' Configurations   ')
+        print('----------------------------------')
+        print_channel_size(exists_tlm_chan, f'{_PATH_BUILD_ARTIFACTS}/{build}/{deployment}/dict/{deployment}TopologyDictionary.json', deployment)
+        print_command_size(exists_cmd_disp, f'{_PATH_BUILD_ARTIFACTS}/{build}/{deployment}/dict/{deployment}TopologyDictionary.json', deployment)
+
+        print('\n------------------------------')
+        print(f'    Size for {build}')
+        print('------------------------------')
         print_build_size(build, toolchain_path_suffix, binary)
 
 
