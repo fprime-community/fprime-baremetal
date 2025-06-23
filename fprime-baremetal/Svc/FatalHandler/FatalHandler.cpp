@@ -9,7 +9,7 @@
 // acknowledged.
 //
 // ======================================================================
-
+#include <config/FpConfig.hpp>
 #include <Fw/Logger/Logger.hpp>
 #include <fprime-baremetal/Svc/FatalHandler/FatalHandler.hpp>
 

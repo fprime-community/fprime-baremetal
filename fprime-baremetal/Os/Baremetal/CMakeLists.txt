@@ -1,3 +1,12 @@
+####
+# F prime CMakeLists.txt:
+#
+# SOURCE_FILES: combined list of source and autocoding files
+# MOD_DEPS: (optional) module dependencies
+#
+####
+add_custom_target("${FPRIME_CURRENT_MODULE}")
+
 # -----------------------------------------
 ## Shared Section
 # -----------------------------------------
@@ -23,12 +32,11 @@ register_fprime_module(
         Fw_Types
 )
 
-add_library(fprime-baremetal_Os_Baremetal INTERFACE)
-
-add_fprime_supplied_os_module(Cpu Baremetal)
+# Set up Baremetal implementation
+register_os_implementation("Cpu" Baremetal)
+register_os_implementation("Memory" Baremetal)
+register_os_implementation("Task" Baremetal fprime-baremetal_Os_TaskRunner)
 register_os_implementation("File;FileSystem;Directory" Baremetal_MicroFs Os_Baremetal_Shared Os_Baremetal_MicroFs)
-add_fprime_supplied_os_module(Memory Baremetal)
-add_fprime_supplied_os_module(Task Baremetal fprime-baremetal_Os_TaskRunner)
 
 # -----------------------------------------
 # MicroFs Full Test Section
@@ -51,7 +59,6 @@ register_fprime_ut(
 # -----------------------------------------
 # MicroFs File Test Section
 # -----------------------------------------
-
 
 register_fprime_ut(
     MicroFsFileTest

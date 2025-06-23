@@ -2,7 +2,7 @@
 // \title fprime-baremetal/Os/TaskRunner/TaskRunner.cpp
 // \brief TaskRunner implementations
 // ======================================================================
-
+#include <config/FpConfig.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Os/Baremetal/Task.hpp>
 #include <fprime-baremetal/Os/TaskRunner/TaskRunner.hpp>

@@ -4,6 +4,7 @@
 // \brief  Implementation file for channelized telemetry storage component
 // ======================================================================
 
+#include <config/FpConfig.hpp>
 #include <Fw/Com/ComBuffer.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
