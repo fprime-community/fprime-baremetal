@@ -36,7 +36,34 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeDirectory(const char* pa
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_getPathType(const char* path, PathType& pathType) {
-    return NOT_SUPPORTED;
+    if (path == nullptr) {
+        return INVALID_PATH;
+    }
+
+    // get file state
+    FwIndexType index = 0;
+    auto status = MicroFs::getFileStateIndex(path, index);
+    if (status == MicroFs::Status::VALID) {
+        pathType = PathType::FILE;
+        return OP_OK;
+    }
+
+    const char* dirPathSpec = "/" MICROFS_BIN_STRING "%" MICROFS_INDEX_SCN_FORMAT;
+
+    // if the directory number can be scanned out following the directory path spec,
+    // the directory name has the correct format
+    FwIndexType binIndex = 0;
+
+    int stat = sscanf(path, dirPathSpec, &binIndex);
+    // If the path format is correct, check to see if it is in the
+    // range of bins
+    if (stat == 1 && binIndex < MicroFs::getSingleton().s_microFsConfig.numBins) {
+        pathType = PathType::DIRECTORY;
+        return OP_OK;
+    }
+
+    pathType = PathType::NOT_EXIST;
+    return OP_OK;
 }
 
 BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {

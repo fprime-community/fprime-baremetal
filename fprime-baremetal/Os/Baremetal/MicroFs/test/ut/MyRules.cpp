@@ -148,7 +148,7 @@ void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
     // Update FileModel
     this->fileModel->curPtr += fillSize;
     // Check if the currSize is to be increased.
-    if (fileModel->curPtr > fileModel->size) {
+    if (fileModel->size < 0 || fileModel->curPtr > FwSizeType(fileModel->size)) {
         fileModel->size = fileModel->curPtr;
     }
 }
@@ -174,12 +174,12 @@ void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
     // Randomize how much data is read
     FwSizeType randSize = rand() % Tester::FILE_SIZE + 1;
 
-    BYTE buffIn[state.testCfg.bins[0].fileSize];
-    memset(buffIn, 0xA5, sizeof(buffIn));
-    ASSERT_LE(randSize, sizeof(buffIn));
+    std::vector<BYTE> buffInVec(state.testCfg.bins[0].fileSize);
+    memset(buffInVec.data(), 0xA5, buffInVec.size());
+    ASSERT_LE(randSize, buffInVec.size());
     FwSizeType retSize = randSize;
     printf("%s: filename %s request to read %d bytes\n", this->getName(), this->filename, retSize);
-    Os::File::Status stat = this->fileModel->fileDesc.read(buffIn, retSize);
+    Os::File::Status stat = this->fileModel->fileDesc.read(buffInVec.data(), retSize);
     printf("%s: filename %s actually read %d bytes\n", this->getName(), this->filename, retSize);
 
     ASSERT_EQ(stat, Os::File::OP_OK);
@@ -189,7 +189,7 @@ void Os::Tester::ReadData::action(Os::Tester& state  //!< The test state
     // Check the returned data
     ASSERT_LE(fileModel->curPtr + retSize, Tester::FILE_SIZE);
 
-    ASSERT_EQ(0, memcmp(buffIn, this->fileModel->buffOut + this->fileModel->curPtr, retSize));
+    ASSERT_EQ(0, memcmp(buffInVec.data(), this->fileModel->buffOut + this->fileModel->curPtr, retSize));
 
     // Update the FileModel
     fileModel->curPtr += retSize;
@@ -681,14 +681,15 @@ void Os::Tester::SeekFile::action(Os::Tester& state  //!< The test state
 
     // Update the model
     I32 oldSize = this->fileModel->size;
+    ASSERT_GE(oldSize, 0);
     this->fileModel->curPtr = randSeek;
     FwSizeType newSize = 0;
-    if (this->fileModel->curPtr > this->fileModel->size) {
+    if (this->fileModel->curPtr > FwSizeType(oldSize)) {
         newSize = this->fileModel->curPtr;
     }
 
     // fill with zeros if seek went past old size
-    if (newSize > oldSize) {
+    if (newSize > FwSizeType(oldSize)) {
         memset(&this->fileModel->buffOut[oldSize], 0, newSize - oldSize);
     }
 }
@@ -720,7 +721,7 @@ void Os::Tester::SeekNFile::action(Os::Tester& state  //!< The test state
     I32 oldSize = this->fileModel->size;
 
     this->fileModel->curPtr = this->seek;
-    if (this->fileModel->curPtr > this->fileModel->size) {
+    if (this->fileModel->size < 0 || this->fileModel->curPtr > FwSizeType(this->fileModel->size)) {
         this->fileModel->size = this->fileModel->curPtr;
     }
 
@@ -846,7 +847,7 @@ void Os::Tester::SeekRelative::action(Os::Tester& state  //!< The test state
         I32 oldSize = this->fileModel->size;
 
         this->fileModel->curPtr += this->seek;
-        if (this->fileModel->curPtr > this->fileModel->size) {
+        if (this->fileModel->size < 0 || this->fileModel->curPtr > FwSizeType(this->fileModel->size)) {
             this->fileModel->size = this->fileModel->curPtr;
         }
 
