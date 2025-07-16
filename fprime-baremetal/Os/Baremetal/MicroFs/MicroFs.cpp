@@ -130,7 +130,7 @@ MicroFs::Status MicroFs::getFileStateIndex(const char* fileName, FwIndexType& st
         return MicroFs::Status::INVALID;
     }
 
-    if (fileIndex >= microfs.s_microFsConfig.bins[binIndex].numFiles) {
+    if (fileIndex < 0 || FwSizeType(fileIndex) >= microfs.s_microFsConfig.bins[binIndex].numFiles) {
         return MicroFs::Status::INVALID;
     }
 

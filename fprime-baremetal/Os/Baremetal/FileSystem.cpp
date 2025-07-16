@@ -94,7 +94,7 @@ BaremetalFileSystem::Status BaremetalFileSystem::_getFreeSpace(const char* path,
     // iterate through bins
     for (FwIndexType currBin = 0; currBin < microfs.s_microFsConfig.numBins; currBin++) {
         // iterate through files in each bin
-        for (FwIndexType currFile = 0; currFile < microfs.s_microFsConfig.bins[currBin].numFiles; currFile++) {
+        for (FwSizeType currFile = 0; currFile < microfs.s_microFsConfig.bins[currBin].numFiles; currFile++) {
             totalBytes += statePtr->dataSize;
             // only add unused file slots to free space
             if (!statePtr->created) {
