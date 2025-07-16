@@ -15,7 +15,7 @@
 #include "STest/Pick/Pick.hpp"
 namespace Os {
 namespace Test {
-namespace File {
+namespace FileTest {
 
 std::vector<std::shared_ptr<const std::string> > FILES;
 
@@ -102,7 +102,7 @@ void tearDown() {
     cleanup(0);
 }
 
-class MicroFsTester : public Tester {
+class MicroFsTester : public Os::Test::FileTest::Tester {
     //! Check if the test file exists.
     //! \return true if it exists, false otherwise.
     //!
@@ -131,11 +131,11 @@ class MicroFsTester : public Tester {
     bool functional() const override { return true; }
 };
 
-std::unique_ptr<Os::Test::File::Tester> get_tester_implementation() {
-    return std::unique_ptr<Os::Test::File::Tester>(new Os::Test::File::MicroFsTester());
+std::unique_ptr<Os::Test::FileTest::Tester> get_tester_implementation() {
+    return std::unique_ptr<Os::Test::FileTest::Tester>(new Os::Test::FileTest::MicroFsTester());
 }
 
-}  // namespace File
+}  // namespace FileTest
 }  // namespace Test
 }  // namespace Os
 
