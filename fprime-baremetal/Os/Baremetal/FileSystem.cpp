@@ -35,6 +35,10 @@ BaremetalFileSystem::Status BaremetalFileSystem::_removeDirectory(const char* pa
     }
 }
 
+BaremetalFileSystem::Status BaremetalFileSystem::_getPathType(const char* path, PathType& pathType) {
+    return NOT_SUPPORTED;
+}
+
 BaremetalFileSystem::Status BaremetalFileSystem::_removeFile(const char* path) {
     if (path == nullptr) {
         return INVALID_PATH;
