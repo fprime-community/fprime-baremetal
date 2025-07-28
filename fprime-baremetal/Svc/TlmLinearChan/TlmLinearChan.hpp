@@ -47,6 +47,7 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
     Fw::MemAllocator* m_allocator;
     FwEnumStoreType m_memId;
     TlmEntry* m_tlmEntries;
+    // Flag to indicate that setup(...) has been called and memory for m_tlmEntries has been allocated
     bool m_setupDone;
 };
 

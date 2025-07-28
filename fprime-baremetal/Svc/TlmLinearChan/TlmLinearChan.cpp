@@ -17,7 +17,7 @@ TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name
 
 TlmLinearChan::~TlmLinearChan()
 {
-    if (this->m_tlmEntries)
+    if (this->m_tlmEntries != nullptr)
     {
         // First destruct the TLM entry structs
         for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++)
