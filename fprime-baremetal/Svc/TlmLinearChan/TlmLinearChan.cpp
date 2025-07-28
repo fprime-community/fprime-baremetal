@@ -9,7 +9,6 @@
 #include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
 
-#include <array>
 #include <new>
 
 namespace Baremetal {
