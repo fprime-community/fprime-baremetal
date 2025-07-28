@@ -3,4 +3,5 @@ register_fprime_config(
     HEADERS
         "${CMAKE_CURRENT_LIST_DIR}/MicroFsCfg.hpp"
     INTERFACE # No buildable files generated
+    BASE_CONFIG
 )
