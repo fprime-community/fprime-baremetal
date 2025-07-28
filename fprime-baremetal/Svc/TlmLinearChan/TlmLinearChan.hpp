@@ -15,6 +15,8 @@
 namespace Baremetal {
 
 class TlmLinearChan : public TlmLinearChanComponentBase {
+  friend class TlmLinearChanTester;
+
   public:
     TlmLinearChan(const char* compName);
     virtual ~TlmLinearChan();

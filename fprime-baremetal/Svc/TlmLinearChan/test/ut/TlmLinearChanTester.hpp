@@ -1,18 +1,20 @@
 // ======================================================================
-// \title  TlmLinearChan/test/ut/Tester.hpp
+// \title  TlmLinearChan/test/ut/TlmLinearChanTester.hpp
 // \author ethanchee
 // \brief  hpp file for TlmLinearChan test harness implementation class
 // ======================================================================
 
-#ifndef TESTER_HPP
-#define TESTER_HPP
+#ifndef TLMLINEARCHAN_TESTER_HPP
+#define TLMLINEARCHAN_TESTER_HPP
 
 #include "TlmLinearChanGTestBase.hpp"
 #include "fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp"
 
+#include <Fw/Types/MallocAllocator.hpp>
+
 namespace Baremetal {
 
-class Tester : public TlmLinearChanGTestBase {
+class TlmLinearChanTester : public TlmLinearChanGTestBase {
     // ----------------------------------------------------------------------
     // Construction and destruction
     // ----------------------------------------------------------------------
@@ -20,11 +22,11 @@ class Tester : public TlmLinearChanGTestBase {
   public:
     //! Construct object Tester
     //!
-    Tester();
+    TlmLinearChanTester();
 
     //! Destroy object Tester
     //!
-    ~Tester();
+    ~TlmLinearChanTester();
 
   public:
     // ----------------------------------------------------------------------
@@ -89,12 +91,14 @@ class Tester : public TlmLinearChanGTestBase {
     //! The component under test
     //!
     TlmLinearChan component;
+
+    Fw::MallocAllocator m_mallocator;
     // Keep a history
     FwIndexType m_numBuffs;
     Fw::ComBuffer m_rcvdBuffer[TLMCHAN_HASH_BUCKETS];
     bool m_bufferRecv;
 };
 
-}  // end namespace Svc
+}  // end namespace Baremetal
 
 #endif
