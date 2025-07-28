@@ -8,6 +8,7 @@
 #define TELEMCHANIMPL_HPP_
 
 #include <Fw/Tlm/TlmPacket.hpp>
+#include <Fw/Types/MemAllocator.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
 #include <config/TlmChanImplCfg.hpp>
 
@@ -19,6 +20,9 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
     virtual ~TlmLinearChan();
     void init(FwSizeType queueDepth, /*!< The queue depth*/
               FwEnumStoreType instance    /*!< The instance number*/
+    );
+    void setup(FwEnumStoreType memId,       //!< Memory segment identifier
+               Fw::MemAllocator& allocator  //!< Memory allocator
     );
 
   PRIVATE:
@@ -40,7 +44,10 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
         bool used;                  //!< if entry has been used
     } TlmEntry;
 
-    TlmEntry m_tlmEntries[TLMCHAN_HASH_BUCKETS];
+    Fw::MemAllocator* m_allocator;
+    FwEnumStoreType m_memId;
+    TlmEntry* m_tlmEntries;
+    bool m_setupDone;
 };
 
 }  // namespace TlmLinearChan
