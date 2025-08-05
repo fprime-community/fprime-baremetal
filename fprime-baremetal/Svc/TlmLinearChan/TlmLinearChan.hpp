@@ -27,7 +27,7 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
                Fw::MemAllocator& allocator  //!< Memory allocator
     );
 
-  PRIVATE:
+  private:
     // Port functions
     void TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
     Fw::TlmValid TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
