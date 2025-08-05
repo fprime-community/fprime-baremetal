@@ -68,6 +68,7 @@ register_fprime_ut(
         "${CMAKE_CURRENT_LIST_DIR}/MicroFs/test/ut/MicroFsFileTests.cpp"
     DEPENDS
         Os
+        Os_RawTime
         STest
         Os_Test_File_SyntheticFileSystem
     CHOOSES_IMPLEMENTATIONS
