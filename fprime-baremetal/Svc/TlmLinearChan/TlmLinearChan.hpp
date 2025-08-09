@@ -21,7 +21,7 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
               FwEnumStoreType instance    /*!< The instance number*/
     );
 
-  PRIVATE:
+  private:
     // Port functions
     void TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
     Fw::TlmValid TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
