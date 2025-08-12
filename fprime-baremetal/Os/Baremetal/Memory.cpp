@@ -13,10 +13,9 @@ MemoryInterface::Status BaremetalMemory::_getUsage(Os::Memory::Usage& memory_usa
     return Status::OP_OK;
 }
 
-
 MemoryHandle* BaremetalMemory::getHandle() {
     return &this->m_handle;
 }
 
-} // namespace Baremetal
-} // namespace Os
+}  // namespace Baremetal
+}  // namespace Os

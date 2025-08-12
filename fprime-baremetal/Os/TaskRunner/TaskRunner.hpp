@@ -23,7 +23,6 @@ constexpr FwSizeType TASK_CAPACITY = 100;  // TODO: configurize this
 //! priority tasks initial unit of works to run.
 //!
 class TaskRunner : TaskRegistry {
-
   public:
     //!< Nothing constructor
     TaskRunner();
@@ -73,14 +72,15 @@ class TaskRunner : TaskRegistry {
 
     //! \brief get a singleton instance of the global task runner
     static TaskRunner& getSingleton();
+
   private:
     //! \brief helper to run a single unit of work, from this task
     static void runOne(Task& task);
     bool runNext();
-    Task* m_task_table[TASK_CAPACITY]; //!< Task table of registered tasks
-    FwSizeType m_index = 0; //!< Index of current task
-    bool m_cycling = true; //!< Is the task runner cycling
+    Task* m_task_table[TASK_CAPACITY];  //!< Task table of registered tasks
+    FwSizeType m_index = 0;             //!< Index of current task
+    bool m_cycling = true;              //!< Is the task runner cycling
 };
-} // End namespace Baremetal
-} // End Namespace Os
+}  // End namespace Baremetal
+}  // End Namespace Os
 #endif /* OS_BAREMETAL_TASKRUNNER_TASKRUNNER_HPP_ */

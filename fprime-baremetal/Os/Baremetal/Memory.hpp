@@ -2,8 +2,8 @@
 // \title fprime-baremetal/Os/Baremetal/Memory.hpp
 // \brief implementation for Os::Baremetal::BaremetalMemory, header definitions
 // ======================================================================
-#include <cstdio>
 #include <Os/Memory.hpp>
+#include <cstdio>
 #ifndef OS_Baremetal_Memory_HPP
 #define OS_Baremetal_Memory_HPP
 
@@ -12,8 +12,7 @@ namespace Baremetal {
 
 //! MemoryHandle class definition for stub implementations.
 //!
-struct BaremetalMemoryHandle : public MemoryHandle {
-};
+struct BaremetalMemoryHandle : public MemoryHandle {};
 
 //! \brief stub implementation of Os::MemoryInterface
 //!
@@ -54,12 +53,13 @@ class BaremetalMemory : public MemoryInterface {
     //!
     //! \return raw console handle
     //!
-    MemoryHandle *getHandle() override;
+    MemoryHandle* getHandle() override;
+
   private:
     //! Internal handle
     BaremetalMemoryHandle m_handle;
 };
-} // namespace Stub
-} // namespace Os
+}  // namespace Baremetal
+}  // namespace Os
 
-#endif // OS_Stub_Memory_HPP
+#endif  // OS_Stub_Memory_HPP

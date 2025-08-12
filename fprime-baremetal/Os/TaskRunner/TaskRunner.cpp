@@ -2,8 +2,8 @@
 // \title fprime-baremetal/Os/TaskRunner/TaskRunner.cpp
 // \brief TaskRunner implementations
 // ======================================================================
-#include <config/FpConfig.hpp>
 #include <Fw/Types/Assert.hpp>
+#include <config/FpConfig.hpp>
 #include <fprime-baremetal/Os/Baremetal/Task.hpp>
 #include <fprime-baremetal/Os/TaskRunner/TaskRunner.hpp>
 
@@ -34,8 +34,8 @@ void TaskRunner::addTask(Task* task) {
     // Sort by priority during insertion
     Task* sort_element = task;
     for (FwSizeType i = 0; (sort_element != nullptr) && (i < Os::Baremetal::TASK_CAPACITY); i++) {
-        if ((this->m_task_table[i] == nullptr) or (sort_element->getPriority() >
-        this->m_task_table[i]->getPriority())) {
+        if ((this->m_task_table[i] == nullptr) or
+            (sort_element->getPriority() > this->m_task_table[i]->getPriority())) {
             Task* temp = sort_element;
             sort_element = this->m_task_table[i];
             this->m_task_table[i] = temp;
@@ -121,7 +121,7 @@ void TaskRunner::runAll() {
         this->m_index = 0;
         for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
             // Run each task exactly once.
-            (void) runNext();
+            (void)runNext();
             if (this->m_index == 0) {
                 break;
             }

@@ -24,5 +24,5 @@ CpuHandle* BaremetalCpu::getHandle() {
     return &this->m_handle;
 }
 
-} // namespace Baremetal
-} // namespace Os
+}  // namespace Baremetal
+}  // namespace Os

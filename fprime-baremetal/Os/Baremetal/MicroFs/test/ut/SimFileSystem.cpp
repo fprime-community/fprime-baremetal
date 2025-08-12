@@ -1,17 +1,15 @@
-#include <random>
-#include <vector>
+#include "SimFileSystem.h"
 #include <algorithm>
 #include <iostream>
-#include "SimFileSystem.h"
 #include <map>
-
+#include <random>
+#include <vector>
 
 const int SimFileSystem::max_files_per_bin = 10;
 const int SimFileSystem::max_bins = 10;
 
 SimFileSystem::SimFileSystem(int n_bins, int n_files_per_bin, std::size_t max_file_size)
     : max_file_size(max_file_size) {
-
     for (int i = 0; i < n_bins; ++i) {
         bins[i] = std::vector<std::string>();
         for (int j = 0; j < n_files_per_bin; ++j) {
@@ -34,7 +32,6 @@ bool SimFileSystem::canOpenFile() const {
 
     return false;  // No files that can be opened were found
 }
-
 
 std::string SimFileSystem::openFile() {
     std::vector<std::string> available_files;
@@ -62,12 +59,11 @@ std::string SimFileSystem::openFile() {
     std::string file_to_open = available_files[distribution(generator)];
     file_states[file_to_open] = FileState::OPENED;
 
-     // Reset the position pointer
+    // Reset the position pointer
     file_positions[file_to_open] = 0;
 
     return file_to_open;
 }
-
 
 bool SimFileSystem::canCloseFile() const {
     // Check all bins for opened files
@@ -82,7 +78,6 @@ bool SimFileSystem::canCloseFile() const {
 
     return false;  // No files that can be closed were found
 }
-
 
 std::string SimFileSystem::closeFile() {
     std::vector<std::string> open_files;
@@ -131,7 +126,7 @@ std::string SimFileSystem::writeToFile(const std::vector<uint8_t>& data) {
     int random_file_idx = rand() % openFiles.size();
     std::string selected_file = openFiles[random_file_idx];
 
-     // Append data to the existing file content
+    // Append data to the existing file content
     file_contents[selected_file] += std::string(data.begin(), data.end());
 
     // Update the position pointer
@@ -140,20 +135,17 @@ std::string SimFileSystem::writeToFile(const std::vector<uint8_t>& data) {
     return selected_file;
 }
 
-
 std::unordered_map<std::string, SimFileSystem::FileState> SimFileSystem::getAllFileStates() const {
     return file_states;
 }
 
-Os::File *SimFileSystem::getFileDesc(const std::string filename) {
+Os::File* SimFileSystem::getFileDesc(const std::string filename) {
     return &this->file_desc[filename];
 }
 
 std::size_t SimFileSystem::getFilePos(const std::string filename) {
     return file_positions[filename];
 }
-
-
 
 bool SimFileSystem::canWriteFile() const {
     for (const auto& file_state_pair : file_states) {
@@ -163,7 +155,3 @@ bool SimFileSystem::canWriteFile() const {
     }
     return false;
 }
-
-
-
-
