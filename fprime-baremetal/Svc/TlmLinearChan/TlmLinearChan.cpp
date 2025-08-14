@@ -25,7 +25,10 @@ TlmLinearChan::~TlmLinearChan()
             this->m_tlmEntries[i].~TlmEntry();
         }
         // Then deallocate the memory
-        this->m_allocator->deallocate(this->m_memId, this->m_tlmEntries);
+        if (this->m_allocator != nullptr)
+        {
+            this->m_allocator->deallocate(this->m_memId, this->m_tlmEntries);
+        }
     }
 }
 
