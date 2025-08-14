@@ -8,20 +8,26 @@
 #define TELEMCHANIMPL_HPP_
 
 #include <Fw/Tlm/TlmPacket.hpp>
+#include <Fw/Types/MemAllocator.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
 #include <config/TlmChanImplCfg.hpp>
 
 namespace Baremetal {
 
 class TlmLinearChan : public TlmLinearChanComponentBase {
+  friend class TlmLinearChanTester;
+
   public:
     TlmLinearChan(const char* compName);
     virtual ~TlmLinearChan();
     void init(FwSizeType queueDepth, /*!< The queue depth*/
               FwEnumStoreType instance    /*!< The instance number*/
     );
+    void setup(FwEnumStoreType memId,       //!< Memory segment identifier
+               Fw::MemAllocator& allocator  //!< Memory allocator
+    );
 
-  PRIVATE:
+  private:
     // Port functions
     void TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
     Fw::TlmValid TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val);
@@ -40,7 +46,11 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
         bool used;                  //!< if entry has been used
     } TlmEntry;
 
-    TlmEntry m_tlmEntries[TLMCHAN_HASH_BUCKETS];
+    Fw::MemAllocator* m_allocator;
+    FwEnumStoreType m_memId;
+    TlmEntry* m_tlmEntries;
+    // Flag to indicate that setup(...) has been called and memory for m_tlmEntries has been allocated
+    bool m_setupDone;
 };
 
 }  // namespace TlmLinearChan

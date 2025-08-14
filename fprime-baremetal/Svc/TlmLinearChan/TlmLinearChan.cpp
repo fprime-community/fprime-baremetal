@@ -9,23 +9,63 @@
 #include <Fw/Types/Assert.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
 
+#include <new>
+
 namespace Baremetal {
 
-TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name) {
+TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_setupDone(false) {}
+
+TlmLinearChan::~TlmLinearChan()
+{
+    if (this->m_tlmEntries != nullptr)
+    {
+        // First destruct the TLM entry structs
+        for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++)
+        {
+            this->m_tlmEntries[i].~TlmEntry();
+        }
+        // Then deallocate the memory
+        if (this->m_allocator != nullptr)
+        {
+            this->m_allocator->deallocate(this->m_memId, this->m_tlmEntries);
+        }
+    }
+}
+
+void TlmLinearChan::init(FwSizeType queueDepth, /*!< The queue depth*/
+                         FwEnumStoreType instance    /*!< The instance number*/
+) {
+    TlmLinearChanComponentBase::init(queueDepth, instance);
+}
+
+void TlmLinearChan::setup(FwEnumStoreType memId, Fw::MemAllocator& allocator)
+{
+    FW_ASSERT(!this->m_setupDone);
+    this->m_allocator = &allocator;
+    this->m_memId = memId;
+
+    // Allocate memory for TLM entries
+    FwSizeType expected_size = TLMCHAN_HASH_BUCKETS * sizeof(TlmEntry);
+    FwSizeType allocated_size = expected_size;
+    bool recoverable = false;
+    void* memory = allocator.allocate(memId, allocated_size, recoverable);
+    FW_ASSERT(memory != nullptr && allocated_size == expected_size, allocated_size);
+    this->m_tlmEntries = static_cast<TlmEntry*>(memory);
+    // Initialize TLM entries
+    for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++)
+    {
+        void* address = static_cast<void*>(this->m_tlmEntries + i);
+        new (address) TlmEntry();
+    }
+
     // clear buckets
     for (U32 entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
         this->m_tlmEntries[entry].updated = false;
         this->m_tlmEntries[entry].id = 0;
         this->m_tlmEntries[entry].used = false;
     }
-}
 
-TlmLinearChan::~TlmLinearChan() {}
-
-void TlmLinearChan::init(FwSizeType queueDepth, /*!< The queue depth*/
-                         FwEnumStoreType instance    /*!< The instance number*/
-) {
-    TlmLinearChanComponentBase::init(queueDepth, instance);
+    this->m_setupDone = true;
 }
 
 void TlmLinearChan::pingIn_handler(const FwIndexType portNum, U32 key) {
@@ -34,8 +74,9 @@ void TlmLinearChan::pingIn_handler(const FwIndexType portNum, U32 key) {
 }
 
 Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
-    // Compute index for entry
+    FW_ASSERT(this->m_setupDone);
 
+    // Compute index for entry
     U32 entry;
     for (entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
         if (this->m_tlmEntries[entry].id == id) {  // If bucket exists, check id
@@ -54,11 +95,12 @@ Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id,
 }
 
 void TlmLinearChan::TlmRecv_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
-    // Compute index for entry
+    FW_ASSERT(this->m_setupDone);
 
+    // Compute index for entry
     U32 entry;
     for (entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
-        if (this->m_tlmEntries[entry].id == id || this->m_tlmEntries[entry].used == false) {  
+        if (this->m_tlmEntries[entry].id == id || this->m_tlmEntries[entry].used == false) {
             break;
         }
     }
@@ -77,6 +119,7 @@ void TlmLinearChan::Run_handler(FwIndexType portNum, U32 context) {
     if (not this->isConnected_PktSend_OutputPort(0)) {
         return;
     }
+    FW_ASSERT(this->m_setupDone);
 
     // go through each entry and send a packet if it has been updated
     Fw::TlmPacket pkt;

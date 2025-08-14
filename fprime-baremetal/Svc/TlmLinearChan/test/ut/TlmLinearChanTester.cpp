@@ -1,10 +1,10 @@
 // ======================================================================
-// \title  TlmLinearChan.hpp
+// \title  TlmLinearChanTester.hpp
 // \author ethanchee
 // \brief  cpp file for TlmLinearChan test harness implementation class
 // ======================================================================
 
-#include "Tester.hpp"
+#include "TlmLinearChanTester.hpp"
 #include <Fw/Test/UnitTest.hpp>
 
 #define INSTANCE 0
@@ -21,19 +21,19 @@ namespace Baremetal {
 // Construction and destruction
 // ----------------------------------------------------------------------
 
-Tester ::Tester()
+TlmLinearChanTester ::TlmLinearChanTester()
     : TlmLinearChanGTestBase("Tester", MAX_HISTORY_SIZE), component("TlmLinearChan"), m_numBuffs(0), m_bufferRecv(false) {
     this->initComponents();
     this->connectPorts();
 }
 
-Tester ::~Tester() {}
+TlmLinearChanTester ::~TlmLinearChanTester() {}
 
 // ----------------------------------------------------------------------
 // Tests
 // ----------------------------------------------------------------------
 
-void Tester::runNominalChannel() {
+void TlmLinearChanTester::runNominalChannel() {
     this->clearBuffs();
     // send first buffer
     this->sendBuff(27, 10);
@@ -59,7 +59,7 @@ void Tester::runNominalChannel() {
     this->sendBuff(27, 20);
 }
 
-void Tester::runMultiChannel() {
+void TlmLinearChanTester::runMultiChannel() {
     FwChanIdType ID_0[] = {// Test channel IDs
                            0x1000, 0x1001, 0x1002, 0x1003, 0x1004, 0x1005, 0x1100, 0x1101, 0x1102, 0x1103, 0x300,
                            0x301,  0x400,  0x401,  0x402,  0x100,  0x101,  0x102,  0x103,  0x104,  0x105};
@@ -98,7 +98,7 @@ void Tester::runMultiChannel() {
     this->doRun(true);
     ASSERT_TRUE(this->m_bufferRecv);
     ASSERT_EQ((FW_NUM_ARRAY_ELEMENTS(ID_1) + CHANS_PER_COMBUFFER - 1) / CHANS_PER_COMBUFFER, this->m_numBuffs);
-    
+
     // verify packets
     for (U32 n = 0; n < FW_NUM_ARRAY_ELEMENTS(ID_1); n++) {
         // printf("#: %d\n",n);
@@ -106,7 +106,7 @@ void Tester::runMultiChannel() {
     }
 }
 
-void Tester::runOffNominal() {
+void TlmLinearChanTester::runOffNominal() {
     // Ask for a packet that isn't written yet
     Fw::TlmBuffer buff;
     Fw::SerializeStatus stat;
@@ -127,14 +127,14 @@ void Tester::runOffNominal() {
 // Handlers for typed from ports
 // ----------------------------------------------------------------------
 
-void Tester ::from_PktSend_handler(const FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
+void TlmLinearChanTester ::from_PktSend_handler(const FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
     this->pushFromPortEntry_PktSend(data, context);
     this->m_bufferRecv = true;
     this->m_rcvdBuffer[this->m_numBuffs] = data;
     this->m_numBuffs++;
 }
 
-void Tester ::from_pingOut_handler(const FwIndexType portNum, U32 key) {
+void TlmLinearChanTester ::from_pingOut_handler(const FwIndexType portNum, U32 key) {
     this->pushFromPortEntry_pingOut(key);
 }
 
@@ -142,7 +142,7 @@ void Tester ::from_pingOut_handler(const FwIndexType portNum, U32 key) {
 // Helper methods
 // ----------------------------------------------------------------------
 
-bool Tester::doRun(bool check) {
+bool TlmLinearChanTester::doRun(bool check) {
     // execute run port to send packet
     this->invoke_to_Run(0, 0);
     // dispatch run message
@@ -154,7 +154,7 @@ bool Tester::doRun(bool check) {
     return this->m_bufferRecv;
 }
 
-void Tester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdType id, U32 val) {
+void TlmLinearChanTester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdType id, U32 val) {
     Fw::Time timeTag;
     // deserialize packet
     Fw::SerializeStatus stat;
@@ -185,7 +185,7 @@ void Tester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdTyp
             ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
 
             // next piece is time tag
-            Fw::Time recTimeTag(TB_NONE, 0, 0);
+            Fw::Time recTimeTag(TimeBase::TB_NONE, 0, 0);
             stat = this->m_rcvdBuffer[packet].deserialize(recTimeTag);
             ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
             ASSERT_TRUE(timeTag == recTimeTag);
@@ -212,7 +212,7 @@ void Tester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan, FwChanIdTyp
     }
 }
 
-void Tester::sendBuff(FwChanIdType id, U32 val) {
+void TlmLinearChanTester::sendBuff(FwChanIdType id, U32 val) {
     Fw::TlmBuffer buff;
     Fw::TlmBuffer readBack;
     Fw::SerializeStatus stat;
@@ -247,14 +247,14 @@ void Tester::sendBuff(FwChanIdType id, U32 val) {
     ASSERT_EQ(retestVal, val);
 }
 
-void Tester::clearBuffs() {
+void TlmLinearChanTester::clearBuffs() {
     this->m_numBuffs = 0;
     for (U32 n = 0; n < TLMCHAN_HASH_BUCKETS; n++) {
         this->m_rcvdBuffer[n].resetSer();
     }
 }
 
-void Tester::dumpTlmEntry(TlmLinearChan::TlmEntry* entry) {
+void TlmLinearChanTester::dumpTlmEntry(TlmLinearChan::TlmEntry* entry) {
     printf(
         "Entry "
         " Ptr: %p"
@@ -262,7 +262,7 @@ void Tester::dumpTlmEntry(TlmLinearChan::TlmEntry* entry) {
         static_cast<void*>(entry), entry->id);
 }
 
-void Tester ::connectPorts() {
+void TlmLinearChanTester ::connectPorts() {
     // Run
     this->connect_to_Run(0, this->component.get_Run_InputPort(0));
 
@@ -282,9 +282,10 @@ void Tester ::connectPorts() {
     this->component.set_pingOut_OutputPort(0, this->get_from_pingOut(0));
 }
 
-void Tester ::initComponents() {
+void TlmLinearChanTester ::initComponents() {
     this->init();
     this->component.init(QUEUE_DEPTH, INSTANCE);
+    this->component.setup(0, this->m_mallocator);
 }
 
-}  // end namespace Svc
+}  // end namespace Baremetal
