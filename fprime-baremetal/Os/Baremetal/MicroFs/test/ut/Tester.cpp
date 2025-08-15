@@ -11,8 +11,7 @@ namespace Os {
 // Construction and destruction
 // ----------------------------------------------------------------------
 
-Tester ::Tester() : alloc() {
-}
+Tester ::Tester() : alloc() {}
 
 Tester ::~Tester() {}
 

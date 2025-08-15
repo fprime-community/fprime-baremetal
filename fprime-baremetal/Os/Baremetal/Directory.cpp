@@ -64,7 +64,8 @@ BaremetalDirectory::Status BaremetalDirectory::read(char* fileNameBuffer, FwSize
 
     MicroFs& microfs = MicroFs::getSingleton();
 
-    if (this->m_handle.m_file_index < 0 || FwSizeType(this->m_handle.m_file_index) >= microfs.s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles) {
+    if (this->m_handle.m_file_index < 0 ||
+        FwSizeType(this->m_handle.m_file_index) >= microfs.s_microFsConfig.bins[this->m_handle.m_dir_index].numFiles) {
         return NO_MORE_FILES;
     }
 

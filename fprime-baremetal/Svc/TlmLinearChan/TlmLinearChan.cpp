@@ -4,9 +4,9 @@
 // \brief  Implementation file for channelized telemetry storage component
 // ======================================================================
 
-#include <config/FpConfig.hpp>
 #include <Fw/Com/ComBuffer.hpp>
 #include <Fw/Types/Assert.hpp>
+#include <config/FpConfig.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
 
 #include <new>
@@ -15,31 +15,26 @@ namespace Baremetal {
 
 TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_setupDone(false) {}
 
-TlmLinearChan::~TlmLinearChan()
-{
-    if (this->m_tlmEntries != nullptr)
-    {
+TlmLinearChan::~TlmLinearChan() {
+    if (this->m_tlmEntries != nullptr) {
         // First destruct the TLM entry structs
-        for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++)
-        {
+        for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++) {
             this->m_tlmEntries[i].~TlmEntry();
         }
         // Then deallocate the memory
-        if (this->m_allocator != nullptr)
-        {
+        if (this->m_allocator != nullptr) {
             this->m_allocator->deallocate(this->m_memId, this->m_tlmEntries);
         }
     }
 }
 
-void TlmLinearChan::init(FwSizeType queueDepth, /*!< The queue depth*/
-                         FwEnumStoreType instance    /*!< The instance number*/
+void TlmLinearChan::init(FwSizeType queueDepth,   /*!< The queue depth*/
+                         FwEnumStoreType instance /*!< The instance number*/
 ) {
     TlmLinearChanComponentBase::init(queueDepth, instance);
 }
 
-void TlmLinearChan::setup(FwEnumStoreType memId, Fw::MemAllocator& allocator)
-{
+void TlmLinearChan::setup(FwEnumStoreType memId, Fw::MemAllocator& allocator) {
     FW_ASSERT(!this->m_setupDone);
     this->m_allocator = &allocator;
     this->m_memId = memId;
@@ -52,8 +47,7 @@ void TlmLinearChan::setup(FwEnumStoreType memId, Fw::MemAllocator& allocator)
     FW_ASSERT(memory != nullptr && allocated_size == expected_size, allocated_size);
     this->m_tlmEntries = static_cast<TlmEntry*>(memory);
     // Initialize TLM entries
-    for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++)
-    {
+    for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++) {
         void* address = static_cast<void*>(this->m_tlmEntries + i);
         new (address) TlmEntry();
     }
@@ -73,7 +67,10 @@ void TlmLinearChan::pingIn_handler(const FwIndexType portNum, U32 key) {
     this->pingOut_out(0, key);
 }
 
-Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id, Fw::Time& timeTag, Fw::TlmBuffer& val) {
+Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum,
+                                           FwChanIdType id,
+                                           Fw::Time& timeTag,
+                                           Fw::TlmBuffer& val) {
     FW_ASSERT(this->m_setupDone);
 
     // Compute index for entry
@@ -84,7 +81,7 @@ Fw::TlmValid TlmLinearChan::TlmGet_handler(FwIndexType portNum, FwChanIdType id,
         }
     }
 
-    if(entry < TLMCHAN_HASH_BUCKETS) {
+    if (entry < TLMCHAN_HASH_BUCKETS) {
         val = this->m_tlmEntries[entry].buffer;
         timeTag = this->m_tlmEntries[entry].lastUpdate;
         return Fw::TlmValid::VALID;
@@ -125,11 +122,9 @@ void TlmLinearChan::Run_handler(FwIndexType portNum, U32 context) {
     Fw::TlmPacket pkt;
     pkt.resetPktSer();
 
-    for (U32 entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++)
-    {
+    for (U32 entry = 0; entry < TLMCHAN_HASH_BUCKETS; entry++) {
         TlmEntry p_entry = this->m_tlmEntries[entry];
-        if(p_entry.used && p_entry.updated)
-        {
+        if (p_entry.used && p_entry.updated) {
             Fw::SerializeStatus stat = pkt.addValue(p_entry.id, p_entry.lastUpdate, p_entry.buffer);
 
             // check to see if this packet is full, if so, send it
@@ -166,4 +161,4 @@ void TlmLinearChan::Run_handler(FwIndexType portNum, U32 context) {
     }
 }  // end run handler
 
-}  // namespace TlmLinearChan
+}  // namespace Baremetal

@@ -2,8 +2,8 @@
 // \title fprime-baremetal/Os/Baremetal/Cpu.hpp
 // \brief implementation for Os::Baremetal::BaremetalCpu header definitions
 // ======================================================================
-#include <cstdio>
 #include <Os/Cpu.hpp>
+#include <cstdio>
 #ifndef OS_Baremetal_Cpu_HPP
 #define OS_Baremetal_Cpu_HPP
 
@@ -12,8 +12,7 @@ namespace Baremetal {
 
 //! BaremetalCpuHandle class definition for stub implementations.
 //!
-struct BaremetalCpuHandle : public Os::CpuHandle {
-};
+struct BaremetalCpuHandle : public Os::CpuHandle {};
 
 //! \brief stub implementation of Os::CpuInterface
 //!
@@ -39,7 +38,6 @@ class BaremetalCpu : public Os::CpuInterface {
     // Functions overrides
     // ------------------------------------
   public:
-
     //! \brief Request the count of the CPUs detected by the system
     //!
     //! This method wraps delegates to the underlying implementation.
@@ -69,12 +67,13 @@ class BaremetalCpu : public Os::CpuInterface {
     //!
     //! \return raw console handle
     //!
-    CpuHandle *getHandle() override;
+    CpuHandle* getHandle() override;
+
   private:
     //! File handle for PosixFile
     BaremetalCpuHandle m_handle;
 };
-} // namespace Baremetal
-} // namespace Os
+}  // namespace Baremetal
+}  // namespace Os
 
-#endif // OS_Stub_Cpu_HPP
+#endif  // OS_Stub_Cpu_HPP

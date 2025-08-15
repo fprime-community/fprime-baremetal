@@ -44,6 +44,6 @@ class FatalHandler : public FatalHandlerComponentBase {
     );
 };
 
-}  // end namespace Svc
+}  // namespace Baremetal
 
 #endif

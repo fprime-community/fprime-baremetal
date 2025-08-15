@@ -1,26 +1,22 @@
 #ifndef SimFileSystem_H
 #define SimFileSystem_H
 
-#include <vector>
+#include <Os/File.hpp>
+#include <map>
 #include <string>
 #include <unordered_map>
-#include <map>
-#include <Os/File.hpp>
+#include <vector>
 
 class SimFileSystem {
-public:
-    enum class FileState {
-        DOES_NOT_EXIST,
-        OPENED,
-        CLOSED
-    };
+  public:
+    enum class FileState { DOES_NOT_EXIST, OPENED, CLOSED };
 
     static const int max_files_per_bin;
     static const int max_bins;
 
     SimFileSystem(int n_bins, int n_files_per_bin, std::size_t max_file_size);
 
-    bool canOpenFile() const; 
+    bool canOpenFile() const;
     std::string openFile();
 
     bool canCloseFile() const;
@@ -28,7 +24,7 @@ public:
 
     std::string writeToFile(const std::vector<uint8_t>& data);
 
-    Os::File *getFileDesc(const std::string filename);
+    Os::File* getFileDesc(const std::string filename);
 
     std::size_t getFilePos(const std::string filename);
 
@@ -36,7 +32,7 @@ public:
 
     bool canWriteFile() const;
 
-private:
+  private:
     std::unordered_map<int, std::vector<std::string>> bins;
     std::unordered_map<std::string, FileState> file_states;
     std::unordered_map<std::string, Os::File> file_desc;
@@ -45,4 +41,4 @@ private:
     std::size_t max_file_size;  // The maximum size of a file
 };
 
-#endif // SimFileSystem_H
+#endif  // SimFileSystem_H

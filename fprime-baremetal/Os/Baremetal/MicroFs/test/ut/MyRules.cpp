@@ -121,7 +121,7 @@ void Os::Tester::WriteData::action(Os::Tester& state  //!< The test state
     // Randomize how many bytes are written to the file
     FwSizeType randSize = rand() % Tester::FILE_SIZE + 1;
 
-    if(fileModel->mode == Os::Tester::FileModel::OPEN_APPEND) {
+    if (fileModel->mode == Os::Tester::FileModel::OPEN_APPEND) {
         fileModel->curPtr = fileModel->size;
     }
 

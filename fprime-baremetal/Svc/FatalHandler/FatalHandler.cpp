@@ -9,8 +9,8 @@
 // acknowledged.
 //
 // ======================================================================
-#include <config/FpConfig.hpp>
 #include <Fw/Logger/Logger.hpp>
+#include <config/FpConfig.hpp>
 #include <fprime-baremetal/Svc/FatalHandler/FatalHandler.hpp>
 
 namespace Baremetal {
@@ -30,7 +30,8 @@ FatalHandler ::~FatalHandler() {}
 void FatalHandler::FatalReceive_handler(FwIndexType portNum, FwEventIdType Id) {
     // for **nix, delay then exit with error code
     Fw::Logger::log("FATAL %" PRI_FwEventIdType "handled.\n", Id);
-    while (true) {}  // Returning might be bad
+    while (true) {
+    }  // Returning might be bad
 }
 
-}  // end namespace Svc
+}  // namespace Baremetal
