@@ -4,7 +4,7 @@
 // ======================================================================
 #include "Os/Cpu.hpp"
 #include "Os/Delegate.hpp"
-#include "fprime-baremetal/Os/Baremetal//Cpu.hpp"
+#include "fprime-baremetal/Os/Baremetal/Cpu.hpp"
 
 namespace Os {
 CpuInterface* CpuInterface::getDelegate(CpuHandleStorage& aligned_new_memory) {
