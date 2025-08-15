@@ -45,20 +45,20 @@ class TlmLinearChanTester : public TlmLinearChanGTestBase {
     //! Handler for from_PktSend
     //!
     void from_PktSend_handler(FwIndexType portNum, /*!< The port number*/
-                              Fw::ComBuffer& data,           /*!<
-                                    Buffer containing packet data
-                                    */
-                              U32 context                    /*!<
-                                             Call context value; meaning chosen by user
-                                             */
+                              Fw::ComBuffer& data, /*!<
+                          Buffer containing packet data
+                          */
+                              U32 context          /*!<
+                                   Call context value; meaning chosen by user
+                                   */
     );
 
     //! Handler for from_pingOut
     //!
     void from_pingOut_handler(FwIndexType portNum, /*!< The port number*/
-                              U32 key                        /*!<
-                                                 Value to return to pinger
-                                                 */
+                              U32 key              /*!<
+                                       Value to return to pinger
+                                       */
     );
 
   private:

@@ -9,19 +9,19 @@
 
 #include <Fw/Tlm/TlmPacket.hpp>
 #include <Fw/Types/MemAllocator.hpp>
-#include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
 #include <config/TlmChanImplCfg.hpp>
+#include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChanComponentAc.hpp>
 
 namespace Baremetal {
 
 class TlmLinearChan : public TlmLinearChanComponentBase {
-  friend class TlmLinearChanTester;
+    friend class TlmLinearChanTester;
 
   public:
     TlmLinearChan(const char* compName);
     virtual ~TlmLinearChan();
-    void init(FwSizeType queueDepth, /*!< The queue depth*/
-              FwEnumStoreType instance    /*!< The instance number*/
+    void init(FwSizeType queueDepth,   /*!< The queue depth*/
+              FwEnumStoreType instance /*!< The instance number*/
     );
     void setup(FwEnumStoreType memId,       //!< Memory segment identifier
                Fw::MemAllocator& allocator  //!< Memory allocator
@@ -41,9 +41,9 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
     typedef struct tlmEntry {
         FwChanIdType id;  //!< telemetry id stored in slot
         bool updated;     //!< set whenever a value has been written. Used to skip if writing out values for downlinking
-        Fw::Time lastUpdate;        //!< last updated time
-        Fw::TlmBuffer buffer;       //!< buffer to store serialized telemetry
-        bool used;                  //!< if entry has been used
+        Fw::Time lastUpdate;   //!< last updated time
+        Fw::TlmBuffer buffer;  //!< buffer to store serialized telemetry
+        bool used;             //!< if entry has been used
     } TlmEntry;
 
     Fw::MemAllocator* m_allocator;
@@ -53,6 +53,6 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
     bool m_setupDone;
 };
 
-}  // namespace TlmLinearChan
+}  // namespace Baremetal
 
 #endif /* TELEMCHANIMPL_HPP_ */

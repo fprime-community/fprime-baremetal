@@ -22,7 +22,10 @@ namespace Baremetal {
 // ----------------------------------------------------------------------
 
 TlmLinearChanTester ::TlmLinearChanTester()
-    : TlmLinearChanGTestBase("Tester", MAX_HISTORY_SIZE), component("TlmLinearChan"), m_numBuffs(0), m_bufferRecv(false) {
+    : TlmLinearChanGTestBase("Tester", MAX_HISTORY_SIZE),
+      component("TlmLinearChan"),
+      m_numBuffs(0),
+      m_bufferRecv(false) {
     this->initComponents();
     this->connectPorts();
 }
