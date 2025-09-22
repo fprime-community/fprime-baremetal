@@ -1,7 +1,11 @@
-# Svc::PassiveCmdDispatcher
+# Baremetal::PassiveCmdDispatcher
 
 A passive component for dispatching commands. Designed as a pared-down, passive replacement for
 [`Svc::CmdDispatcher`](../../CmdDispatcher/docs/sdd.md).
+
+Note that the implementation of `Baremetal::PassiveCmdDispatcher` assumes that only one invocation
+of any given port is made at a time. This assumption is essential for the memory coherency of the
+component's data structures.
 
 ## Usage Examples
 Add usage examples here
@@ -25,7 +29,7 @@ Add a class diagram here
 | [`Fw::CmdResponse`](../../../Fw/Cmd/docs/sdd.md) | `seqCmdStatus` | `output` | Send command status to command buffer source |
 
 ## Component States
-`Svc::PassiveCmdDispatcher` has no state machines.
+`Baremetal::PassiveCmdDispatcher` has no state machines.
 
 ## Sequence Diagrams
 Add sequence diagrams here

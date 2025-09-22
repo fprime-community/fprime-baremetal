@@ -4,13 +4,13 @@
 // \brief  hpp file for PassiveCmdDispatcher component implementation class
 // ======================================================================
 
-#ifndef Svc_PassiveCmdDispatcher_HPP
-#define Svc_PassiveCmdDispatcher_HPP
+#ifndef Baremetal_PassiveCmdDispatcher_HPP
+#define Baremetal_PassiveCmdDispatcher_HPP
 
 #include <Svc/PassiveCmdDispatcher/PassiveCmdDispatcherComponentAc.hpp>
 #include <config/CommandDispatcherImplCfg.hpp>
 
-namespace Svc {
+namespace Baremetal {
 
 class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
   public:
@@ -96,6 +96,6 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
     SequenceTracker m_sequenceTracker[CMD_DISPATCHER_SEQUENCER_TABLE_SIZE];
 };
 
-}  // namespace Svc
+}  // namespace Baremetal
 
-#endif
+#endif // Baremetal_PassiveCmdDispatcher_HPP

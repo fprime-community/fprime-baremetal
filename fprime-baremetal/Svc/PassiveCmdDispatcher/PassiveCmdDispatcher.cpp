@@ -7,7 +7,7 @@
 #include <Fw/Cmd/CmdPacket.hpp>
 #include <Svc/PassiveCmdDispatcher/PassiveCmdDispatcher.hpp>
 
-namespace Svc {
+namespace Baremetal {
 
 // Check the CMD_DISPATCHER_DISPATCH_TABLE_SIZE and CMD_DISPATCHER_SEQUENCER_TABLE_SIZE constants for overflow
 static_assert(CMD_DISPATCHER_DISPATCH_TABLE_SIZE <= std::numeric_limits<FwOpcodeType>::max(),
@@ -165,4 +165,4 @@ void PassiveCmdDispatcher::CMD_CLEAR_TRACKING_cmdHandler(FwOpcodeType opCode, U3
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
-}  // namespace Svc
+}  // namespace Baremetal

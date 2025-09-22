@@ -1,4 +1,4 @@
-module Svc {
+module Baremetal {
 
     @ A passive component for dispatching commands
     passive component PassiveCmdDispatcher {
