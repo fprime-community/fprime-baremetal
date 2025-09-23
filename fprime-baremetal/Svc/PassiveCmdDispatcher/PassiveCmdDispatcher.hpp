@@ -7,6 +7,7 @@
 #ifndef Baremetal_PassiveCmdDispatcher_HPP
 #define Baremetal_PassiveCmdDispatcher_HPP
 
+#include <Fw/Types/MemAllocator.hpp>
 #include <Svc/PassiveCmdDispatcher/PassiveCmdDispatcherComponentAc.hpp>
 #include <config/CommandDispatcherImplCfg.hpp>
 
@@ -24,6 +25,11 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
 
     //! Destroy PassiveCmdDispatcher object
     ~PassiveCmdDispatcher();
+
+    //! Allocate memory and set up buffers
+    void setup(FwEnumStoreType memId,       //!< Memory segment identifier
+               Fw::MemAllocator& allocator  //!< Memory allocator
+    );
 
   private:
     // ----------------------------------------------------------------------
@@ -74,28 +80,37 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
                                        ) override;
 
     struct DispatchEntry {
-        bool used;            //!< if entry has been used yet
         FwOpcodeType opcode;  //!< opcode of entry
         FwIndexType port;     //!< which port the entry invokes
     };
 
     struct SequenceTracker {
-        bool used;               //!< if this slot is used
         U32 seq;                 //!< command sequence number
-        FwOpcodeType opCode;     //!< opcode being tracked
+        FwOpcodeType opcode;     //!< opcode being tracked
         U32 context;             //!< context passed by user
         FwIndexType callerPort;  //!< port command source port
     };
 
     //!< Current command sequence number
+    // TODO: this could be sized down but would require fprime core changes to typedef the sequence
+    // value, currently it is hard-coded to a U32 in many type/port definitions
     U32 m_seq;
     //! Dispatch entry table: maps incoming opcodes to the port connected to the component that
     //! implements the command
-    DispatchEntry m_entryTable[CMD_DISPATCHER_DISPATCH_TABLE_SIZE];
+    //! size: CMD_DISPATCHER_DISPATCH_TABLE_SIZE
+    DispatchEntry* m_entryTable;
     //! Sequence tracker table: tracks commands that are being executed but are not yet complete
-    SequenceTracker m_sequenceTracker[CMD_DISPATCHER_SEQUENCER_TABLE_SIZE];
+    //! size: CMD_DISPATCHER_SEQUENCER_TABLE_SIZE
+    SequenceTracker* m_sequenceTracker;
+
+    //! Memory allocator and region ID
+    Fw::MemAllocator* m_allocator;
+    FwEnumStoreType m_memId;
+    //! Flag to indicate that the setup function has been called and the memory for the dispatch
+    //! entry table and sequence tracker been allocated
+    bool m_setupDone;
 };
 
 }  // namespace Baremetal
 
-#endif // Baremetal_PassiveCmdDispatcher_HPP
+#endif  // Baremetal_PassiveCmdDispatcher_HPP

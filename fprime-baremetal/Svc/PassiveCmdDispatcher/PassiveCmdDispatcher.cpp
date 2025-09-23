@@ -5,7 +5,10 @@
 // ======================================================================
 
 #include <Fw/Cmd/CmdPacket.hpp>
-#include <Svc/PassiveCmdDispatcher/PassiveCmdDispatcher.hpp>
+#include <fprime-baremetal/Svc/PassiveCmdDispatcher/PassiveCmdDispatcher.hpp>
+
+#include <limits>
+#include <new>
 
 namespace Baremetal {
 
@@ -15,35 +18,95 @@ static_assert(CMD_DISPATCHER_DISPATCH_TABLE_SIZE <= std::numeric_limits<FwOpcode
 static_assert(CMD_DISPATCHER_SEQUENCER_TABLE_SIZE <= std::numeric_limits<U32>::max(),
               "Sequencer table limited to range of U32");
 
+// Indicates that an entry in the dispatch table or sequence tracker is unused
+constexpr FwOpcodeType OPCODE_UNUSED = std::numeric_limits<FwOpcodeType>::max();
+
 // ----------------------------------------------------------------------
 // Component construction and destruction
 // ----------------------------------------------------------------------
 
 PassiveCmdDispatcher::PassiveCmdDispatcher(const char* const compName)
-    : PassiveCmdDispatcherComponentBase(compName), m_seq(0) {
-    memset(this->m_entryTable, 0, sizeof(this->m_entryTable));
-    memset(this->m_sequenceTracker, 0, sizeof(this->m_sequenceTracker));
+    : PassiveCmdDispatcherComponentBase(compName), m_seq(0), m_setupDone(false) {}
+
+PassiveCmdDispatcher::~PassiveCmdDispatcher() {
+    // Memory is allocated in a contiguous chunk for both the dispatch table and the sequence
+    // tracker so just check if the dispatch table was allocated
+    if (this->m_entryTable != nullptr) {
+        FW_ASSERT(this->m_sequenceTracker != nullptr);
+        // First destruct the table structs
+        for (auto i = 0; i < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; i++) {
+            this->m_entryTable[i].~DispatchEntry();
+        }
+        for (auto i = 0; i < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; i++) {
+            this->m_sequenceTracker[i].~SequenceTracker();
+        }
+        // Then deallocate the memory
+        if (this->m_allocator != nullptr) {
+            void* memory = static_cast<void*>(this->m_entryTable);
+            this->m_allocator->deallocate(this->m_memId, memory);
+        }
+    }
 }
 
-PassiveCmdDispatcher::~PassiveCmdDispatcher() {}
+void PassiveCmdDispatcher::setup(FwEnumStoreType memId, Fw::MemAllocator& allocator) {
+    FW_ASSERT(!this->m_setupDone);
+    this->m_allocator = &allocator;
+    this->m_memId = memId;
+
+    // Allocate a chunk of memory for both the dispatch table and sequence tracker
+    FwSizeType expected_size = (CMD_DISPATCHER_DISPATCH_TABLE_SIZE * sizeof(DispatchEntry)) +
+                               (CMD_DISPATCHER_SEQUENCER_TABLE_SIZE * sizeof(SequenceTracker));
+    FwSizeType allocated_size = expected_size;
+    bool recoverable = false;
+    void* memory = allocator.allocate(memId, allocated_size, recoverable);
+    FW_ASSERT((memory != nullptr) && (allocated_size == expected_size), allocated_size);
+
+    // Initialize dispatch table entries
+    this->m_entryTable = static_cast<DispatchEntry*>(memory);
+    for (auto i = 0; i < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; i++) {
+        void* address = static_cast<void*>(this->m_entryTable + i);
+        new (address) DispatchEntry();
+    }
+    for (U32 entry = 0; entry < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; entry++) {
+        this->m_entryTable[entry].opcode = OPCODE_UNUSED;
+    }
+
+    // Initialize sequence tracker entries
+    void* dispatch_table_end = static_cast<void*>(this->m_entryTable + CMD_DISPATCHER_DISPATCH_TABLE_SIZE);
+    this->m_sequenceTracker = static_cast<SequenceTracker*>(dispatch_table_end);
+    for (auto i = 0; i < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; i++) {
+        void* address = static_cast<void*>(this->m_sequenceTracker + i);
+        new (address) SequenceTracker();
+    }
+    for (U32 entry = 0; entry < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; entry++) {
+        this->m_sequenceTracker[entry].opcode = OPCODE_UNUSED;
+    }
+
+    this->m_setupDone = true;
+}
 
 // ----------------------------------------------------------------------
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
 void PassiveCmdDispatcher::compCmdReg_handler(FwIndexType portNum, FwOpcodeType opCode) {
+    FW_ASSERT(this->m_setupDone);
+    // This opcode is reserved for internal use
+    FW_ASSERT(opCode != OPCODE_UNUSED);
+
     // Search for an empty slot
     bool slotFound = false;
     for (FwOpcodeType slot = 0; slot < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; slot++) {
-        if ((!this->m_entryTable[slot].used) && (!slotFound)) {
+        if ((this->m_entryTable[slot].opcode == OPCODE_UNUSED) && (!slotFound)) {
+            // Empty slot found
             this->m_entryTable[slot].opcode = opCode;
             this->m_entryTable[slot].port = portNum;
-            this->m_entryTable[slot].used = true;
             slotFound = true;
-        } else if (this->m_entryTable[slot].used && (this->m_entryTable[slot].opcode == opCode) &&
-                   (this->m_entryTable[slot].port == portNum) && (!slotFound)) {
+        } else if ((this->m_entryTable[slot].opcode == opCode) && (this->m_entryTable[slot].port == portNum) &&
+                   (!slotFound)) {
+            // Found a slot where the opcode was already registered
             slotFound = true;
-        } else if (this->m_entryTable[slot].used) {
+        } else if (this->m_entryTable[slot].opcode != OPCODE_UNUSED) {
             // Ensure that there are no duplicates
             FW_ASSERT(this->m_entryTable[slot].opcode != opCode, static_cast<FwAssertArgType>(opCode));
         }
@@ -55,6 +118,10 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
                                                FwOpcodeType opCode,
                                                U32 cmdSeq,
                                                const Fw::CmdResponse& response) {
+    FW_ASSERT(this->m_setupDone);
+    // This opcode is reserved for internal use
+    FW_ASSERT(opCode != OPCODE_UNUSED);
+
     // Check the command response and log success/failure
     if (response.e == Fw::CmdResponse::OK) {
         this->log_COMMAND_OpCodeCompleted(opCode);
@@ -67,12 +134,13 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
     FwIndexType portToCall = -1;
     U32 context;
     for (U32 pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
-        if ((this->m_sequenceTracker[pending].seq == cmdSeq) && this->m_sequenceTracker[pending].used) {
+        if ((this->m_sequenceTracker[pending].seq == cmdSeq) &&
+            (this->m_sequenceTracker[pending].opcode != OPCODE_UNUSED)) {
             portToCall = this->m_sequenceTracker[pending].callerPort;
             context = this->m_sequenceTracker[pending].context;
-            FW_ASSERT(opCode == this->m_sequenceTracker[pending].opCode);
+            FW_ASSERT(opCode == this->m_sequenceTracker[pending].opcode);
             FW_ASSERT(portToCall < this->getNum_seqCmdStatus_OutputPorts());
-            this->m_sequenceTracker[pending].used = false;
+            this->m_sequenceTracker[pending].opcode = OPCODE_UNUSED;
             break;
         }
     }
@@ -86,6 +154,8 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
 }
 
 void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
+    FW_ASSERT(this->m_setupDone);
+
     // Deserialize the command packet
     Fw::CmdPacket cmdPkt;
     Fw::SerializeStatus stat = cmdPkt.deserialize(data);
@@ -97,13 +167,15 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
         }
         return;
     }
+    FwOpcodeType opcode = cmdPkt.getOpCode();
+    // This opcode is reserved for internal use
+    FW_ASSERT(opcode != OPCODE_UNUSED);
 
     // Search for the opcode in the dispatch table
-    FwOpcodeType opcode = cmdPkt.getOpCode();
     FwOpcodeType entry;
     bool entryFound = false;
     for (entry = 0; entry < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; entry++) {
-        if (this->m_entryTable[entry].used && (this->m_entryTable[entry].opcode == opcode)) {
+        if (this->m_entryTable[entry].opcode == opcode) {
             entryFound = true;
             break;
         }
@@ -113,10 +185,9 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
             bool pendingFound = false;
             for (U32 pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
-                if (!this->m_sequenceTracker[pending].used) {
+                if (this->m_sequenceTracker[pending].opcode == OPCODE_UNUSED) {
                     pendingFound = true;
-                    this->m_sequenceTracker[pending].used = true;
-                    this->m_sequenceTracker[pending].opCode = opcode;
+                    this->m_sequenceTracker[pending].opcode = opcode;
                     this->m_sequenceTracker[pending].seq = this->m_seq;
                     this->m_sequenceTracker[pending].context = context;
                     this->m_sequenceTracker[pending].callerPort = portNum;
@@ -153,14 +224,18 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
 // ----------------------------------------------------------------------
 
 void PassiveCmdDispatcher::CMD_NO_OP_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
+    FW_ASSERT(this->m_setupDone);
+
     this->log_ACTIVITY_HI_NoOpReceived();
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
 void PassiveCmdDispatcher::CMD_CLEAR_TRACKING_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
+    FW_ASSERT(this->m_setupDone);
+
     // Clear the sequence tracking table
     for (FwOpcodeType entry = 0; entry < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; entry++) {
-        this->m_sequenceTracker[entry].used = false;
+        this->m_sequenceTracker[entry].opcode = OPCODE_UNUSED;
     }
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
