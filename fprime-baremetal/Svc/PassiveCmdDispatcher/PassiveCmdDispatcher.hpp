@@ -14,6 +14,36 @@
 namespace Baremetal {
 
 class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
+  private:
+    // ----------------------------------------------------------------------
+    // Type definitions
+    // ----------------------------------------------------------------------
+
+    struct DispatchEntry {
+        // unused entries have the opcode set to OPCODE_UNUSED (see .cpp for definition)
+        FwOpcodeType opcode;  //!< opcode of entry
+        FwIndexType port;     //!< which port the entry invokes
+    };
+
+    struct SequenceTracker {
+        // unused entries have the opcode set to OPCODE_UNUSED (see .cpp for definition)
+        FwOpcodeType opcode;     //!< opcode being tracked
+        FwIndexType callerPort;  //!< port command source port
+        U32 seq;                 //!< command sequence number
+        U32 context;             //!< context passed by user
+    };
+
+    // Wraps the dispatch entry and sequence tracker tables for cleaner memory management
+    struct CmdTables {
+        CmdTables();  // initializes m_entryTable[i].opcode and m_sequenceTracker[i].opcode
+
+        //! Dispatch entry table: maps incoming opcodes to the port connected to the component that
+        //! implements the command
+        DispatchEntry m_entryTable[CMD_DISPATCHER_DISPATCH_TABLE_SIZE];
+        //! Sequence tracker table: tracks commands that are being executed but not yet complete
+        SequenceTracker m_sequenceTracker[CMD_DISPATCHER_SEQUENCER_TABLE_SIZE];
+    };
+
   public:
     // ----------------------------------------------------------------------
     // Component construction and destruction
@@ -79,36 +109,16 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
                                        U32 cmdSeq            //!< The command sequence number
                                        ) override;
 
-    struct DispatchEntry {
-        FwOpcodeType opcode;  //!< opcode of entry
-        FwIndexType port;     //!< which port the entry invokes
-    };
-
-    struct SequenceTracker {
-        U32 seq;                 //!< command sequence number
-        FwOpcodeType opcode;     //!< opcode being tracked
-        U32 context;             //!< context passed by user
-        FwIndexType callerPort;  //!< port command source port
-    };
-
     //!< Current command sequence number
     // TODO: this could be sized down but would require fprime core changes to typedef the sequence
     // value, currently it is hard-coded to a U32 in many type/port definitions
     U32 m_seq;
-    //! Dispatch entry table: maps incoming opcodes to the port connected to the component that
-    //! implements the command
-    //! size: CMD_DISPATCHER_DISPATCH_TABLE_SIZE
-    DispatchEntry* m_entryTable;
-    //! Sequence tracker table: tracks commands that are being executed but are not yet complete
-    //! size: CMD_DISPATCHER_SEQUENCER_TABLE_SIZE
-    SequenceTracker* m_sequenceTracker;
+    //! Contains dispatch entry table and sequence tracker, see type definitions for more details
+    CmdTables* m_cmdTables;
 
     //! Memory allocator and region ID
     Fw::MemAllocator* m_allocator;
     FwEnumStoreType m_memId;
-    //! Flag to indicate that the setup function has been called and the memory for the dispatch
-    //! entry table and sequence tracker been allocated
-    bool m_setupDone;
 };
 
 }  // namespace Baremetal
