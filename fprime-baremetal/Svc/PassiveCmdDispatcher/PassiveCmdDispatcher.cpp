@@ -50,7 +50,7 @@ PassiveCmdDispatcher::~PassiveCmdDispatcher() {
 }
 
 void PassiveCmdDispatcher::setup(FwEnumStoreType memId, Fw::MemAllocator& allocator) {
-    FW_ASSERT(this->m_cmdTables != nullptr);
+    FW_ASSERT(this->m_cmdTables == nullptr);
     this->m_allocator = &allocator;
     this->m_memId = memId;
 
