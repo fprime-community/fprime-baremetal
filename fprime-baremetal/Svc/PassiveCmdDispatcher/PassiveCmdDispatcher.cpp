@@ -74,7 +74,7 @@ void PassiveCmdDispatcher::compCmdReg_handler(FwIndexType portNum, FwOpcodeType 
 
     // Search for an empty slot
     bool slotFound = false;
-    for (FwOpcodeType slot = 0; slot < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; slot++) {
+    for (auto slot = 0; slot < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; slot++) {
         if ((this->m_cmdTables->m_entryTable[slot].opcode == OPCODE_UNUSED) && (!slotFound)) {
             // Empty slot found
             this->m_cmdTables->m_entryTable[slot].opcode = opCode;
@@ -111,14 +111,15 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
     // Search for the command source
     FwIndexType portToCall = -1;
     U32 context;
-    for (U32 pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
-        if ((this->m_cmdTables->m_sequenceTracker[pending].seq == cmdSeq) &&
-            (this->m_cmdTables->m_sequenceTracker[pending].opcode != OPCODE_UNUSED)) {
-            portToCall = this->m_cmdTables->m_sequenceTracker[pending].callerPort;
-            context = this->m_cmdTables->m_sequenceTracker[pending].context;
-            FW_ASSERT(opCode == this->m_cmdTables->m_sequenceTracker[pending].opcode);
+    for (auto pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
+        auto entry = &this->m_cmdTables->m_sequenceTracker[pending];
+        if ((entry->opcode != OPCODE_UNUSED) && (entry->seq == cmdSeq)) {
+            portToCall = entry->callerPort;
+            context = entry->context;
+            FW_ASSERT(opCode == entry->opcode);
             FW_ASSERT(portToCall < this->getNum_seqCmdStatus_OutputPorts());
-            this->m_cmdTables->m_sequenceTracker[pending].opcode = OPCODE_UNUSED;
+            // Free up the sequence tracker entry
+            entry->opcode = OPCODE_UNUSED;
             break;
         }
     }
@@ -148,25 +149,27 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
     FwOpcodeType opcode = cmdPkt.getOpCode();
 
     // Search for the opcode in the dispatch table
-    FwOpcodeType entry;
-    bool entryFound = false;
-    for (entry = 0; entry < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; entry++) {
-        if ((opcode != OPCODE_UNUSED) && (this->m_cmdTables->m_entryTable[entry].opcode == opcode)) {
-            entryFound = true;
-            break;
+    DispatchEntry* entry = nullptr;
+    // Ignore OPCODE_UNUSED, reserved for internal use
+    if (opcode != OPCODE_UNUSED) {
+        for (auto slot = 0; slot < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; slot++) {
+            if (this->m_cmdTables->m_entryTable[slot].opcode == opcode) {
+                entry = &this->m_cmdTables->m_entryTable[slot];
+            }
         }
     }
-    if (entryFound && this->isConnected_compCmdSend_OutputPort(this->m_cmdTables->m_entryTable[entry].port)) {
+    if ((entry != nullptr) && this->isConnected_compCmdSend_OutputPort(entry->port)) {
         // Register the command in the command tracker only if the response port is connected
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
             bool pendingFound = false;
             for (U32 pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
-                if (this->m_cmdTables->m_sequenceTracker[pending].opcode == OPCODE_UNUSED) {
+                SequenceTracker* trackerEntry = &this->m_cmdTables->m_sequenceTracker[pending];
+                if (trackerEntry->opcode == OPCODE_UNUSED) {
                     pendingFound = true;
-                    this->m_cmdTables->m_sequenceTracker[pending].opcode = opcode;
-                    this->m_cmdTables->m_sequenceTracker[pending].callerPort = portNum;
-                    this->m_cmdTables->m_sequenceTracker[pending].seq = this->m_seq;
-                    this->m_cmdTables->m_sequenceTracker[pending].context = context;
+                    trackerEntry->opcode = opcode;
+                    trackerEntry->callerPort = portNum;
+                    trackerEntry->seq = this->m_seq;
+                    trackerEntry->context = context;
                     break;
                 }
             }
@@ -181,8 +184,8 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
         }
 
         // Pass arguments to the argument buffer and log the dispatched command
-        this->compCmdSend_out(this->m_cmdTables->m_entryTable[entry].port, opcode, this->m_seq, cmdPkt.getArgBuffer());
-        this->log_COMMAND_OpCodeDispatched(opcode, this->m_cmdTables->m_entryTable[entry].port);
+        this->compCmdSend_out(entry->port, opcode, this->m_seq, cmdPkt.getArgBuffer());
+        this->log_COMMAND_OpCodeDispatched(opcode, entry->port);
     } else {
         // Opcode could not be found in the dispatch table, fail the command
         this->log_WARNING_HI_InvalidCommand(opcode);
