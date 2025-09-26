@@ -110,7 +110,7 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
 
     // Search for the command source
     FwIndexType portToCall = -1;
-    U32 context;
+    U32 context = 0;
     for (auto pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
         auto entry = &this->m_cmdTables->m_sequenceTracker[pending];
         if ((entry->opcode != OPCODE_UNUSED) && (entry->seq == cmdSeq)) {

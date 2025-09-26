@@ -3,9 +3,11 @@
 A passive component for dispatching commands. Designed as a pared-down, passive replacement for
 [`Svc::CmdDispatcher`](../../CmdDispatcher/docs/sdd.md).
 
-Note that the implementation of `Baremetal::PassiveCmdDispatcher` assumes that only one invocation
-of any given port is made at a time. This assumption is essential for the memory coherency of the
-component's data structures.
+## Assumptions
+
+The implementation of `Baremetal::PassiveCmdDispatcher` makes the following assumptions:
+
+1. Only one invocation of any given input port is made at a time. This is essential for the memory coherency of the component's data structures.
 
 ## Usage Examples
 Add usage examples here
