@@ -1,2 +1,5 @@
 add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Baremetal")
 add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/TaskRunner")
+if(FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE)
+    add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/OverrideNewDelete")
+endif()

@@ -21,3 +21,9 @@ baremetal-size {build}
 ```
 
 Change `{build}` to your specific build (i.e. `teensy41`, `featherM0`, etc.)
+
+## Tracking memory allocation done by new & delete
+fprime-baremental includes a feature which overrides the default implementations of new, new[], delete, and delete[] with calls to a Fw::MallocAllocator class. 
+There are also helper functions for registering a Fw::MallocAllocator and for setting the default memoryId to be used when allocating memory. 
+This feature is disabled by default, it can be enabled by setting FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE in your project's top level CMakeLists.txt.
+One example of how to leverage this feature is the StrictMallocAllocator class in fprime-vorago

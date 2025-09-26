@@ -8,12 +8,14 @@
 #include <Fw/Types/Assert.hpp>
 #include <config/FpConfig.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
-
+#ifdef FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE
+#include <fprime-baremetal/Os/OverrideNewDelete/OverrideNewDelete.hpp>
+#endif
 #include <new>
 
 namespace Baremetal {
 
-TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_setupDone(false) {}
+TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_memId(0), m_setupDone(false) {}
 
 TlmLinearChan::~TlmLinearChan() {
     if (this->m_tlmEntries != nullptr) {
@@ -31,6 +33,12 @@ TlmLinearChan::~TlmLinearChan() {
 void TlmLinearChan::init(FwSizeType queueDepth,   /*!< The queue depth*/
                          FwEnumStoreType instance /*!< The instance number*/
 ) {
+#ifdef FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE
+    // This component's init does dynamic allocation (through Os::Queue)
+    // So set the default memory ID
+    Os::Baremetal::OverrideNewDelete::TemporaryDefaultId tmp =
+        Os::Baremetal::OverrideNewDelete::TemporaryDefaultId(this->m_memId);
+#endif
     TlmLinearChanComponentBase::init(queueDepth, instance);
 }
 
