@@ -12,7 +12,7 @@ set(SOURCE_FILES
 )
 if(FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE)
 set(MOD_DEPS
-        Os_OverrideNewDelete
+        Os_Baremetal_OverrideNewDelete
 )
 endif()
 
