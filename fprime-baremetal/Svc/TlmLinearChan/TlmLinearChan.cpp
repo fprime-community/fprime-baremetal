@@ -36,8 +36,8 @@ void TlmLinearChan::init(FwSizeType queueDepth,   /*!< The queue depth*/
 #ifdef FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE
     // This component's init does dynamic allocation (through Os::Queue)
     // So set the default memory ID
-    Os::Baremetal::OverrideNewDelete::TemporaryDefaultId tmp =
-        Os::Baremetal::OverrideNewDelete::TemporaryDefaultId(this->m_memId);
+    Os::Baremetal::OverrideNewDelete::MemoryIdScope tmp =
+        Os::Baremetal::OverrideNewDelete::MemoryIdScope(this->m_memId);
 #endif
     TlmLinearChanComponentBase::init(queueDepth, instance);
 }
