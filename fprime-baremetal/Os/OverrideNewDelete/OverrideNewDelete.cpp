@@ -117,36 +117,9 @@ void operator delete[](void* ptr) noexcept {
 void operator delete[](void* ptr, const FwEnumStoreType identifier) noexcept {
     Os::Baremetal::OverrideNewDelete::deallocateMemory(identifier, ptr);
 }
-
-// If you need to deep dive into all memory calls being done,  add
-// 'list(APPEND ARGN "-Wl,--wrap=malloc" "-Wl,--wrap=free"  "-Wl,--wrap=calloc" "-Wl,--wrap=realloc")'
-// to fprime__internal_target_interceptor
-extern "C" {
-// Declare the original malloc function (aliased as __real_malloc)
-void* __real_malloc(size_t size);
-
-// Your wrapper function for malloc
-void* __wrap_malloc(size_t size) {
-    printf("malloc %d\n", size);
-    return __real_malloc(size);
+void operator delete(void* ptr, std::size_t size) {
+    Os::Baremetal::OverrideNewDelete::deallocateMemoryWoId(ptr);
 }
-// Declare the original free function (aliased as __real_free)
-void __real_free(void* ptr);
-
-// wrapper function for free
-void __wrap_free(void* ptr) {
-    printf("free %p\n", ptr);
-    return __real_free(ptr);
-}
-void* __real_calloc(size_t num, size_t size);  // Declare the real calloc
-void* __wrap_calloc(size_t num, size_t size) {
-    printf("calloc %d, %d\n", num, size);
-    return __real_calloc(num, size);  // Call the real calloc
-}
-void* __real_realloc(void* ptr, size_t size);
-
-void* __wrap_realloc(void* ptr, size_t size) {
-    printf("realloc %p, %d\n", ptr, size);
-    return __real_realloc(ptr, size);
-}
+void operator delete[](void* ptr, std::size_t size) {
+    Os::Baremetal::OverrideNewDelete::deallocateMemoryWoId(ptr);
 }
