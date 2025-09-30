@@ -7,11 +7,19 @@
 #include <stdio.h>
 #include <Fw/Types/Assert.hpp>
 #include <atomic>
-#include <new>  // included to get std::nothrow_t
+#include <new>        // included to get std::nothrow_t
+#include <stdexcept>  // For standard exception types
 
 namespace Os {
 namespace Baremetal {
 namespace OverrideNewDelete {
+
+// Determine whether it's possible to throw exceptions
+// Whether __cpp_exceptions is undefined, 0, or other varies 
+// by compiler, so set to the year the macro was instroduced
+#if defined(__cpp_exceptions) && __cpp_exceptions == 199711
+#define ENABLE_EXCEPTIONS
+#endif
 
 // global variables
 //! Modifiable default (useful before calling code with new/delete to attribute the memory user)
@@ -20,9 +28,9 @@ FwEnumStoreType customId = DEFAULT_ID;
 static Fw::MemAllocator* pAllocator = nullptr;
 
 // Prototypes
-void deallocateMemoryWoId(void* ptr);
+void deallocateMemoryWithoutId(void* ptr);
 void deallocateMemory(const FwEnumStoreType identifier, void* ptr);
-void* allocateMemoryWoId(const FwSizeType size);
+void* allocateMemoryWithoutId(const FwSizeType size);
 void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size);
 
 // Function implementations
@@ -38,12 +46,11 @@ FwSizeType registerMemAllocator(Fw::MemAllocator* allocator) {
     return mi.uordblks;
 }
 
-void deallocateMemoryWoId(void* ptr) {
+void deallocateMemoryWithoutId(void* ptr) {
     deallocateMemory(customId, ptr);
 }
 
 void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
-    FW_ASSERT(pAllocator != nullptr);
     if (pAllocator == nullptr) {
         ::free(ptr);
     } else {
@@ -51,12 +58,13 @@ void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
     }
 }
 
-void* allocateMemoryWoId(const FwSizeType size) {
+void* allocateMemoryWithoutId(const FwSizeType size) {
     return allocateMemory(customId, size);
 }
 
 void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
     void* ptr;
+    FW_ASSERT(pAllocator != nullptr);
     if (pAllocator == nullptr) {
         ptr = ::malloc(size);
     } else {
@@ -64,7 +72,13 @@ void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
         bool recoverable = false;
         ptr = pAllocator->allocate(identifier, cSize, recoverable);
         if (cSize != size) {
-            ptr = nullptr;
+            // Most MemAllocator implementations free the memory if
+            // if allocation fails, but handle the case where that's
+            // not the case
+            if (ptr != nullptr) {
+                pAllocator->deallocate(identifier, ptr);
+                ptr = nullptr;
+            }
         }
     }
     return ptr;
@@ -75,32 +89,64 @@ void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
 }  // namespace Os
 
 void* operator new[](std::size_t size, const std::nothrow_t& tag) noexcept {
-    return Os::Baremetal::OverrideNewDelete::allocateMemoryWoId(size);
+    return Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
 }
 void* operator new(std::size_t size, const std::nothrow_t& tag) noexcept {
-    return Os::Baremetal::OverrideNewDelete::allocateMemoryWoId(size);
+    return Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
 }
 // Global operator new
 void* operator new(std::size_t size) {
-    return Os::Baremetal::OverrideNewDelete::allocateMemoryWoId(size);
+    void* mem = Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
+    if (mem == nullptr) {
+#ifdef OND_ENABLE_EXCEPTIONS
+        throw std::bad_alloc();
+#else
+        FW_ASSERT(false);
+#endif
+    }
+    return mem;
 }
 // Global operator new w/ identifier
 void* operator new(std::size_t size, const FwEnumStoreType identifier) {
-    return Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
+    void* mem = Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
+    if (mem == nullptr) {
+#ifdef OND_ENABLE_EXCEPTIONS
+        throw std::bad_alloc();
+#else
+        FW_ASSERT(false);
+#endif
+    }
+    return mem;
 }
 // Global override for operator new[]
 void* operator new[](std::size_t size) {
-    return Os::Baremetal::OverrideNewDelete::allocateMemoryWoId(size);
+    void* mem = Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
+    if (mem == nullptr) {
+#ifdef OND_ENABLE_EXCEPTIONS
+        throw std::bad_alloc();
+#else
+        FW_ASSERT(false);
+#endif
+    }
+    return mem;
 }
 
 // Global override for operator new[] w/ identifier
 void* operator new[](std::size_t size, const FwEnumStoreType identifier) {
-    return Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
+    void* mem = Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
+    if (mem == nullptr) {
+#ifdef OND_ENABLE_EXCEPTIONS
+        throw std::bad_alloc();
+#else
+        FW_ASSERT(false);
+#endif
+    }
+    return mem;
 }
 
 // Global operator delete
 void operator delete(void* ptr) noexcept {
-    Os::Baremetal::OverrideNewDelete::deallocateMemoryWoId(ptr);
+    Os::Baremetal::OverrideNewDelete::deallocateMemoryWithoutId(ptr);
 }
 
 // Global operator delete w/ identifier
@@ -110,7 +156,7 @@ void operator delete(void* ptr, const FwEnumStoreType identifier) noexcept {
 
 // Global operator delete[]
 void operator delete[](void* ptr) noexcept {
-    Os::Baremetal::OverrideNewDelete::deallocateMemoryWoId(ptr);
+    Os::Baremetal::OverrideNewDelete::deallocateMemoryWithoutId(ptr);
 }
 
 // Global operator delete[] w/ identifier
@@ -118,8 +164,8 @@ void operator delete[](void* ptr, const FwEnumStoreType identifier) noexcept {
     Os::Baremetal::OverrideNewDelete::deallocateMemory(identifier, ptr);
 }
 void operator delete(void* ptr, std::size_t size) {
-    Os::Baremetal::OverrideNewDelete::deallocateMemoryWoId(ptr);
+    Os::Baremetal::OverrideNewDelete::deallocateMemoryWithoutId(ptr);
 }
 void operator delete[](void* ptr, std::size_t size) {
-    Os::Baremetal::OverrideNewDelete::deallocateMemoryWoId(ptr);
+    Os::Baremetal::OverrideNewDelete::deallocateMemoryWithoutId(ptr);
 }

@@ -32,14 +32,14 @@ FwSizeType registerMemAllocator(Fw::MemAllocator* allocator);
 
 void setDefaultId(FwEnumStoreType tmpId);
 // Temporary change default ID
-class TemporaryDefaultId {
+class MemoryIdScope {
   public:
-    TemporaryDefaultId(FwEnumStoreType tmpId) {
+    MemoryIdScope(FwEnumStoreType tmpId) {
         puts("set default ID");
         setDefaultId(tmpId);
     }
 
-    ~TemporaryDefaultId() {
+    ~MemoryIdScope() {
         puts("restore default ID");
         setDefaultId(DEFAULT_ID);
     }
