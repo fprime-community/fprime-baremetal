@@ -15,7 +15,7 @@ namespace Baremetal {
 namespace OverrideNewDelete {
 
 // Determine whether it's possible to throw exceptions
-// Whether __cpp_exceptions is undefined, 0, or other varies 
+// Whether __cpp_exceptions is undefined, 0, or other varies
 // by compiler, so set to the year the macro was instroduced
 #if defined(__cpp_exceptions) && __cpp_exceptions == 199711
 #define ENABLE_EXCEPTIONS
