@@ -21,7 +21,10 @@ std::vector<std::shared_ptr<const std::string> > FILES;
 
 Fw::MallocAllocator alloc;
 
-static const U32 MAX_FILES = 100;
+// Match this number to RANDOM_BOUND in CommonTests.cpp.
+// If it does not match, a unit test may hit a corner case
+// where it opens more files than MicroFs is configured to allow.
+static const U32 MAX_FILES = 1000;
 static constexpr U16 MAX_FILE_PATH = 256;
 static const char BASE_PATH[] = "/" MICROFS_BIN_STRING "0";
 static const char TEST_FILE[] = MICROFS_FILE_STRING;
