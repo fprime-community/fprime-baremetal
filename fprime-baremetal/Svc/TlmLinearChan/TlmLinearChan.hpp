@@ -23,6 +23,7 @@ class TlmLinearChan : public TlmLinearChanComponentBase {
     void init(FwSizeType queueDepth,   /*!< The queue depth*/
               FwEnumStoreType instance /*!< The instance number*/
     );
+    // NOTE: setup() should be called before init()
     void setup(FwEnumStoreType memId,       //!< Memory segment identifier
                Fw::MemAllocator& allocator  //!< Memory allocator
     );
