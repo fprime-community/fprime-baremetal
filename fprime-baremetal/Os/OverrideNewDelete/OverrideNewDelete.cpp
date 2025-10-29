@@ -64,7 +64,9 @@ void* allocateMemoryWithoutId(const FwSizeType size) {
 
 void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
     void* ptr;
+#ifndef BUILD_UT    
     FW_ASSERT(pAllocator != nullptr);
+#endif
     if (pAllocator == nullptr) {
         ptr = ::malloc(size);
     } else {
@@ -98,7 +100,7 @@ void* operator new(std::size_t size, const std::nothrow_t& tag) noexcept {
 void* operator new(std::size_t size) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
     if (mem == nullptr) {
-#ifdef OND_ENABLE_EXCEPTIONS
+#ifdef ENABLE_EXCEPTIONS
         throw std::bad_alloc();
 #else
         FW_ASSERT(false);
@@ -110,7 +112,7 @@ void* operator new(std::size_t size) {
 void* operator new(std::size_t size, const FwEnumStoreType identifier) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
     if (mem == nullptr) {
-#ifdef OND_ENABLE_EXCEPTIONS
+#ifdef ENABLE_EXCEPTIONS
         throw std::bad_alloc();
 #else
         FW_ASSERT(false);
@@ -122,7 +124,7 @@ void* operator new(std::size_t size, const FwEnumStoreType identifier) {
 void* operator new[](std::size_t size) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
     if (mem == nullptr) {
-#ifdef OND_ENABLE_EXCEPTIONS
+#ifdef ENABLE_EXCEPTIONS
         throw std::bad_alloc();
 #else
         FW_ASSERT(false);
@@ -135,7 +137,7 @@ void* operator new[](std::size_t size) {
 void* operator new[](std::size_t size, const FwEnumStoreType identifier) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
     if (mem == nullptr) {
-#ifdef OND_ENABLE_EXCEPTIONS
+#ifdef ENABLE_EXCEPTIONS
         throw std::bad_alloc();
 #else
         FW_ASSERT(false);

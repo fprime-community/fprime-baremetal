@@ -5,6 +5,11 @@
 #include <gtest/gtest.h>
 #include <Fw/Test/UnitTest.hpp>
 #include "TlmLinearChanTester.hpp"
+#include <Fw/Types/MallocAllocator.hpp>
+// FIXME: This should be able to go away once https://github.com/nasa/fprime/issues/4039 is implemented
+#include "fprime-baremetal/Os/OverrideNewDelete/OverrideNewDelete.hpp"
+
+static Fw::MallocAllocator mallocator;
 
 TEST(TlmLinearChanTest, InitTest) {
     Baremetal::TlmLinearChanTester tester;
@@ -40,6 +45,8 @@ TEST(TlmLinearChanTest, OffNominal) {
 }
 
 int main(int argc, char** argv) {
+    Os::Baremetal::OverrideNewDelete::registerMemAllocator(&mallocator);
+
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
