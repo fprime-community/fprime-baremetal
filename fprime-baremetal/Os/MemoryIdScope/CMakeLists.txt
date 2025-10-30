@@ -6,12 +6,11 @@
 #
 ####
 register_fprime_module(
-    Os_Baremetal_OverrideNewDelete
+    Os_Baremetal_MemoryIdScope
     SOURCES
-        "${CMAKE_CURRENT_LIST_DIR}/OverrideNewDelete.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/MemoryIdScope.cpp"
     HEADERS
-        "${CMAKE_CURRENT_LIST_DIR}/OverrideNewDelete.hpp"
+        "${CMAKE_CURRENT_LIST_DIR}/MemoryIdScope.hpp"
     DEPENDS
         Fw_Types
-        Os_Baremetal_MemoryIdScope
 )

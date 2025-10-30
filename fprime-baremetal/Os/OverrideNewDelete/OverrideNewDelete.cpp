@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <Fw/Types/Assert.hpp>
 #include <atomic>
+#include <fprime-baremetal/Os/MemoryIdScope/MemoryIdScope.hpp>
 #include <new>        // included to get std::nothrow_t
 #include <stdexcept>  // For standard exception types
 
@@ -23,7 +24,7 @@ namespace OverrideNewDelete {
 
 // global variables
 //! Modifiable default (useful before calling code with new/delete to attribute the memory user)
-FwEnumStoreType customId = DEFAULT_ID;
+FwEnumStoreType customId = Os::Baremetal::MemoryIdScope::DEFAULT_ID;
 //! Pointer to MemAllocator
 static Fw::MemAllocator* pAllocator = nullptr;
 
@@ -34,9 +35,6 @@ void* allocateMemoryWithoutId(const FwSizeType size);
 void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size);
 
 // Function implementations
-void setDefaultId(FwEnumStoreType tmpId) {
-    customId = tmpId;
-}
 FwSizeType registerMemAllocator(Fw::MemAllocator* allocator) {
     FW_ASSERT(pAllocator == nullptr);
     FW_ASSERT(allocator != nullptr);
@@ -170,4 +168,8 @@ void operator delete(void* ptr, std::size_t size) {
 }
 void operator delete[](void* ptr, std::size_t size) {
     Os::Baremetal::OverrideNewDelete::deallocateMemoryWithoutId(ptr);
+}
+// Override the weak implementation provided by MemoryIdScope
+void setDefaultMemoryId(FwEnumStoreType tmpId) {
+    Os::Baremetal::OverrideNewDelete::customId = tmpId;
 }

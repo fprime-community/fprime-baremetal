@@ -21,29 +21,11 @@ namespace Os {
 namespace Baremetal {
 namespace OverrideNewDelete {
 
-//! ID passed to Fw::MemAllocator::allocate() and Fw::MemAllocator::deallocate() calls
-constexpr FwEnumStoreType DEFAULT_ID = -1;
-
 //! \brief Register a memory allocator for all future new operator calls
 //!
 //! \param allocator MemAllocator to use for all future new/delete calls
 //! \return Returns number of bytes allocated before
 FwSizeType registerMemAllocator(Fw::MemAllocator* allocator);
-
-void setDefaultId(FwEnumStoreType tmpId);
-// Temporary change default ID
-class MemoryIdScope {
-  public:
-    MemoryIdScope(FwEnumStoreType tmpId) {
-        puts("set default ID");
-        setDefaultId(tmpId);
-    }
-
-    ~MemoryIdScope() {
-        puts("restore default ID");
-        setDefaultId(DEFAULT_ID);
-    }
-};
 
 }  // namespace OverrideNewDelete
 }  // namespace Baremetal

@@ -7,10 +7,8 @@
 #include <Fw/Com/ComBuffer.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <config/FpConfig.hpp>
+#include <fprime-baremetal/Os/MemoryIdScope/MemoryIdScope.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
-#ifdef FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE
-#include <fprime-baremetal/Os/OverrideNewDelete/OverrideNewDelete.hpp>
-#endif
 #include <new>
 
 namespace Baremetal {
@@ -33,12 +31,9 @@ TlmLinearChan::~TlmLinearChan() {
 void TlmLinearChan::init(FwSizeType queueDepth,   /*!< The queue depth*/
                          FwEnumStoreType instance /*!< The instance number*/
 ) {
-#ifdef FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE
     // This component's init does dynamic allocation (through Os::Queue)
     // So set the default memory ID
-    Os::Baremetal::OverrideNewDelete::MemoryIdScope tmp =
-        Os::Baremetal::OverrideNewDelete::MemoryIdScope(this->m_memId);
-#endif
+    Os::Baremetal::MemoryIdScope tmp = Os::Baremetal::MemoryIdScope(this->m_memId);
     TlmLinearChanComponentBase::init(queueDepth, instance);
 }
 
