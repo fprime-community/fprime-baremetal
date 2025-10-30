@@ -10,11 +10,9 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/TlmLinearChan.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/TlmLinearChan.cpp"
 )
-if(FPRIME_BAREMENTAL_OVERRIDE_NEW_DELETE)
 set(MOD_DEPS
-        Os_Baremetal_OverrideNewDelete
+        Os_Baremetal_MemoryIdScope
 )
-endif()
 
 register_fprime_module()
 
