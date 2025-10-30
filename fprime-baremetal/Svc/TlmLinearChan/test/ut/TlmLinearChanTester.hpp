@@ -88,11 +88,14 @@ class TlmLinearChanTester : public TlmLinearChanGTestBase {
     // Variables
     // ----------------------------------------------------------------------
 
+    // Note: This MUST be declared before 'component' or it will be destroyed
+    // before the component can deallocate its memory.
+    Fw::MallocAllocator m_mallocator;
+
     //! The component under test
     //!
     TlmLinearChan component;
 
-    Fw::MallocAllocator m_mallocator;
     // Keep a history
     FwIndexType m_numBuffs;
     Fw::ComBuffer m_rcvdBuffer[TLMCHAN_HASH_BUCKETS];

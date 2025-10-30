@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 #include <Fw/Test/UnitTest.hpp>
-#include "TlmLinearChanTester.hpp"
 #include <Fw/Types/MallocAllocator.hpp>
+#include "TlmLinearChanTester.hpp"
 // FIXME: This should be able to go away once https://github.com/nasa/fprime/issues/4039 is implemented
 #include "fprime-baremetal/Os/OverrideNewDelete/OverrideNewDelete.hpp"
 

@@ -64,7 +64,7 @@ void* allocateMemoryWithoutId(const FwSizeType size) {
 
 void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
     void* ptr;
-#ifndef BUILD_UT    
+#ifndef BUILD_UT
     FW_ASSERT(pAllocator != nullptr);
 #endif
     if (pAllocator == nullptr) {
