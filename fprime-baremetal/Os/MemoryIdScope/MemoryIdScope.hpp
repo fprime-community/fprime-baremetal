@@ -1,8 +1,8 @@
 //! ======================================================================
 //! \title fprime-baremetal/Os/Baremetal/MemoryIdScope.hpp
 //! \brief Header file defining a class that can be used to temporarily
-//! over set the default memory ID (which is used if OverrideNewDelete is
-//! included in the deployment, else is a ignored)
+//!  set the default memory ID (which is used if OverrideNewDelete is
+//! included in the deployment, else it's ignored)
 // ======================================================================
 #ifndef OS_Baremetal_MemoryIdScope_HPP
 #define OS_Baremetal_MemoryIdScope_HPP
