@@ -16,15 +16,13 @@ namespace Baremetal {
 namespace OverrideNewDelete {
 
 // Determine whether it's possible to throw exceptions
-// Whether __cpp_exceptions is undefined, 0, or other varies
-// by compiler, so set to the year the macro was instroduced
-#if defined(__cpp_exceptions) && __cpp_exceptions == 199711
+// Whether __cpp_exceptions is undefined, 0, or other varies by compiler,
+// so check the macro's value (it's 199711 b/c it was introduced in the
+// C++98 standard and hasn't been changed since)
+#if defined(__cpp_exceptions) && __cpp_exceptions >= 199711
 #define ENABLE_EXCEPTIONS
 #endif
 
-// global variables
-//! Modifiable default (useful before calling code with new/delete to attribute the memory user)
-FwEnumStoreType customId = Os::Baremetal::MemoryIdScope::DEFAULT_ID;
 //! Pointer to MemAllocator
 static Fw::MemAllocator* pAllocator = nullptr;
 
@@ -45,7 +43,7 @@ FwSizeType registerMemAllocator(Fw::MemAllocator* allocator) {
 }
 
 void deallocateMemoryWithoutId(void* ptr) {
-    deallocateMemory(customId, ptr);
+    deallocateMemory(Os::Baremetal::defaultMemoryId, ptr);
 }
 
 void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
@@ -57,7 +55,7 @@ void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
 }
 
 void* allocateMemoryWithoutId(const FwSizeType size) {
-    return allocateMemory(customId, size);
+    return allocateMemory(Os::Baremetal::defaultMemoryId, size);
 }
 
 void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
@@ -168,8 +166,4 @@ void operator delete(void* ptr, std::size_t size) {
 }
 void operator delete[](void* ptr, std::size_t size) {
     Os::Baremetal::OverrideNewDelete::deallocateMemoryWithoutId(ptr);
-}
-// Override the weak implementation provided by MemoryIdScope
-void setDefaultMemoryId(FwEnumStoreType tmpId) {
-    Os::Baremetal::OverrideNewDelete::customId = tmpId;
 }

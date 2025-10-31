@@ -22,7 +22,5 @@ set(UT_SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/test/ut/TestMain.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/test/ut/TlmLinearChanTester.cpp"
 )
-set(UT_MOD_DEPS
-        Os_Baremetal_OverrideNewDelete
-)
+
 register_fprime_ut()
