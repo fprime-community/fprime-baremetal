@@ -27,10 +27,10 @@ namespace OverrideNewDelete {
 static Fw::MemAllocator* pAllocator = nullptr;
 
 // Prototypes
-void deallocateMemoryWithoutId(void* ptr);
-void deallocateMemory(const FwEnumStoreType identifier, void* ptr);
-void* allocateMemoryWithoutId(const FwSizeType size);
-void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size);
+static void deallocateMemoryWithoutId(void* ptr);
+static void deallocateMemory(const FwEnumStoreType identifier, void* ptr);
+static void* allocateMemoryWithoutId(const FwSizeType size);
+static void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size);
 
 // Function implementations
 FwSizeType registerMemAllocator(Fw::MemAllocator* allocator) {
@@ -42,11 +42,11 @@ FwSizeType registerMemAllocator(Fw::MemAllocator* allocator) {
     return mi.uordblks;
 }
 
-void deallocateMemoryWithoutId(void* ptr) {
+static void deallocateMemoryWithoutId(void* ptr) {
     deallocateMemory(Os::Baremetal::defaultMemoryId, ptr);
 }
 
-void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
+static void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
     if (pAllocator == nullptr) {
         ::free(ptr);
     } else {
@@ -54,12 +54,12 @@ void deallocateMemory(const FwEnumStoreType identifier, void* ptr) {
     }
 }
 
-void* allocateMemoryWithoutId(const FwSizeType size) {
+static void* allocateMemoryWithoutId(const FwSizeType size) {
     return allocateMemory(Os::Baremetal::defaultMemoryId, size);
 }
 
-void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
-    void* ptr;
+static void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType size) {
+    void* ptr = nullptr;
 #ifndef BUILD_UT
     FW_ASSERT(pAllocator != nullptr);
 #endif
