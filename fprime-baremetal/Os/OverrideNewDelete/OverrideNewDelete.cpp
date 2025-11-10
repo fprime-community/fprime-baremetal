@@ -15,14 +15,6 @@ namespace Os {
 namespace Baremetal {
 namespace OverrideNewDelete {
 
-// Determine whether it's possible to throw exceptions
-// Whether __cpp_exceptions is undefined, 0, or other varies by compiler,
-// so check the macro's value (it's 199711 b/c it was introduced in the
-// C++98 standard and hasn't been changed since)
-#if defined(__cpp_exceptions) && __cpp_exceptions >= 199711
-#define ENABLE_EXCEPTIONS
-#endif
-
 //! Pointer to MemAllocator
 static Fw::MemAllocator* pAllocator = nullptr;
 
@@ -86,21 +78,21 @@ static void* allocateMemory(const FwEnumStoreType identifier, const FwSizeType s
 }  // namespace Baremetal
 }  // namespace Os
 
+// Global operator new[] w/ nothrow
 void* operator new[](std::size_t size, const std::nothrow_t& tag) noexcept {
     return Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
 }
+// Global operator new w/ nothrow
 void* operator new(std::size_t size, const std::nothrow_t& tag) noexcept {
     return Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
 }
 // Global operator new
+// NOTE: Exceptions are not thrown (instead software asserts) if the allocation
+// fails, because raising exceptions is against the coding standard used by fprime
 void* operator new(std::size_t size) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
     if (mem == nullptr) {
-#ifdef ENABLE_EXCEPTIONS
-        throw std::bad_alloc();
-#else
         FW_ASSERT(false);
-#endif
     }
     return mem;
 }
@@ -108,11 +100,7 @@ void* operator new(std::size_t size) {
 void* operator new(std::size_t size, const FwEnumStoreType identifier) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
     if (mem == nullptr) {
-#ifdef ENABLE_EXCEPTIONS
-        throw std::bad_alloc();
-#else
         FW_ASSERT(false);
-#endif
     }
     return mem;
 }
@@ -120,11 +108,7 @@ void* operator new(std::size_t size, const FwEnumStoreType identifier) {
 void* operator new[](std::size_t size) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemoryWithoutId(size);
     if (mem == nullptr) {
-#ifdef ENABLE_EXCEPTIONS
-        throw std::bad_alloc();
-#else
         FW_ASSERT(false);
-#endif
     }
     return mem;
 }
@@ -133,11 +117,7 @@ void* operator new[](std::size_t size) {
 void* operator new[](std::size_t size, const FwEnumStoreType identifier) {
     void* mem = Os::Baremetal::OverrideNewDelete::allocateMemory(identifier, size);
     if (mem == nullptr) {
-#ifdef ENABLE_EXCEPTIONS
-        throw std::bad_alloc();
-#else
         FW_ASSERT(false);
-#endif
     }
     return mem;
 }
