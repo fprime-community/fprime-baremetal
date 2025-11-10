@@ -137,7 +137,7 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
 
     // Deserialize the command packet
     Fw::CmdPacket cmdPkt;
-    Fw::SerializeStatus stat = cmdPkt.deserialize(data);
+    Fw::SerializeStatus stat = cmdPkt.deserializeFrom(data);
     if (stat != Fw::FW_SERIALIZE_OK) {
         Fw::DeserialStatus serErr = static_cast<Fw::DeserialStatus::t>(stat);
         this->log_WARNING_HI_MalformedCommand(serErr);
