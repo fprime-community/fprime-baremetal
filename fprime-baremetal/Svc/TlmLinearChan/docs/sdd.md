@@ -22,6 +22,9 @@ TLC-004 | The `Baremetal::TlmLinearChan` component shall write changed telemetry
 
 ## 3. Design
 
+### Assumptions
+1.  `Baremetal::TlmLinearChan::setup()` must be called before `Baremetal::TlmLinearChan::init()` because `setup()` is used to provide data that is required by the `init()` function
+
 ### 3.1 Ports
 
 The `Baremetal::TlmLinearChan` component uses the following port types:

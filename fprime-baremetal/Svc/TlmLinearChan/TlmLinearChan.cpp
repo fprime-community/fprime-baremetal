@@ -7,13 +7,13 @@
 #include <Fw/Com/ComBuffer.hpp>
 #include <Fw/Types/Assert.hpp>
 #include <config/FpConfig.hpp>
+#include <fprime-baremetal/Os/MemoryIdScope/MemoryIdScope.hpp>
 #include <fprime-baremetal/Svc/TlmLinearChan/TlmLinearChan.hpp>
-
 #include <new>
 
 namespace Baremetal {
 
-TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_setupDone(false) {}
+TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_memId(0), m_setupDone(false) {}
 
 TlmLinearChan::~TlmLinearChan() {
     if (this->m_tlmEntries != nullptr) {
@@ -31,6 +31,9 @@ TlmLinearChan::~TlmLinearChan() {
 void TlmLinearChan::init(FwSizeType queueDepth,   /*!< The queue depth*/
                          FwEnumStoreType instance /*!< The instance number*/
 ) {
+    // This component's init does dynamic allocation (through Os::Queue)
+    // So set the default memory ID
+    Os::Baremetal::MemoryIdScope tmp = Os::Baremetal::MemoryIdScope(this->m_memId);
     TlmLinearChanComponentBase::init(queueDepth, instance);
 }
 
