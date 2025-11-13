@@ -110,8 +110,11 @@ class MicroFsTester : public Os::Test::FileTest::Tester {
     //! \return true if it exists, false otherwise.
     //!
     bool exists(const std::string& filename) const override {
-        bool exits = check_permissions(filename.c_str(), F_OK);
-        return exits;
+        // FIXME: This is a hack, the previous version called "check_permissions(filename.c_str(), F_OK);"
+        // with check_permissions() hard coded to always return true, which was also a hack
+        // This has to return false because 'Os::Test::FileTest::Tester::OpenBaseRule::action'
+        // was updated to check if a random file name existed and if it did, not use it
+        return false;
     }
 
     //! Get a filename, randomly if random is true, otherwise use a basic filename.
