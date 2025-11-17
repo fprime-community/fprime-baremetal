@@ -118,12 +118,12 @@ void TlmLinearChanTester::runOffNominal() {
 
     // create Telemetry item and put dummy data in to make sure it gets erased
     buff.resetSer();
-    stat = buff.serialize(val);
+    stat = buff.serializeFrom(val);
     ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
 
     // Read back value
     this->invoke_to_TlmGet(0, 10, timeTag, buff);
-    ASSERT_EQ(0u, buff.getBuffLength());
+    ASSERT_EQ(0u, buff.getSize());
 }
 
 // ----------------------------------------------------------------------
@@ -177,24 +177,24 @@ void TlmLinearChanTester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan
         this->m_rcvdBuffer[packet].resetDeser();
         // first piece should be tlm packet descriptor
         FwPacketDescriptorType desc;
-        stat = this->m_rcvdBuffer[packet].deserialize(desc);
+        stat = this->m_rcvdBuffer[packet].deserializeTo(desc);
         ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
         ASSERT_EQ(desc, static_cast<FwPacketDescriptorType>(Fw::ComPacketType::FW_PACKET_TELEM));
 
         for (FwChanIdType chan = 0; chan < CHANS_PER_COMBUFFER; chan++) {
             // decode channel ID
             FwEventIdType sentId;
-            stat = this->m_rcvdBuffer[packet].deserialize(sentId);
+            stat = this->m_rcvdBuffer[packet].deserializeTo(sentId);
             ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
 
             // next piece is time tag
             Fw::Time recTimeTag(TimeBase::TB_NONE, 0, 0);
-            stat = this->m_rcvdBuffer[packet].deserialize(recTimeTag);
+            stat = this->m_rcvdBuffer[packet].deserializeTo(recTimeTag);
             ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
             ASSERT_TRUE(timeTag == recTimeTag);
             // next piece is event argument
             U32 readVal;
-            stat = this->m_rcvdBuffer[packet].deserialize(readVal);
+            stat = this->m_rcvdBuffer[packet].deserializeTo(readVal);
             ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
 
             if (chanNum == currentChan) {
@@ -211,7 +211,7 @@ void TlmLinearChanTester::checkBuff(FwChanIdType chanNum, FwChanIdType totalChan
         }
 
         // packet should be empty
-        ASSERT_EQ(0, this->m_rcvdBuffer[packet].getBuffLeft());
+        ASSERT_EQ(0, this->m_rcvdBuffer[packet].getDeserializeSizeLeft());
     }
 }
 
@@ -224,7 +224,7 @@ void TlmLinearChanTester::sendBuff(FwChanIdType id, U32 val) {
 
     // create telemetry item
     buff.resetSer();
-    stat = buff.serialize(val);
+    stat = buff.serializeFrom(val);
     ASSERT_EQ(Fw::FW_SERIALIZE_OK, stat);
 
     static bool tlc001 = false;
@@ -246,7 +246,7 @@ void TlmLinearChanTester::sendBuff(FwChanIdType id, U32 val) {
     this->invoke_to_TlmGet(0, id, timeTag, readBack);
     // deserialize value
     retestVal = 0;
-    readBack.deserialize(retestVal);
+    readBack.deserializeTo(retestVal);
     ASSERT_EQ(retestVal, val);
 }
 
