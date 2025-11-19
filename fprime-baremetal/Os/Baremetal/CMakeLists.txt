@@ -19,6 +19,7 @@ register_fprime_module(
         "${CMAKE_CURRENT_LIST_DIR}/error.hpp"
     DEPENDS
         Fw_Types
+        Os_RawTime
 )
 
 # Setup MicroFs
