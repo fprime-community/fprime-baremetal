@@ -1,5 +1,10 @@
 module Baremetal {
 
+    # FIXME - Should this be a constant defined outside fprime-baremetal?
+    # Seems like it should be project-configurable; not sure though where it should go
+    @ Constant defining the number of UART command destinations
+    constant NUM_UART_TARGETS = 6
+
     @ A passive component for dispatching commands
     passive component PassiveCmdDispatcher {
 
@@ -79,6 +84,9 @@ module Baremetal {
 
         @ Output command sequence status ports
         output port seqCmdStatus: [CmdDispatcherSequencePorts] Fw.CmdResponse
+
+        @ Output port to send commands over UART
+        output port uartCmdSend: [NUM_UART_TARGETS] Fw.Com
 
         # Port matching specifiers
         match compCmdSend with compCmdReg
