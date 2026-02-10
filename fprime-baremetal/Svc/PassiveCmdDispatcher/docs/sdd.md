@@ -28,6 +28,7 @@ Add a class diagram here
 | [`Fw::Cmd`](../../../Fw/Cmd/docs/sdd.md) | `compCmdSend` | `output` | Send commands to components |
 | [`Fw::CmdResponse`](../../../Fw/Cmd/docs/sdd.md) | `compCmdStat` | `sync input` | Port for components to report command status |
 | [`Fw::Com`](../../../Fw/Com/docs/sdd.md) | `seqCmdBuff` | `sync input` | Receive command buffer |
+| [`Fw::Cmd`](../../../Fw/Com/docs/sdd.md) | `seqCmdIn` | `sync input` | Receive command in command format |
 | [`Fw::CmdResponse`](../../../Fw/Cmd/docs/sdd.md) | `seqCmdStatus` | `output` | Send command status to command buffer source |
 
 ## Component States

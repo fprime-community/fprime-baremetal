@@ -63,6 +63,12 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
 
   private:
     // ----------------------------------------------------------------------
+    // Helper functions for input ports
+    // ----------------------------------------------------------------------
+
+    void seqCmd_helper(FwIndexType portNum, FwOpcodeType opCode, U32 cmdSeq, Fw::CmdArgBuffer& args);
+
+    // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
 
@@ -89,6 +95,15 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
                             Fw::ComBuffer& data,  //!< Buffer containing packet data
                             U32 context           //!< Call context value; meaning chosen by user
                             ) override;
+
+    //! Handler implementation for seqCmdBuffFwCmd
+    //!
+    //! Command buffer input port for sequencers or other sources of command buffers (for Fw.Cmd input)
+    void seqCmdIn_handler(FwIndexType portNum,    //!< The port number
+                          FwOpcodeType opCode,    //!< Command Op Code
+                          U32 cmdSeq,             //!< Command Sequence
+                          Fw::CmdArgBuffer& args  //!< Command arguments
+                          ) override;
 
   private:
     // ----------------------------------------------------------------------

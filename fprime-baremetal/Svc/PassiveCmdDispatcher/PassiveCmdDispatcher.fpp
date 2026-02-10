@@ -77,6 +77,9 @@ module Baremetal {
         @ Command buffer input port for sequencers or other sources of command buffers
         sync input port seqCmdBuff: [CmdDispatcherSequencePorts] Fw.Com
 
+        @ Command input port for sequencers or other sources of commands
+        sync input port seqCmdIn: [CmdDispatcherSequencePorts] Fw.Cmd
+
         @ Output command sequence status ports
         output port seqCmdStatus: [CmdDispatcherSequencePorts] Fw.CmdResponse
 
