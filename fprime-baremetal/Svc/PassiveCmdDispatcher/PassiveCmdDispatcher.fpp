@@ -85,7 +85,6 @@ module Baremetal {
 
         # Port matching specifiers
         match compCmdSend with compCmdReg
-        match seqCmdStatus with seqCmdBuff
 
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters
