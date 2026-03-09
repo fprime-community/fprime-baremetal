@@ -132,21 +132,11 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
     }
 }
 
-void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
+void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
+                                         FwOpcodeType opcode,
+                                         U32 context,
+                                         Fw::CmdArgBuffer& args) {
     FW_ASSERT(this->m_cmdTables != nullptr);
-
-    // Deserialize the command packet
-    Fw::CmdPacket cmdPkt;
-    Fw::SerializeStatus stat = cmdPkt.deserializeFrom(data);
-    if (stat != Fw::FW_SERIALIZE_OK) {
-        Fw::DeserialStatus serErr = static_cast<Fw::DeserialStatus::t>(stat);
-        this->log_WARNING_HI_MalformedCommand(serErr);
-        if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
-            this->seqCmdStatus_out(portNum, cmdPkt.getOpCode(), context, Fw::CmdResponse::VALIDATION_ERROR);
-        }
-        return;
-    }
-    FwOpcodeType opcode = cmdPkt.getOpCode();
 
     // Search for the opcode in the dispatch table
     DispatchEntry* entry = nullptr;
@@ -184,7 +174,7 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
         }
 
         // Pass arguments to the argument buffer and log the dispatched command
-        this->compCmdSend_out(entry->port, opcode, this->m_seq, cmdPkt.getArgBuffer());
+        this->compCmdSend_out(entry->port, opcode, this->m_seq, args);
         this->log_COMMAND_OpCodeDispatched(opcode, entry->port);
     } else {
         // Opcode could not be found in the dispatch table, fail the command
@@ -196,6 +186,28 @@ void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer
 
     // Increment sequence number
     this->m_seq++;
+}
+
+void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
+    // Deserialize the command packet
+    Fw::CmdPacket cmdPkt;
+    Fw::SerializeStatus stat = cmdPkt.deserializeFrom(data);
+    if (stat != Fw::FW_SERIALIZE_OK) {
+        Fw::DeserialStatus serErr = static_cast<Fw::DeserialStatus::t>(stat);
+        this->log_WARNING_HI_MalformedCommand(serErr);
+        if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
+            this->seqCmdStatus_out(portNum, cmdPkt.getOpCode(), context, Fw::CmdResponse::VALIDATION_ERROR);
+        }
+        return;
+    }
+    seqCmd_helper(portNum, cmdPkt.getOpCode(), context, cmdPkt.getArgBuffer());
+}
+
+void PassiveCmdDispatcher::seqCmdIn_handler(FwIndexType portNum,
+                                            FwOpcodeType opCode,
+                                            U32 cmdSeq,
+                                            Fw::CmdArgBuffer& args) {
+    seqCmd_helper(portNum, opCode, cmdSeq, args);
 }
 
 // ----------------------------------------------------------------------
