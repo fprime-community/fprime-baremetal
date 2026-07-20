@@ -199,10 +199,7 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
         MicroFs::getFileStateFromIndex(this->m_handle.m_state_entry - MicroFs::MICROFS_FD_OFFSET);
     FW_ASSERT(state != nullptr);
 
-    FwSizeType oldSize = state->currSize;
-
     auto& loc = state->fd[this->m_handle.m_file_descriptor].loc;
-    auto oldLoc = loc;
 
     // compute new operation location
     switch (seekType) {
@@ -225,16 +222,8 @@ BaremetalFile::Status BaremetalFile::seek(FwSignedSizeType offset, BaremetalFile
             break;
     }
 
-    // Calculate new size. New size to be used below
-    FwSizeType newSize = 0;
-    if (loc > state->currSize) {
-        newSize = loc;
-    }
-
-    // fill with zeros if seek went past old size
-    if (newSize > oldSize) {
-        (void)memset(&state->data[oldSize], 0, newSize - oldSize);
-    }
+    // Per POSIX semantics, seeking past EOF does not change file size.
+    // The size will be updated when a write occurs, and any gap will be zero-filled then.
 
     return OP_OK;
 }
@@ -321,22 +310,34 @@ BaremetalFile::Status BaremetalFile::write(const U8* buffer, FwSizeType& size, B
     FwSizeType& loc = state->fd[this->m_handle.m_file_descriptor].loc;
 
     // Make sure we write to the end of file when appending
-    if (this->m_handle.m_mode == OPEN_APPEND) {
+    // Only reposition for APPEND mode if we're actually writing data (size > 0)
+    // Per POSIX semantics, zero-byte writes should not reposition in APPEND mode
+    if (this->m_handle.m_mode == OPEN_APPEND && size > 0) {
         loc = state->currSize;
+    }
+
+    // If writing past current file size AND actually writing data, zero-fill the gap
+    // Note: A zero-byte write should NOT expand the file per POSIX semantics
+    if (size > 0 && loc > state->currSize) {
+        (void)memset(&state->data[state->currSize], 0, loc - state->currSize);
     }
 
     if (loc + size > state->dataSize) {
         size = state->dataSize - loc;
     }
 
-    // copy data to file buffer
-    (void)memcpy(&state->data[loc], buffer, size);
+    // copy data to file buffer (only if size > 0)
+    if (size > 0) {
+        (void)memcpy(&state->data[loc], buffer, size);
+    }
 
     // increment location
     loc += size;
 
     // Check if the currSize is to be increased.
-    if (loc > state->currSize) {
+    // Only increase size if we actually wrote data (size > 0).
+    // A zero-byte write should not expand the file per POSIX semantics.
+    if (size > 0 && loc > state->currSize) {
         state->currSize = loc;
     }
 
