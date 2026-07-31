@@ -271,8 +271,9 @@ void Os::Tester::Listings::action(Os::Tester& state  //!< The test state
         auto stat = dir.open(dirname.toChar(), Os::DirectoryInterface::READ);
         ASSERT_EQ(stat, Os::DirectoryInterface::OP_OK);
         Fw::String filenameArray[MAX_FILES_PER_BIN];
+        Fw::ExternalArray<Fw::String> filenameExternalArray(filenameArray, MAX_FILES_PER_BIN);
         FwSizeType filenameCount = 0;
-        stat = dir.readDirectory(filenameArray, MAX_FILES_PER_BIN, filenameCount);
+        stat = dir.readDirectory(filenameExternalArray, filenameCount);
         ASSERT_EQ(filenameCount, MAX_FILES_PER_BIN);
         ASSERT_EQ(stat, Os::DirectoryInterface::OP_OK);
         for (U16 j = 0; j < MAX_FILES_PER_BIN; j++) {
