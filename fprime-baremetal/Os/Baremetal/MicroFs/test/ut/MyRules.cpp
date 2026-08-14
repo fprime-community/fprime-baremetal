@@ -990,13 +990,17 @@ void Os::Tester::AppendFile::action(Os::Tester& state  //!< The test state
 ) {
     printf("--> Rule: %s Append %s to %s\n", this->getName(), this->srcFile, this->destFile);
     Os::FileSystem::Status stat = Os::FileSystem::appendFile(this->srcFile, this->destFile);
-    ASSERT_EQ(Os::FileSystem::OP_OK, stat);
 
     I32 addSize = this->srcModel->size;
-    // If the size is going to overflow, then limit the addition size
-    if ((this->destModel->size + this->srcModel->size) > FILE_SIZE) {
+    // fprime pull request #5632 updated the file model to return OTHER_ERROR when a
+    // write is truncated (i.e. when the entire size requested isn't written).
+    // If the size is going to overflow, MicroFs truncates the write in this case.
+    // So if the that's going to happen, limit the addition size and expect status OTHER_ERROR.
+    const bool willOverflow = (this->destModel->size + this->srcModel->size) > FILE_SIZE;
+    if (willOverflow) {
         addSize = FILE_SIZE - this->destModel->size;
     }
+    ASSERT_EQ(willOverflow ? Os::FileSystem::OTHER_ERROR : Os::FileSystem::OP_OK, stat);
 
     memcpy(this->destModel->buffOut + this->destModel->size, this->srcModel->buffOut, addSize);
     this->destModel->size += addSize;
