@@ -20,19 +20,19 @@ module Baremetal {
         ###############################################################################
 
         @ Command dispatched
-        event OpCodeDispatched($opcode: FwOpcodeType, $port: I32) \
+        event OpCodeDispatched(opCode: FwOpcodeType, $port: I32) \
             severity command \
             id 0x0 \
             format "Opcode 0x{x} dispatched to port {}"
 
         @ Command success event
-        event OpCodeCompleted($opcode: FwOpcodeType) \
+        event OpCodeCompleted(opCode: FwOpcodeType) \
             severity command \
             id 0x1 \
             format "Opcode 0x{x} completed"
 
         @ Command failure event
-        event OpCodeError($opcode: FwOpcodeType, error: Fw.CmdResponse) \
+        event OpCodeError(opCode: FwOpcodeType, error: Fw.CmdResponse) \
             severity command \
             id 0x2 \
             format "Opcode 0x{x} completed with error {}"
@@ -44,13 +44,13 @@ module Baremetal {
             format "Received malformed command packet. Status: {}"
 
         @ Received an invalid opcode
-        event InvalidCommand($opcode: FwOpcodeType) \
+        event InvalidCommand(opCode: FwOpcodeType) \
             severity warning high \
             id 0x4 \
             format "Invalid opcode 0x{x} received"
 
         @ Exceeded the number of commands that can be executed simultaneously
-        event TooManyCommands($opcode: FwOpcodeType) \
+        event TooManyCommands(opCode: FwOpcodeType) \
             severity warning high \
             id 0x5 \
             format "Too many outstanding commands. Opcode: 0x{x}"
