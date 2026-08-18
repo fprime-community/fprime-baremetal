@@ -9,6 +9,7 @@
 
 #include <limits>
 #include <new>
+#include "Fw/Types/Assert.hpp"
 
 namespace Baremetal {
 
@@ -26,7 +27,7 @@ constexpr FwOpcodeType OPCODE_UNUSED = std::numeric_limits<FwOpcodeType>::max();
 // ----------------------------------------------------------------------
 
 PassiveCmdDispatcher::PassiveCmdDispatcher(const char* const compName)
-    : PassiveCmdDispatcherComponentBase(compName), m_seq(0) {}
+    : PassiveCmdDispatcherComponentBase(compName), m_seq(0), m_eventDisabled() {}
 
 PassiveCmdDispatcher::CmdTables::CmdTables() {
     for (auto i = 0; i < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; i++) {
@@ -100,14 +101,6 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
     // This opcode is reserved for internal use
     FW_ASSERT(opCode != OPCODE_UNUSED, portNum);
 
-    // Check the command response and log success/failure
-    if (response.e == Fw::CmdResponse::OK) {
-        this->log_COMMAND_OpCodeCompleted(opCode);
-    } else {
-        FW_ASSERT(response.e != Fw::CmdResponse::OK);
-        this->log_COMMAND_OpCodeError(opCode, response);
-    }
-
     // Search for the command source
     FwIndexType portToCall = -1;
     U32 context = 0;
@@ -123,12 +116,28 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
             break;
         }
     }
-    // If found, call the port to report the command status
-    if ((portToCall != -1) && this->isConnected_seqCmdStatus_OutputPort(portToCall)) {
-        // NOTE: seqCmdStatus port forwards three arguments (opCode, cmdSeq, response) but the
-        // cmdSeq value has no meaning for the calling sequencer; instead, the context value is
-        // forwarded to allow the caller to utilize it if needed.
-        this->seqCmdStatus_out(portToCall, opCode, context, response);
+
+    FW_ASSERT(portToCall < NUM_SEQCMDSTATUS_OUTPUT_PORTS);
+
+    if (portToCall != -1) {
+        // Check the command response and log success/failure
+        if (response.e == Fw::CmdResponse::OK) {
+            if (!m_eventDisabled[portToCall]) {
+                this->log_COMMAND_OpCodeCompleted(opCode);
+            }
+        } else {
+            FW_ASSERT(response.e != Fw::CmdResponse::OK);
+            this->log_COMMAND_OpCodeError(opCode, response);
+        }
+
+        if (this->isConnected_seqCmdStatus_OutputPort(portToCall)) {
+            // NOTE: seqCmdStatus port forwards three arguments (opCode, cmdSeq, response) but the
+            // cmdSeq value has no meaning for the calling sequencer; instead, the context value is
+            // forwarded to allow the caller to utilize it if needed.
+            this->seqCmdStatus_out(portToCall, opCode, context, response);
+        }
+    } else {
+        this->log_WARNING_LO_UnexpectedCommandResponse(opCode, cmdSeq, response);
     }
 }
 
@@ -175,7 +184,9 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
 
         // Pass arguments to the argument buffer and log the dispatched command
         this->compCmdSend_out(entry->port, opcode, this->m_seq, args);
-        this->log_COMMAND_OpCodeDispatched(opcode, entry->port);
+        if (!this->m_eventDisabled[portNum]) {
+            this->log_COMMAND_OpCodeDispatched(opcode, entry->port);
+        }
     } else {
         // Opcode could not be found in the dispatch table, fail the command
         this->log_WARNING_HI_InvalidCommand(opcode);
@@ -229,6 +240,16 @@ void PassiveCmdDispatcher::CMD_CLEAR_TRACKING_cmdHandler(FwOpcodeType opCode, U3
         this->m_cmdTables->m_sequenceTracker[entry].opcode = OPCODE_UNUSED;
     }
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void PassiveCmdDispatcher ::SET_EVENT_EMISSION_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U8 portIdx, bool enabled) {
+    if (portIdx >= NUM_SEQCMDSTATUS_OUTPUT_PORTS) {
+        this->log_WARNING_LO_PortIndexOutOfRange(portIdx);
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    } else {
+        this->m_eventDisabled[portIdx] = !enabled;
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    }
 }
 
 }  // namespace Baremetal
