@@ -139,7 +139,7 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
                                          U32 context,
                                          Fw::CmdArgBuffer& args) {
     FW_ASSERT(this->m_cmdTables != nullptr);
-    Fw::CmdResponse::T err = Fw::CmdResponse::OK;
+
     // Search for the opcode in the dispatch table
     DispatchEntry* entry = nullptr;
     // Ignore OPCODE_UNUSED, reserved for internal use
@@ -151,11 +151,7 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
             }
         }
     }
-    if (entry == nullptr) {
-        // Opcode could not be found in the dispatch table, fail the command
-        err = Fw::CmdResponse::INVALID_OPCODE;
-    } else if (__builtin_expect(this->isConnected_compCmdSend_OutputPort(entry->port),
-                                1)) {
+    if (entry != nullptr && this->isConnected_compCmdSend_OutputPort(entry->port)) {
         // Register the command in the command tracker only if the response port is connected
         bool pendingFound = false;
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
@@ -182,17 +178,13 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
             this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::EXECUTION_ERROR);
         }
     } else {
-        c err = Fw::CmdResponse::EXECUTION_ERROR;
+        this->log_WARNING_HI_InvalidCommand(opcode);
+        if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
+            this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::INVALID_OPCODE;);
+        }
     }
     // Increment sequence number
     this->m_seq++;
-
-    if (err != Fw::CmdResponse::OK) {
-        this->log_WARNING_HI_InvalidCommand(opcode);
-        if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
-            this->seqCmdStatus_out(portNum, opcode, context, err);
-        }
-    }
 }
 
 void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
