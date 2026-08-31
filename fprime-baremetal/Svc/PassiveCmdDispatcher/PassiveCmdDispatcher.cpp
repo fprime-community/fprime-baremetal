@@ -115,7 +115,7 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
     U32 context = 0;
     for (auto pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
         auto entry = &this->m_cmdTables->m_sequenceTracker[pending];
-        if ((entry->seq == cmdSeq) && (entry->opcode != OPCODE_UNUSED)) {  // micro-op. higher entropy condition first
+        if ((entry->seq == cmdSeq) && (entry->opcode != OPCODE_UNUSED)) {
             portToCall = entry->callerPort;
             context = entry->context;
             FW_ASSERT(opCode == entry->opcode);
@@ -155,8 +155,7 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
         // Opcode could not be found in the dispatch table, fail the command
         err = Fw::CmdResponse::INVALID_OPCODE;
     } else if (__builtin_expect(this->isConnected_compCmdSend_OutputPort(entry->port),
-                                1)) {  // Question: is it ok if we add branch priors? I see they're not anywhere in the
-                                       // repo. Added one here just for documenting question.
+                                1)) {
         // Register the command in the command tracker only if the response port is connected
         bool pendingFound = false;
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
@@ -186,7 +185,6 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
         c err = Fw::CmdResponse::EXECUTION_ERROR;
     }
     // Increment sequence number
-    // TODO: increment this such that we know at constant time, what the index of the associated value is (???)
     this->m_seq++;
 
     if (err != Fw::CmdResponse::OK) {
