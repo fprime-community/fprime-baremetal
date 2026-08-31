@@ -13,9 +13,11 @@
 namespace Baremetal {
 
 // Check the CMD_DISPATCHER_DISPATCH_TABLE_SIZE and CMD_DISPATCHER_SEQUENCER_TABLE_SIZE constants for overflow
-static_assert(CMD_DISPATCHER_DISPATCH_TABLE_SIZE <= std::numeric_limits<FwOpcodeType>::max(),
+static_assert(CMD_DISPATCHER_DISPATCH_TABLE_SIZE <=
+                  std::numeric_limits<decltype(PassiveCmdDispatcher::DispatchEntry::opcode)>::max(),
               "Opcode table limited to opcode range");
-static_assert(CMD_DISPATCHER_SEQUENCER_TABLE_SIZE <= std::numeric_limits<U32>::max(),
+static_assert(CMD_DISPATCHER_SEQUENCER_TABLE_SIZE <=
+                  std::numeric_limits<decltype(PassiveCmdDispatcher::SequenceTracker::seq)>::max(),
               "Sequencer table limited to range of U32");
 
 // Indicates that an entry in the dispatch table or sequence tracker is unused
@@ -29,10 +31,10 @@ PassiveCmdDispatcher::PassiveCmdDispatcher(const char* const compName)
     : PassiveCmdDispatcherComponentBase(compName), m_seq(0) {}
 
 PassiveCmdDispatcher::CmdTables::CmdTables() {
-    for (auto i = 0; i < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; i++) {
+    for (auto i = 0; i < std::extent_v<decltype(m_entryTable)>; i++) {
         this->m_entryTable[i].opcode = OPCODE_UNUSED;
     }
-    for (auto i = 0; i < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; i++) {
+    for (auto i = 0; i < std::extent_v<decltype(m_sequenceTracker)>; i++) {
         this->m_sequenceTracker[i].opcode = OPCODE_UNUSED;
     }
 }
@@ -113,7 +115,7 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
     U32 context = 0;
     for (auto pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
         auto entry = &this->m_cmdTables->m_sequenceTracker[pending];
-        if ((entry->opcode != OPCODE_UNUSED) && (entry->seq == cmdSeq)) {
+        if ((entry->seq == cmdSeq) && (entry->opcode != OPCODE_UNUSED)) {  // micro-op. higher entropy condition first
             portToCall = entry->callerPort;
             context = entry->context;
             FW_ASSERT(opCode == entry->opcode);
@@ -137,7 +139,7 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
                                          U32 context,
                                          Fw::CmdArgBuffer& args) {
     FW_ASSERT(this->m_cmdTables != nullptr);
-
+    Fw::CmdResponse::T err = Fw::CmdResponse::OK;
     // Search for the opcode in the dispatch table
     DispatchEntry* entry = nullptr;
     // Ignore OPCODE_UNUSED, reserved for internal use
@@ -145,13 +147,19 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
         for (auto slot = 0; slot < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; slot++) {
             if (this->m_cmdTables->m_entryTable[slot].opcode == opcode) {
                 entry = &this->m_cmdTables->m_entryTable[slot];
+                break;
             }
         }
     }
-    if ((entry != nullptr) && this->isConnected_compCmdSend_OutputPort(entry->port)) {
+    if (entry == nullptr) {
+        // Opcode could not be found in the dispatch table, fail the command
+        err = Fw::CmdResponse::INVALID_OPCODE;
+    } else if (__builtin_expect(this->isConnected_compCmdSend_OutputPort(entry->port),
+                                1)) {  // Question: is it ok if we add branch priors? I see they're not anywhere in the
+                                       // repo. Added one here just for documenting question.
         // Register the command in the command tracker only if the response port is connected
+        bool pendingFound = false;
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
-            bool pendingFound = false;
             for (U32 pending = 0; pending < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; pending++) {
                 SequenceTracker* trackerEntry = &this->m_cmdTables->m_sequenceTracker[pending];
                 if (trackerEntry->opcode == OPCODE_UNUSED) {
@@ -163,29 +171,30 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
                     break;
                 }
             }
-            // If no slot was found to track the command, quit
-            if (!pendingFound) {
-                this->log_WARNING_HI_TooManyCommands(opcode);
-                if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
-                    this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::EXECUTION_ERROR);
-                }
-                return;
-            }
         }
-
-        // Pass arguments to the argument buffer and log the dispatched command
+        // Pass arguments to the argument buffer and log the dispatched command.
+        // Even if we did got find a sequencer slot, still send the command as we must ensure all critical commands can
+        // be completed.
         this->compCmdSend_out(entry->port, opcode, this->m_seq, args);
         this->log_COMMAND_OpCodeDispatched(opcode, entry->port);
+
+        if (!pendingFound) {  // PassiveCmdDispatcher::compCmdStat_handler will not clear the sequence
+            this->log_WARNING_HI_TooManyCommands(opcode);
+            this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::EXECUTION_ERROR);
+        }
     } else {
-        // Opcode could not be found in the dispatch table, fail the command
+        c err = Fw::CmdResponse::EXECUTION_ERROR;
+    }
+    // Increment sequence number
+    // TODO: increment this such that we know at constant time, what the index of the associated value is (???)
+    this->m_seq++;
+
+    if (err != Fw::CmdResponse::OK) {
         this->log_WARNING_HI_InvalidCommand(opcode);
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
-            this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::INVALID_OPCODE);
+            this->seqCmdStatus_out(portNum, opcode, context, err);
         }
     }
-
-    // Increment sequence number
-    this->m_seq++;
 }
 
 void PassiveCmdDispatcher::seqCmdBuff_handler(FwIndexType portNum, Fw::ComBuffer& data, U32 context) {
