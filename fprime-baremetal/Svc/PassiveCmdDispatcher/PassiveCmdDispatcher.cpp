@@ -13,11 +13,9 @@
 namespace Baremetal {
 
 // Check the CMD_DISPATCHER_DISPATCH_TABLE_SIZE and CMD_DISPATCHER_SEQUENCER_TABLE_SIZE constants for overflow
-static_assert(CMD_DISPATCHER_DISPATCH_TABLE_SIZE <=
-                  std::numeric_limits<decltype(PassiveCmdDispatcher::DispatchEntry::opcode)>::max(),
+static_assert(CMD_DISPATCHER_DISPATCH_TABLE_SIZE <= std::numeric_limits<FwOpcodeType>::max(),
               "Opcode table limited to opcode range");
-static_assert(CMD_DISPATCHER_SEQUENCER_TABLE_SIZE <=
-                  std::numeric_limits<decltype(PassiveCmdDispatcher::SequenceTracker::seq)>::max(),
+static_assert(CMD_DISPATCHER_SEQUENCER_TABLE_SIZE <= std::numeric_limits<U32>::max(),
               "Sequencer table limited to range of U32");
 
 // Indicates that an entry in the dispatch table or sequence tracker is unused
@@ -31,10 +29,10 @@ PassiveCmdDispatcher::PassiveCmdDispatcher(const char* const compName)
     : PassiveCmdDispatcherComponentBase(compName), m_seq(0) {}
 
 PassiveCmdDispatcher::CmdTables::CmdTables() {
-    for (auto i = 0; i < std::extent_v<decltype(m_entryTable)>; i++) {
+    for (auto i = 0; i < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; i++) {
         this->m_entryTable[i].opcode = OPCODE_UNUSED;
     }
-    for (auto i = 0; i < std::extent_v<decltype(m_sequenceTracker)>; i++) {
+    for (auto i = 0; i < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; i++) {
         this->m_sequenceTracker[i].opcode = OPCODE_UNUSED;
     }
 }
