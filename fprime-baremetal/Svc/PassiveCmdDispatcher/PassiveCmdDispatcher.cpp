@@ -178,9 +178,10 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
             this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::EXECUTION_ERROR);
         }
     } else {
+        // Branch taken when opcode fails to properly resolve to a mapped connected port.
         this->log_WARNING_HI_InvalidCommand(opcode);
         if (this->isConnected_seqCmdStatus_OutputPort(portNum)) {
-            this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::INVALID_OPCODE;);
+            this->seqCmdStatus_out(portNum, opcode, context, Fw::CmdResponse::INVALID_OPCODE);
         }
     }
     // Increment sequence number
