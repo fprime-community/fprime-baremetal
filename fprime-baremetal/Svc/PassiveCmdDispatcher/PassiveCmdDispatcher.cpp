@@ -225,8 +225,15 @@ void PassiveCmdDispatcher::CMD_CLEAR_TRACKING_cmdHandler(FwOpcodeType opCode, U3
     FW_ASSERT(this->m_cmdTables != nullptr);
 
     // Clear the sequence tracking table
-    for (FwOpcodeType entry = 0; entry < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; entry++) {
-        this->m_cmdTables->m_sequenceTracker[entry].opcode = OPCODE_UNUSED;
+    for (auto i = 0; i < CMD_DISPATCHER_SEQUENCER_TABLE_SIZE; i++) {
+        SequenceTracker* entry = &(this->m_cmdTables->m_sequenceTracker[i]);
+        if ((entry->opcode != OPCODE_UNUSED) && (entry->seq != cmdSeq)) {
+            // Alert the other callers that the SequenceTracker table is cleared and their pending status won't arrive.
+            entry->opcode = OPCODE_UNUSED;
+            if (this->isConnected_seqCmdStatus_OutputPort(entry->callerPort)) {
+                this->seqCmdStatus_out(entry->callerPort, entry->opcode, entry->context, Fw::CmdResponse::CLEARED);
+            }
+        }
     }
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
