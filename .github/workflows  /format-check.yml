@@ -1,0 +1,62 @@
+# Based on https://github.com/nasa/fprime/blob/c98eb751ce5a296c2f07cbd92c412ce365532264/.github/workflows/format-check.yml
+
+name: "Code Format Check"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CHECKED_DIRS: >-
+    cmake/
+    Va416x0/
+
+  # Third party code that does not satisfy our formatting rules
+  EXCLUDED_DIR: >-
+    Va416x0/Os/SeggerTerminal/RTT
+
+jobs:
+  cpp-formatting:
+    name: C++ Formatting
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: "Install Dependencies"
+        # FIXME: Release 4.3.0 does not include the fix in https://github.com/nasa/fprime-tools/pull/331, so we have to install a more recent commit
+        # Note: We need to use clang-format==20.1.8 for consistency with the F Prime python environment, or the formatting will be wrong
+        run: pip install git+https://github.com/nasa/fprime-tools@f5835682f34f10d8fbb97dc80b0d9cc66c38a375 clang-format==20.1.8
+
+      - name: "Check C++ Formatting"
+        run: |
+          fprime-util format --check --dirs $CHECKED_DIRS --exclude $EXCLUDED_DIR
+
+      - name: "Comment on PR in case of Failure"
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'C++ formatting checks failed on the submitted code. To fix, you can run this command on your branch:\n\n```bash\ngit diff --name-only origin/main...HEAD | fprime-util format --stdin\n```'
+            })
