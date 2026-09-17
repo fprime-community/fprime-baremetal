@@ -17,12 +17,7 @@ concurrency:
 
 env:
   CHECKED_DIRS: >-
-    cmake/
-    Va416x0/
-
-  # Third party code that does not satisfy our formatting rules
-  EXCLUDED_DIR: >-
-    Va416x0/Os/SeggerTerminal/RTT
+    fprime-baremetal
 
 jobs:
   cpp-formatting:
@@ -47,7 +42,7 @@ jobs:
 
       - name: "Check C++ Formatting"
         run: |
-          fprime-util format --check --dirs $CHECKED_DIRS --exclude $EXCLUDED_DIR
+          fprime-util format --check --dirs $CHECKED_DIRS
 
       - name: "Comment on PR in case of Failure"
         if: failure() && github.event_name == 'pull_request'
