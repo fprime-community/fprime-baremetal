@@ -20,37 +20,51 @@ module Baremetal {
         ###############################################################################
 
         @ Command dispatched
-        event OpCodeDispatched($opcode: FwOpcodeType, $port: I32) \
+        event OpCodeDispatched( \
+            $opcode: FwOpcodeType @< Opcode for the command that was dispatched
+            $port: FwIndexType @< Index of the port the command was dispatched to
+        ) \
             severity command \
             id 0x0 \
             format "Opcode 0x{x} dispatched to port {}"
 
-        @ Command success event
-        event OpCodeCompleted($opcode: FwOpcodeType) \
+        @ Command succeeded
+        event OpCodeCompleted( \
+            $opcode: FwOpcodeType @< Opcode for the command that completed
+        ) \
             severity command \
             id 0x1 \
             format "Opcode 0x{x} completed"
 
-        @ Command failure event
-        event OpCodeError($opcode: FwOpcodeType, error: Fw.CmdResponse) \
+        @ Command failed
+        event OpCodeError( \
+            $opcode: FwOpcodeType @< Opcode for the command that failed
+            error: Fw.CmdResponse @< Error status returned by the failed command
+        ) \
             severity command \
             id 0x2 \
             format "Opcode 0x{x} completed with error {}"
 
         @ Received a malformed command packet
-        event MalformedCommand($status: Fw.DeserialStatus) \
+        event MalformedCommand( \
+            $status: Fw.DeserialStatus @< Deserialization error encountered
+        ) \
             severity warning high \
             id 0x3 \
             format "Received malformed command packet. Status: {}"
 
         @ Received an invalid opcode
-        event InvalidCommand($opcode: FwOpcodeType) \
+        event InvalidCommand( \
+            $opcode: FwOpcodeType @< Invalid opcode that was received
+        ) \
             severity warning high \
             id 0x4 \
             format "Invalid opcode 0x{x} received"
 
         @ Exceeded the number of commands that can be executed simultaneously
-        event TooManyCommands($opcode: FwOpcodeType) \
+        event TooManyCommands( \
+            $opcode: FwOpcodeType @< Opcode for the command that was rejected due to too many outstanding commands
+        ) \
             severity warning high \
             id 0x5 \
             format "Too many outstanding commands. Opcode: 0x{x}"
