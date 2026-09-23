@@ -26,8 +26,11 @@ TaskRunner::~TaskRunner() {}
 
 void TaskRunner::addTask(Task* task) {
     FW_ASSERT(task->isCooperative());  // Cannot register uncooperative tasks
+    FW_ASSERT(task != nullptr);  // Cannot register a null task
 
-    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY);
+    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY, this->m_index, Os::Baremetal::TASK_CAPACITY);
+    this->m_task_table[this->m_index] = task;
+    this->m_index++;
 
     // Find the insertion point that keeps the table sorted in descending priority order.
     FwSizeType insert_pos = this->m_index;
