@@ -28,6 +28,8 @@ def main():
     # Get toolchain path
     if args.toolchain == 'native':
         toolchain_path_suffix = ''
+    elif args.toolchain == 'stm32h7':
+        toolchain_path_suffix = 'arm-none-eabi-'
     else:
         try:
             # Load JSON data generated from arduino-cli wrapper
