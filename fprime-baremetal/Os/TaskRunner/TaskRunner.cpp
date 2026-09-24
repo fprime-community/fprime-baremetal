@@ -28,7 +28,7 @@ void TaskRunner::addTask(Task* task) {
     FW_ASSERT(task->isCooperative());  // Cannot register uncooperative tasks
     FW_ASSERT(task != nullptr);  // Cannot register a null task
 
-    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY, this->m_index, Os::Baremetal::TASK_CAPACITY);
+    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY, static_cast<FwAssertArgType>(this->m_index), static_cast<FwAssertArgType>(Os::Baremetal::TASK_CAPACITY));
     this->m_task_table[this->m_index] = task;
     this->m_index++;
 
