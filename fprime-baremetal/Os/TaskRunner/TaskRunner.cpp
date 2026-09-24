@@ -26,24 +26,28 @@ TaskRunner::~TaskRunner() {}
 
 void TaskRunner::addTask(Task* task) {
     FW_ASSERT(task->isCooperative());  // Cannot register uncooperative tasks
+    FW_ASSERT(task != nullptr);  // Cannot register a null task
 
-    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY);
+    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY, static_cast<FwAssertArgType>(this->m_index), static_cast<FwAssertArgType>(Os::Baremetal::TASK_CAPACITY));
     this->m_task_table[this->m_index] = task;
     this->m_index++;
 
-    // Sort by priority during insertion
-    Task* sort_element = task;
-    for (FwSizeType i = 0; (sort_element != nullptr) && (i < Os::Baremetal::TASK_CAPACITY); i++) {
-        if ((this->m_task_table[i] == nullptr) or
-            (sort_element->getPriority() > this->m_task_table[i]->getPriority())) {
-            Task* temp = sort_element;
-            sort_element = this->m_task_table[i];
-            this->m_task_table[i] = temp;
+    // Find the insertion point that keeps the table sorted in descending priority order.
+    FwSizeType insert_pos = this->m_index;
+    for (FwSizeType i = 0; i < this->m_index; i++) {
+        if (task->getPriority() > this->m_task_table[i]->getPriority()) {
+            insert_pos = i;
+            break;
         }
     }
 
-    // The last sort element must be nullptr or the table overflowed
-    FW_ASSERT(sort_element == nullptr);
+    // Shift every entry from insert_pos onward one slot to the right to make room, then place the new task. 
+    // This avoids duplicating/overwriting existing entries.
+    for (FwSizeType i = this->m_index; i > insert_pos; i--) {
+        this->m_task_table[i] = this->m_task_table[i - 1];
+    }
+    this->m_task_table[insert_pos] = task;
+    this->m_index++;
 }
 
 void TaskRunner::removeTask(Task* task) {
