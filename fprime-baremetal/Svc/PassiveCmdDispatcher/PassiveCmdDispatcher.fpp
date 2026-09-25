@@ -15,6 +15,13 @@ module Baremetal {
         sync command CMD_CLEAR_TRACKING \
             opcode 0x1
 
+        @ Enable or disable OpCodeDispatched/OpCodeCompleted events for commands that come in on a certain port index
+        sync command SET_EVENT_EMISSION(
+            portIdx: U8 @< Index of the incoming command port
+            enabled: Fw.Enabled @< Whether OpCodeDispatched/OpCodeCompleted events are emitted for the port
+        ) \
+            opcode 0x2
+
         ###############################################################################
         # Events
         ###############################################################################
@@ -74,6 +81,27 @@ module Baremetal {
             severity activity high \
             id 0x6 \
             format "Received a NO_OP command"
+
+        @ Port index passed to SET_EVENT_EMISSION is out of range
+        event PortIndexOutOfRange(idx: U8) \
+            severity warning low \
+            id 0x7 \
+            format "Event emission port index {} out of range"
+
+        @ Received a command status response that does not match any tracked outstanding command
+        event UnexpectedCommandResponse(opCode: FwOpcodeType, cmdSeq: U32, response: Fw.CmdResponse) \
+            severity warning low \
+            id 0x8 \
+            format "Got an unexpected command response with opcode {}, cmdSeq {}: {}"
+
+        @ Event emission for an incoming port index was set by SET_EVENT_EMISSION
+        event EventEmissionSet( \
+            portIdx: U8 @< Index of the incoming command port
+            enabled: Fw.Enabled @< Whether OpCodeDispatched/OpCodeCompleted events are emitted for the port
+        ) \
+            severity activity high \
+            id 0x9 \
+            format "Event emission for port {} set to {}"
 
         ###############################################################################
         # General Ports
