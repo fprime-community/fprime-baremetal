@@ -126,11 +126,12 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
 
     //! Handler implementation for command SET_EVENT_EMISSION
     //!
-    //! Enable or dispatch OpCodeDispatched/OpCodeCompleted events for commands that come in on a certain port index
-    void SET_EVENT_EMISSION_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                       U32 cmdSeq,           //!< The command sequence number
-                                       U8 portIdx,
-                                       bool enabled) override;
+    //! Enable or disable OpCodeDispatched/OpCodeCompleted events for commands that come in on a certain port index
+    void SET_EVENT_EMISSION_cmdHandler(FwOpcodeType opCode,        //!< The opcode
+                                       U32 cmdSeq,                 //!< The command sequence number
+                                       U8 portIdx,                 //!< The incoming port index
+                                       const Fw::Enabled& enabled  //!< Whether events are emitted for the port
+                                       ) override;
 
     //!< Current command sequence number
     // TODO: this could be sized down but would require fprime core changes to typedef the sequence
@@ -140,7 +141,7 @@ class PassiveCmdDispatcher final : public PassiveCmdDispatcherComponentBase {
     CmdTables* m_cmdTables;
 
     //! Tracks whether or not to emit OpCodeDispatched/OpCodeCompleted events for each incoming port index
-    bool m_eventDisabled[NUM_SEQCMDSTATUS_OUTPUT_PORTS];
+    bool m_eventEnabled[NUM_SEQCMDSTATUS_OUTPUT_PORTS];
 
     //! Memory allocator and region ID
     Fw::MemAllocator* m_allocator;

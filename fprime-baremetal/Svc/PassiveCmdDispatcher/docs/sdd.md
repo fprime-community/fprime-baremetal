@@ -45,6 +45,7 @@ None.
 |---|---|
 | `CMD_NO_OP` | Basic no-op command |
 | `CMD_CLEAR_TRACKING` | Clear any command tracking status |
+| `SET_EVENT_EMISSION` | Enable or disable `OpCodeDispatched`/`OpCodeCompleted` events for commands arriving on a given port index. `OpCodeError` is always emitted. |
 
 ## Events
 | Name | Description |
@@ -56,6 +57,9 @@ None.
 | `InvalidCommand` | Received an invalid opcode |
 | `TooManyCommands` | Received a command when the sequence tracker table was already full |
 | `NoOpReceived` | Output when a `CMD_NO_OP` is received |
+| `PortIndexOutOfRange` | `SET_EVENT_EMISSION` was given an out-of-range port index |
+| `UnexpectedCommandResponse` | Received a command status that does not match any tracked command |
+| `EventEmissionSet` | Event emission for a port index was set by `SET_EVENT_EMISSION` |
 
 ## Telemetry
 None.

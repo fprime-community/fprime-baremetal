@@ -27,7 +27,12 @@ constexpr FwOpcodeType OPCODE_UNUSED = std::numeric_limits<FwOpcodeType>::max();
 // ----------------------------------------------------------------------
 
 PassiveCmdDispatcher::PassiveCmdDispatcher(const char* const compName)
-    : PassiveCmdDispatcherComponentBase(compName), m_seq(0), m_eventDisabled() {}
+    : PassiveCmdDispatcherComponentBase(compName), m_seq(0) {
+    // Emit OpCodeDispatched/OpCodeCompleted events for all ports by default, matching Svc::CmdDispatcher
+    for (FwIndexType i = 0; i < NUM_SEQCMDSTATUS_OUTPUT_PORTS; i++) {
+        this->m_eventEnabled[i] = true;
+    }
+}
 
 PassiveCmdDispatcher::CmdTables::CmdTables() {
     for (auto i = 0; i < CMD_DISPATCHER_DISPATCH_TABLE_SIZE; i++) {
@@ -117,16 +122,18 @@ void PassiveCmdDispatcher::compCmdStat_handler(FwIndexType portNum,
         }
     }
 
-    FW_ASSERT(portToCall < NUM_SEQCMDSTATUS_OUTPUT_PORTS);
+    FW_ASSERT(portToCall < NUM_SEQCMDSTATUS_OUTPUT_PORTS, static_cast<FwAssertArgType>(portToCall),
+              static_cast<FwAssertArgType>(NUM_SEQCMDSTATUS_OUTPUT_PORTS));
 
     if (portToCall != -1) {
         // Check the command response and log success/failure
         if (response.e == Fw::CmdResponse::OK) {
-            if (!m_eventDisabled[portToCall]) {
+            if (this->m_eventEnabled[portToCall]) {
                 this->log_COMMAND_OpCodeCompleted(opCode);
             }
         } else {
             FW_ASSERT(response.e != Fw::CmdResponse::OK);
+            // Errors are always reported, regardless of the port's event emission setting
             this->log_COMMAND_OpCodeError(opCode, response);
         }
 
@@ -178,7 +185,9 @@ void PassiveCmdDispatcher::seqCmd_helper(FwIndexType portNum,
         // Even if we did got find a sequencer slot, still send the command as we must ensure all critical commands can
         // be completed.
         this->compCmdSend_out(entry->port, opcode, this->m_seq, args);
-        if (!this->m_eventDisabled[portNum]) {
+        FW_ASSERT(portNum < NUM_SEQCMDSTATUS_OUTPUT_PORTS, static_cast<FwAssertArgType>(portNum),
+                  static_cast<FwAssertArgType>(NUM_SEQCMDSTATUS_OUTPUT_PORTS));
+        if (this->m_eventEnabled[portNum]) {
             this->log_COMMAND_OpCodeDispatched(opcode, entry->port);
         }
 
@@ -248,12 +257,16 @@ void PassiveCmdDispatcher::CMD_CLEAR_TRACKING_cmdHandler(FwOpcodeType opCode, U3
     this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
-void PassiveCmdDispatcher ::SET_EVENT_EMISSION_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U8 portIdx, bool enabled) {
+void PassiveCmdDispatcher ::SET_EVENT_EMISSION_cmdHandler(FwOpcodeType opCode,
+                                                          U32 cmdSeq,
+                                                          U8 portIdx,
+                                                          const Fw::Enabled& enabled) {
     if (portIdx >= NUM_SEQCMDSTATUS_OUTPUT_PORTS) {
         this->log_WARNING_LO_PortIndexOutOfRange(portIdx);
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
     } else {
-        this->m_eventDisabled[portIdx] = !enabled;
+        this->m_eventEnabled[portIdx] = (enabled == Fw::Enabled::ENABLED);
+        this->log_ACTIVITY_HI_EventEmissionSet(portIdx, enabled);
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
     }
 }

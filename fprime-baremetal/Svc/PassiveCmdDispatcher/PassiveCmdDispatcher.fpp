@@ -15,10 +15,10 @@ module Baremetal {
         sync command CMD_CLEAR_TRACKING \
             opcode 0x1
 
-        @ Enable or dispatch OpCodeDispatched/OpCodeCompleted events for commands that come in on a certain port index
+        @ Enable or disable OpCodeDispatched/OpCodeCompleted events for commands that come in on a certain port index
         sync command SET_EVENT_EMISSION(
-            portIdx: U8,
-            enabled: bool
+            portIdx: U8 @< Index of the incoming command port
+            enabled: Fw.Enabled @< Whether OpCodeDispatched/OpCodeCompleted events are emitted for the port
         ) \
             opcode 0x2
 
@@ -93,6 +93,15 @@ module Baremetal {
             severity warning low \
             id 0x8 \
             format "Got an unexpected command response with opcode {}, cmdSeq {}: {}"
+
+        @ Event emission for an incoming port index was set by SET_EVENT_EMISSION
+        event EventEmissionSet( \
+            portIdx: U8 @< Index of the incoming command port
+            enabled: Fw.Enabled @< Whether OpCodeDispatched/OpCodeCompleted events are emitted for the port
+        ) \
+            severity activity high \
+            id 0x9 \
+            format "Event emission for port {} set to {}"
 
         ###############################################################################
         # General Ports
