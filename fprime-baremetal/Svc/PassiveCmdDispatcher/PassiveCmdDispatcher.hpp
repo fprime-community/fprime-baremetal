@@ -8,8 +8,8 @@
 #define Baremetal_PassiveCmdDispatcher_HPP
 
 #include <Fw/Types/MemAllocator.hpp>
-#include <Svc/PassiveCmdDispatcher/PassiveCmdDispatcherComponentAc.hpp>
 #include <config/CommandDispatcherImplCfg.hpp>
+#include "fprime-baremetal/Svc/PassiveCmdDispatcher/PassiveCmdDispatcherComponentAc.hpp"
 
 namespace Baremetal {
 
