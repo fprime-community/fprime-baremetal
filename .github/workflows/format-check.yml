@@ -34,6 +34,8 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
+          # There is no requirements.txt here; the pip pins are in this file, so key the cache on it
+          cache-dependency-path: .github/workflows/format-check.yml
 
       - name: "Install Dependencies"
         # FIXME: Release 4.3.0 does not include the fix in https://github.com/nasa/fprime-tools/pull/331, so we have to install a more recent commit
