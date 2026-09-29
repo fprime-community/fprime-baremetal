@@ -15,17 +15,26 @@ namespace Baremetal {
 
 TlmLinearChan::TlmLinearChan(const char* name) : TlmLinearChanComponentBase(name), m_memId(0), m_setupDone(false) {}
 
-TlmLinearChan::~TlmLinearChan() {
-    if (this->m_tlmEntries != nullptr) {
+TlmLinearChan::~TlmLinearChan() {}
+
+void TlmLinearChan::deinit() {
+    if (this->m_setupDone) {
+        FW_ASSERT(this->m_tlmEntries != nullptr);
+        FW_ASSERT(this->m_allocator != nullptr);
+
         // First destruct the TLM entry structs
         for (auto i = 0; i < TLMCHAN_HASH_BUCKETS; i++) {
             this->m_tlmEntries[i].~TlmEntry();
         }
         // Then deallocate the memory
-        if (this->m_allocator != nullptr) {
-            this->m_allocator->deallocate(this->m_memId, this->m_tlmEntries);
-        }
+        this->m_allocator->deallocate(this->m_memId, this->m_tlmEntries);
+
+        this->m_tlmEntries = nullptr;
+        this->m_allocator = nullptr;
+        this->m_setupDone = false;
     }
+
+    TlmLinearChanComponentBase::deinit();
 }
 
 void TlmLinearChan::init(FwSizeType queueDepth,   /*!< The queue depth*/
