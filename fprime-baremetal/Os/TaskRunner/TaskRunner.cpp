@@ -26,9 +26,10 @@ TaskRunner::~TaskRunner() {}
 
 void TaskRunner::addTask(Task* task) {
     FW_ASSERT(task->isCooperative());  // Cannot register uncooperative tasks
-    FW_ASSERT(task != nullptr);  // Cannot register a null task
+    FW_ASSERT(task != nullptr);        // Cannot register a null task
 
-    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY, static_cast<FwAssertArgType>(this->m_index), static_cast<FwAssertArgType>(Os::Baremetal::TASK_CAPACITY));
+    FW_ASSERT(this->m_index < Os::Baremetal::TASK_CAPACITY, static_cast<FwAssertArgType>(this->m_index),
+              static_cast<FwAssertArgType>(Os::Baremetal::TASK_CAPACITY));
     this->m_task_table[this->m_index] = task;
     this->m_index++;
 
@@ -41,7 +42,7 @@ void TaskRunner::addTask(Task* task) {
         }
     }
 
-    // Shift every entry from insert_pos onward one slot to the right to make room, then place the new task. 
+    // Shift every entry from insert_pos onward one slot to the right to make room, then place the new task.
     // This avoids duplicating/overwriting existing entries.
     for (FwSizeType i = this->m_index; i > insert_pos; i--) {
         this->m_task_table[i] = this->m_task_table[i - 1];
