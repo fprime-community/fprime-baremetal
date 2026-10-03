@@ -31,6 +31,7 @@ register_fprime_module(
         "${CMAKE_CURRENT_LIST_DIR}/MicroFs/MicroFs.hpp"
     DEPENDS
         Fw_Types
+        fprime-baremetal-config
 )
 
 # Set up Baremetal implementation
