@@ -30,8 +30,12 @@ void TaskRunner::addTask(Task* task) {
 
     // removeTask() keeps the table packed, so the first empty slot is the task count
     FwSizeType count = 0;
-    while ((count < Os::Baremetal::TASK_CAPACITY) && (this->m_task_table[count] != nullptr)) {
-        count++;
+    for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
+        if (this->m_task_table[i] != nullptr) {
+            count++;
+        } else {
+            break;
+        }
     }
     FW_ASSERT(count < Os::Baremetal::TASK_CAPACITY, static_cast<FwAssertArgType>(count),
               static_cast<FwAssertArgType>(Os::Baremetal::TASK_CAPACITY));
