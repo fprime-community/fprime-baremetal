@@ -19,6 +19,7 @@ TR-003 | The `Os::Baremetal::TaskRunner` shall run one unit of work of one task 
 TR-004 | The `Os::Baremetal::TaskRunner` shall run one unit of work of each registered task per call to `runAll()` | Unit Test
 TR-005 | The `Os::Baremetal::TaskRunner` shall register tasks started after it has begun running without dropping or duplicating registered tasks | Unit Test
 TR-006 | The `Os::Baremetal::TaskRunner` shall stop running a task once the task is removed | Unit Test
+TR-007 | The `Os::Baremetal::TaskRunner` shall register up to `TASK_CAPACITY` tasks, and assert when more are started | Unit Test
 
 ## 3. Design
 

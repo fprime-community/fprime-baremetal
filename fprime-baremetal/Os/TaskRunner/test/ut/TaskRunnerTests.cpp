@@ -162,3 +162,21 @@ TEST_F(TaskRunnerTest, DestroyedTaskIsNoLongerRun) {
         ASSERT_EQ(this->m_log, expected);
     }
 }
+
+TEST_F(TaskRunnerTest, AddTaskUpToCapacity) {
+    std::vector<FwTaskPriorityType> priorities;
+    for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
+        priorities.push_back(static_cast<FwTaskPriorityType>(STest::Pick::lowerUpper(0, MAX_PRIORITY)));
+    }
+    this->startTasks(priorities);
+    runner().runAll();
+    ASSERT_EQ(this->m_log, expectedOrder(priorities));
+}
+
+TEST_F(TaskRunnerTest, AddTaskBeyondCapacityAsserts) {
+    for (FwSizeType i = 0; i < Os::Baremetal::TASK_CAPACITY; i++) {
+        this->startTask(static_cast<FwTaskPriorityType>(STest::Pick::lowerUpper(0, MAX_PRIORITY)));
+    }
+    ASSERT_DEATH(this->startTask(static_cast<FwTaskPriorityType>(STest::Pick::lowerUpper(0, MAX_PRIORITY))),
+                 "TaskRunner\\.cpp");
+}
