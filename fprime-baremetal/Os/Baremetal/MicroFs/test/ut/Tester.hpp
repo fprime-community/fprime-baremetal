@@ -84,6 +84,7 @@ class Tester {
     void AppendTest();
     void SimFileTest();
     void NewTest();
+    void AliasResolvesToSlotTest();
 
     // Helper functions
     void clearFileBuffer();

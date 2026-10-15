@@ -102,11 +102,43 @@ void MicroFs::MicroFsCleanup(const FwEnumStoreType id, Fw::MemAllocator& allocat
     MicroFs::getSingleton().s_microFsMem = nullptr;
 }
 
+// helper to register a static alias mapping a human-readable path to a bin/file slot
+MicroFs::Status MicroFs::registerAlias(const Fw::String& alias, const Fw::String& slotPath) {
+    MicroFs& microfs = MicroFs::getSingleton();
+
+    for (FwIndexType i = 0; i < microfs.s_numAliases; i++) {
+        if (microfs.s_aliases[i].alias == alias) {
+            return MicroFs::Status::INVALID;  // already registered
+        }
+    }
+
+    if (microfs.s_numAliases >= MAX_MICROFS_ALIASES) {
+        return MicroFs::Status::INVALID;  // table full
+    }
+
+    microfs.s_aliases[microfs.s_numAliases].alias = alias;
+    microfs.s_aliases[microfs.s_numAliases].slotPath = slotPath;
+    microfs.s_numAliases++;
+
+    return MicroFs::Status::VALID;
+}
+
 // helper to find file state entry from file name. Will return VALID if found, INVALID if not
 MicroFs::Status MicroFs::getFileStateIndex(const char* fileName, FwIndexType& stateIndex) {
     // the directory/filename rule is very strict - it has to be /MICROFS_BIN_STRING<n>/MICROFS_FILE_STRING<m>,
     // where n = number of file bins, and m = number of files in a particular bin
-    // any other name will return an error
+    // any other name will return an error, unless it matches a registered alias (see registerAlias()),
+    // in which case the alias's canonical slot path is used instead.
+
+    MicroFs& microfs = MicroFs::getSingleton();
+
+    const char* resolvedName = fileName;
+    for (FwIndexType i = 0; i < microfs.s_numAliases; i++) {
+        if (microfs.s_aliases[i].alias == fileName) {
+            resolvedName = microfs.s_aliases[i].slotPath.toChar();
+            break;
+        }
+    }
 
     // Scan the string for the bin and file numbers.
     // We want a failure to find the file if there is any extension
@@ -118,12 +150,10 @@ MicroFs::Status MicroFs::getFileStateIndex(const char* fileName, FwIndexType& st
     FwIndexType fileIndex = 0;
     // crcExtension should be 2 bytes because scanf appends a null character at the end.
     char crcExtension[2];
-    int stat = sscanf(fileName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);
+    int stat = sscanf(resolvedName, filePathSpec, &binIndex, &fileIndex, &crcExtension[0]);
     if (stat != 2) {
         return MicroFs::Status::INVALID;
     }
-
-    MicroFs& microfs = MicroFs::getSingleton();
 
     // check to see that indexes don't exceed config
     if (binIndex >= microfs.s_microFsConfig.numBins) {

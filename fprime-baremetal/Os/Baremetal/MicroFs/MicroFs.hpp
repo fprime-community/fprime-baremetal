@@ -1,8 +1,10 @@
 #ifndef _MICROFS_HPP_
 #define _MICROFS_HPP_
 
+#include <Fw/DataStructures/Array.hpp>
 #include <Fw/Types/BasicTypes.hpp>
 #include <Fw/Types/MemAllocator.hpp>
+#include <Fw/Types/String.hpp>
 #include "config/MicroFsCfg.hpp"
 
 // MicroFs - F Prime Micro Filesystem
@@ -114,6 +116,11 @@ class MicroFs {
         Status status;   //!< status of each FD
     };
 
+    struct MicroFsAlias {
+        Fw::String alias;     //!< human-readable path requested by callers (e.g. "PrmDb.dat")
+        Fw::String slotPath;  //!< canonical "/bin<N>/file<M>" slot it resolves to
+    };
+
   public:
     // data structure for managing file state
     struct MicroFsFileState {
@@ -158,6 +165,12 @@ class MicroFs {
         const FwEnumStoreType id,      //!< The memory id. Value doesn't matter if allocator doesn't need it
         Fw::MemAllocator& allocator);  //!< Memory allocator to to deallocate. Should match MicroFsInit allocator
 
+    //! \brief register a static alias mapping a human-readable path to a bin/file slot.
+    //! Boot-time only: call before tasks start, same as MicroFsInit. Not interrupt-safe.
+    //! \return VALID if registered, INVALID if the alias table is full or the alias is already registered
+    static Status registerAlias(const Fw::String& alias,      //!< human-readable path, e.g. "PrmDb.dat"
+                                const Fw::String& slotPath);  //!< canonical "/bin<N>/file<M>" slot
+
     // helper to get state pointer from index
     static MicroFsFileState* getFileStateFromIndex(FwIndexType index);
 
@@ -177,6 +190,9 @@ class MicroFs {
     // private copy of configuration struct passed by
     // user
     MicroFsConfig s_microFsConfig;
+    // registered path aliases
+    Fw::Array<MicroFsAlias, MAX_MICROFS_ALIASES> s_aliases;
+    FwIndexType s_numAliases = 0;
     // offset from zero for fds to allow zero checks
     static constexpr FwIndexType MICROFS_FD_OFFSET = 1;
 };

@@ -19,10 +19,11 @@
 
 namespace Os {
 
-static const FwIndexType MAX_MICROFS_BINS = 10;  //!< Maximum number of bin configurations
-static const FwIndexType MAX_MICROFS_FD = 200;   //!< Maximum number of file descriptors
-#define MICROFS_BIN_STRING "bin"                 //!< path name for bin directory
-#define MICROFS_FILE_STRING "file"               //!< name for file slot prefix
+static const FwIndexType MAX_MICROFS_BINS = 10;    //!< Maximum number of bin configurations
+static const FwIndexType MAX_MICROFS_FD = 200;     //!< Maximum number of file descriptors
+static const FwIndexType MAX_MICROFS_ALIASES = 8;  //!< Maximum number of registered path aliases
+#define MICROFS_BIN_STRING "bin"                   //!< path name for bin directory
+#define MICROFS_FILE_STRING "file"                 //!< name for file slot prefix
 #define MICROFS_INDEX_SCN_FORMAT \
     "hd"  //!< SCN format. Must be updated when FwIndexType is updated. Failure to do so could cause a
           //!< stack-buffer-overflow.

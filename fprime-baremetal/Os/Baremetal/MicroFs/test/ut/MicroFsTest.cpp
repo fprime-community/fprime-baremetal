@@ -4,6 +4,7 @@
 #include <Fw/Types/String.hpp>
 #include <Os/File.hpp>
 #include <Os/FileSystem.hpp>
+#include <cstring>
 #include <fprime-baremetal/Os/Baremetal/MicroFs/MicroFs.hpp>
 #include "Tester.hpp"
 
@@ -124,6 +125,11 @@ TEST(FileOps, NewTest) {
     tester.NewTest();
 }
 #endif
+
+TEST(AliasOps, AliasResolvesToSlotTest) {
+    Os::Tester tester;
+    tester.AliasResolvesToSlotTest();
+}
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
