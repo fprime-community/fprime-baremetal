@@ -14,12 +14,13 @@ namespace Os {
 namespace Baremetal {
 namespace File {
 
-BaremetalFile::BaremetalFile(const BaremetalFile& other) {
+BaremetalFile::BaremetalFile(const BaremetalFile& other) : FileInterface(other) {
     this->helpAssign(other);
 }
 
 BaremetalFile& BaremetalFile::operator=(const BaremetalFile& other) {
     if (this != &other) {
+        FileInterface::operator=(other);
         this->helpAssign(other);
     }
     return *this;
